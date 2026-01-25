@@ -105,3 +105,27 @@
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - full Assistant UI
 - components/ui/{toggle,textarea,checkbox,badge}.tsx - new shadcn components
+
+## 2026-01-25: Assistant Streaming
+
+### Completed
+- Created POST /api/assistant/query endpoint with streaming
+- Uses Vercel AI SDK streamText() with toTextStreamResponse()
+- Supports inputText, outputType (draft/review_table), sources, deepAnalysis params
+- System prompt adapts based on outputType
+- Installed @ai-sdk/react for useCompletion hook
+- Wired Assistant page to /api/assistant/query endpoint
+- Response streams progressively with Loader2 spinner indicator
+- UI disables inputs during streaming
+- Response area shows query + streamed response
+- Error handling displays user-friendly messages
+
+### Notes for next dev
+- useCompletion from @ai-sdk/react (not ai/react)
+- No DB persistence yet - requires data model migration first
+- Vault sources passed to API but not used for RAG (no embeddings yet)
+- deepAnalysis flag ready but uses same model currently
+
+### Files created/modified
+- app/api/assistant/query/route.ts - streaming endpoint
+- app/(dashboard)/assistant/page.tsx - wired to streaming API

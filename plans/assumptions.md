@@ -20,3 +20,7 @@
 - Dev will provide their own ANTHROPIC_API_KEY
 - Using claude-sonnet-4-20250514 as default model
 - toTextStreamResponse() used (not toDataStreamResponse which doesn't exist in current ai SDK)
+
+## React Hooks
+- useCompletion/useChat from @ai-sdk/react package (not ai/react)
+- ai v6+ split React hooks into separate @ai-sdk/react package

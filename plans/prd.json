@@ -324,7 +324,7 @@
       "Verify streaming indicator shows during generation",
       "Verify response completes and indicator stops"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
