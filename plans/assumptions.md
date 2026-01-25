@@ -14,3 +14,9 @@
 - Removed polymorphic Prisma relations (Prompt/Example) from StarredItem
 - App code handles lookup via itemType + itemId string
 - This avoids Prisma's limitation with shared foreign key columns
+
+## AI Provider
+- Anthropic Claude is the primary AI provider
+- Dev will provide their own ANTHROPIC_API_KEY
+- Using claude-sonnet-4-20250514 as default model
+- toTextStreamResponse() used (not toDataStreamResponse which doesn't exist in current ai SDK)

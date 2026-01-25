@@ -30,7 +30,7 @@
       "Create lib/ai.ts with provider configuration",
       "Verify streaming response works with test endpoint"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "setup",

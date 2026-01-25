@@ -35,3 +35,21 @@
 - lib/utils.ts has cn() helper for class merging
 - Tailwind 4 uses @import "tailwindcss" syntax in globals.css
 - CSS variables defined in :root and .dark for theming
+
+## 2026-01-25: Vercel AI SDK Setup
+
+### Completed
+- Installed ai and @ai-sdk/anthropic packages
+- Updated .env.example with ANTHROPIC_API_KEY
+- Created lib/ai.ts with Anthropic provider singleton (same pattern as lib/db.ts)
+- Created app/api/test-ai/route.ts endpoint for streaming verification
+- Exports: anthropic provider, defaultModel, analysisModel
+
+### Notes for next dev
+- Uses streamText from ai package with toTextStreamResponse() for streaming
+- Provider throws if ANTHROPIC_API_KEY not set (fail-fast)
+- Test endpoint: POST /api/test-ai with { prompt: "..." } body
+- Default model: claude-sonnet-4-20250514
+
+### Blocked
+- "Verify streaming response works" requires actual ANTHROPIC_API_KEY
