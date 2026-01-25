@@ -263,3 +263,24 @@
 - app/(dashboard)/library/page.tsx - full Library page with 3 view modes
 - app/api/prompts/route.ts - GET and POST endpoints
 - app/api/examples/route.ts - GET endpoint
+
+## 2026-01-25: Starred Items API
+
+### Completed
+- Created GET /api/starred endpoint (list starred items, filter by itemType)
+- Created POST /api/starred endpoint (add starred item)
+- Validates itemType must be 'prompt' or 'example'
+- Returns 409 Conflict if item already starred (unique constraint)
+- Created DELETE /api/starred/[type]/[id] endpoint (remove starred item)
+- Created GET /api/starred/[type]/[id] endpoint (check if item starred)
+- All endpoints include Prisma query comments for future DB integration
+
+### Notes for next dev
+- Uses in-memory mock storage - replace with Prisma when DATABASE_URL set
+- userId hardcoded to 'mock-user-id' - wire to auth session
+- DELETE returns success even if item not found (mock limitation)
+- Library page can now be wired to these endpoints instead of local state
+
+### Files created
+- app/api/starred/route.ts - GET and POST endpoints
+- app/api/starred/[type]/[id]/route.ts - GET and DELETE endpoints

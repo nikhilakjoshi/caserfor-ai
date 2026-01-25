@@ -829,7 +829,7 @@
       "Verify StarredItem created",
       "Verify duplicate starring prevented (unique constraint)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -839,7 +839,7 @@
       "Verify StarredItem removed",
       "Verify 404 if item wasn't starred"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
