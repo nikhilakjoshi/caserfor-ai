@@ -601,7 +601,7 @@
       "File upload or selection area displayed",
       "Execute/Run button available"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -612,7 +612,7 @@
       "Current step highlighted",
       "Completed steps show checkmark"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

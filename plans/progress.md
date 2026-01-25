@@ -303,3 +303,30 @@
 
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - added Prompt type, mock data, selector panel
+
+## 2026-01-25: Workflow Detail/Execution Page
+
+### Completed
+- Created /workflows/[id] page with full workflow execution UI
+- Page shows workflow name, description, category badge, output type badge
+- Workflow steps displayed in left panel with step indicators
+- Step progress: pending (gray), active (spinner), completed (green checkmark)
+- File upload area with drag-and-drop and click-to-browse
+- Uploaded files shown as list with name, size, remove button
+- Execute button disabled until files uploaded
+- Mock execution simulates step-by-step progress (1.5s per step)
+- Output panel appears on completion with mock content
+- Output varies by outputType (draft/review_table/extraction)
+- Copy/Download buttons on output (UI only)
+- Run Again button to reset and re-execute
+- Back to Workflows navigation
+
+### Notes for next dev
+- Uses mock workflow data with steps - same IDs as workflows list page
+- Execution is simulated - wire to /api/workflows/[id]/execute for real AI
+- File upload stores files in state only - needs S3 integration for persistence
+- Copy/Download buttons are UI placeholders - implement clipboard/blob download
+- Mock output is static - real output would stream from AI endpoint
+
+### Files created
+- app/(dashboard)/workflows/[id]/page.tsx - workflow detail/execution UI
