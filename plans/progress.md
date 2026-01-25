@@ -430,3 +430,27 @@
 
 ### Files modified
 - app/api/assistant/query/route.ts - full rewrite with DB persistence
+
+## 2026-01-25: Vault CRUD Operations
+
+### Completed
+- Added edit vault dialog to vault list page
+- Added delete vault confirmation dialog with AlertDialog component
+- Wired edit to PATCH /api/vaults/[id] endpoint
+- Wired delete to DELETE /api/vaults/[id] endpoint
+- Added dropdown menu on vault cards (grid + list view) with Edit/Delete options
+- Edit dialog allows updating name and description
+- Delete dialog shows vault name and warns about permanent deletion
+- Loading states during edit/delete operations
+- Error handling with user-friendly messages
+- Added shadcn alert-dialog component
+
+### Notes for next dev
+- Vault type cannot be changed after creation (by design)
+- Edit/delete available from both grid and list views
+- API already handles cascade delete of documents
+- No confirmation email/notification on delete
+
+### Files modified
+- app/(dashboard)/vault/page.tsx - edit/delete UI and handlers
+- components/ui/alert-dialog.tsx - new shadcn component

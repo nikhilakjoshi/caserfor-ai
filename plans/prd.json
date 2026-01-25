@@ -480,7 +480,7 @@
       "Delete vault",
       "Verify vault and associated documents removed"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

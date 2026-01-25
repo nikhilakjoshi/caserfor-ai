@@ -23,6 +23,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -47,6 +57,9 @@ import {
   FileText,
   Loader2,
   AlertCircle,
+  MoreVertical,
+  Pencil,
+  Trash2,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -81,6 +94,18 @@ export default function VaultPage() {
   const [newVaultDescription, setNewVaultDescription] = useState("")
   const [newVaultType, setNewVaultType] = useState<VaultType>("knowledge_base")
   const [isCreating, setIsCreating] = useState(false)
+
+  // Edit vault state
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [editingVault, setEditingVault] = useState<Vault | null>(null)
+  const [editVaultName, setEditVaultName] = useState("")
+  const [editVaultDescription, setEditVaultDescription] = useState("")
+  const [isEditing, setIsEditing] = useState(false)
+
+  // Delete vault state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [deletingVault, setDeletingVault] = useState<Vault | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const fetchVaults = useCallback(async () => {
     try {
@@ -158,6 +183,80 @@ export default function VaultPage() {
       setError(err instanceof Error ? err.message : "Failed to create vault")
     } finally {
       setIsCreating(false)
+    }
+  }
+
+  const handleOpenEditDialog = (vault: Vault, e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setEditingVault(vault)
+    setEditVaultName(vault.name)
+    setEditVaultDescription(vault.description || "")
+    setIsEditDialogOpen(true)
+  }
+
+  const handleEditVault = async () => {
+    if (!editingVault || !editVaultName.trim()) return
+
+    setIsEditing(true)
+
+    try {
+      const res = await fetch(`/api/vaults/${editingVault.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editVaultName,
+          description: editVaultDescription || null,
+        }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Failed to update vault")
+      }
+
+      const updatedVault = await res.json()
+      setVaults(vaults.map((v) => (v.id === updatedVault.id ? updatedVault : v)))
+      setIsEditDialogOpen(false)
+      setEditingVault(null)
+    } catch (err) {
+      console.error("Failed to update vault:", err)
+      setError(err instanceof Error ? err.message : "Failed to update vault")
+    } finally {
+      setIsEditing(false)
+    }
+  }
+
+  const handleOpenDeleteDialog = (vault: Vault, e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDeletingVault(vault)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const handleDeleteVault = async () => {
+    if (!deletingVault) return
+
+    setIsDeleting(true)
+
+    try {
+      const res = await fetch(`/api/vaults/${deletingVault.id}`, {
+        method: "DELETE",
+      })
+
+      if (!res.ok && res.status !== 204) {
+        const data = await res.json()
+        throw new Error(data.error || "Failed to delete vault")
+      }
+
+      setVaults(vaults.filter((v) => v.id !== deletingVault.id))
+      setIsDeleteDialogOpen(false)
+      setDeletingVault(null)
+    } catch (err) {
+      console.error("Failed to delete vault:", err)
+      setError(err instanceof Error ? err.message : "Failed to delete vault")
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -384,9 +483,36 @@ export default function VaultPage() {
                               </span>
                             )}
                           </div>
-                          <span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize text-muted-foreground">
-                            {vault.type.replace("_", " ")}
-                          </span>
+                          <div className="flex items-center gap-1">
+                            <span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize text-muted-foreground">
+                              {vault.type.replace("_", " ")}
+                            </span>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0"
+                                  onClick={(e) => e.preventDefault()}
+                                >
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={(e) => handleOpenEditDialog(vault, e)}>
+                                  <Pencil className="mr-2 h-4 w-4" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-red-600"
+                                  onClick={(e) => handleOpenDeleteDialog(vault, e)}
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </div>
                         <CardTitle className="mt-2 text-base">
                           {vault.name}
@@ -438,6 +564,31 @@ export default function VaultPage() {
                           <FileText className="h-3.5 w-3.5" />
                           {vault.fileCount}
                         </span>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              onClick={(e) => e.preventDefault()}
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={(e) => handleOpenEditDialog(vault, e)}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={(e) => handleOpenDeleteDialog(vault, e)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </CardContent>
                   )}
@@ -458,6 +609,79 @@ export default function VaultPage() {
           </div>
         )}
       </div>
+
+      {/* Edit Vault Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit vault</DialogTitle>
+            <DialogDescription>
+              Update the vault name and description.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-name">Name</Label>
+              <Input
+                id="edit-name"
+                placeholder="e.g., M&A Due Diligence"
+                value={editVaultName}
+                onChange={(e) => setEditVaultName(e.target.value)}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="edit-description">Description (optional)</Label>
+              <Textarea
+                id="edit-description"
+                placeholder="What does this vault contain?"
+                value={editVaultDescription}
+                onChange={(e) => setEditVaultDescription(e.target.value)}
+                rows={2}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleEditVault}
+              disabled={!editVaultName.trim() || isEditing}
+            >
+              {isEditing ? "Saving..." : "Save changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Vault Confirmation */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete vault?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete &quot;{deletingVault?.name}&quot; and all
+              its documents. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteVault}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "Deleting..." : "Delete vault"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
