@@ -8,7 +8,7 @@
       "Set up path aliases (@/ for root imports)",
       "Verify project runs with npm run dev"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "setup",
@@ -63,7 +63,7 @@
       "Add unique constraint on email",
       "Run migration and verify table created"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data-model",
@@ -74,7 +74,7 @@
       "Create VaultType enum",
       "Run migration and verify table created"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data-model",
@@ -87,7 +87,7 @@
       "Add indexes on vaultId, documentType, embeddingStatus",
       "Run migration and verify table created"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data-model",
@@ -99,7 +99,7 @@
       "Add index on category and isSystem",
       "Run migration and verify table created"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data-model",
@@ -111,7 +111,7 @@
       "Add foreign key relation to Workflow with cascade delete",
       "Run migration and verify table created"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data-model",
@@ -123,7 +123,7 @@
       "Add optional foreign key to User",
       "Run migration and verify table created"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data-model",
@@ -133,7 +133,7 @@
       "Include fields: id, name, promptText, documentRef, response, ownerType, createdAt",
       "Run migration and verify table created"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data-model",
@@ -147,7 +147,7 @@
       "Add indexes on conversationId and createdAt",
       "Run migration and verify table created"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data-model",
@@ -159,7 +159,7 @@
       "Add foreign key to AssistantQuery with cascade delete",
       "Run migration and verify table created"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data-model",
@@ -171,7 +171,7 @@
       "Add index on createdAt",
       "Run migration and verify table created"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data-model",
@@ -183,7 +183,7 @@
       "Add unique constraint on [userId, itemType, itemId]",
       "Run migration and verify table created"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data-model",

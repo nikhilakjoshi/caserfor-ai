@@ -394,3 +394,18 @@
 
 ### Files modified
 - package.json - added db:seed script, tsx devDependency
+
+## 2026-01-25: PRD Data Model Items Marked Complete
+
+### Completed
+- Updated PRD setup item for Next.js to passes:true (project exists and works)
+- Updated 11 data-model PRD items to passes:true:
+  - User, Vault, Document, Workflow, WorkflowStep
+  - Prompt, Example, AssistantQuery, SourceReference
+  - HistoryEntry, StarredItem
+- All models exist in prisma/schema.prisma with correct fields, enums, relations, indexes
+
+### Notes for next dev
+- PRD items marked complete reflect schema existence, not DB deployment
+- Still requires DATABASE_URL + db:push/migrate to create actual tables
+- Remaining false items: S3 storage setup, functional features requiring DB/auth
