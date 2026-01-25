@@ -19,3 +19,19 @@
 
 ### Blocked
 - "Verify database connection works" step requires actual PostgreSQL instance
+
+## 2026-01-25: Tailwind CSS and shadcn/ui Setup
+
+### Completed
+- shadcn/ui was already initialized (components.json, new-york style, neutral base color)
+- Tailwind CSS v4 already configured with postcss
+- Added Card component via `npx shadcn@latest add card`
+- Added Table component via `npx shadcn@latest add table`
+- Full component set now: Button, Input, Card, Table, Dialog (sheet), plus Sidebar, Dropdown, Avatar, etc.
+- Typecheck passes
+
+### Notes for next dev
+- Components in components/ui/ directory
+- lib/utils.ts has cn() helper for class merging
+- Tailwind 4 uses @import "tailwindcss" syntax in globals.css
+- CSS variables defined in :root and .dark for theming

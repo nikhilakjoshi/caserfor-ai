@@ -41,7 +41,7 @@
       "Add commonly used components (Button, Input, Card, Table, Dialog)",
       "Verify components render correctly"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "setup",
