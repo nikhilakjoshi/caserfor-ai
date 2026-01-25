@@ -380,7 +380,7 @@
       "Verify existing vaults display as cards in grid",
       "Each card shows vault name, type label, file count"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -390,7 +390,7 @@
       "Verify Sandbox vaults have different icon/style or label",
       "Verify 'Shared' label appears for shared vaults"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -402,7 +402,7 @@
       "Displays max file limit info (100,000 files)",
       "Submit creates vault and refreshes list"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -412,7 +412,7 @@
       "Verify grid/list view toggle exists",
       "Verify search box to filter vaults"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -513,7 +513,7 @@
       "Each vault includes id, name, type, fileCount",
       "Supports query params: search, sortBy"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -523,7 +523,7 @@
       "Verify vault created in database",
       "Verify response returns created vault"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",

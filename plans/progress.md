@@ -129,3 +129,29 @@
 ### Files created/modified
 - app/api/assistant/query/route.ts - streaming endpoint
 - app/(dashboard)/assistant/page.tsx - wired to streaming API
+
+## 2026-01-25: Vault Page UI
+
+### Completed
+- Built full Vault page with grid/list layout
+- New vault card opens creation modal (name, description, type selector)
+- Modal shows 100k file limit info
+- Vault cards show name, type badge, file count, shared indicator
+- Knowledge Base vaults have Database icon, Sandbox has FolderOpen icon
+- Sort dropdown: Recently viewed, Name, Date created
+- Grid/list view toggle
+- Search box filters vaults by name/description
+- Added shadcn components: dialog, select, label
+- Created GET /api/vaults endpoint (search, sortBy params)
+- Created POST /api/vaults endpoint (creates vault in DB)
+
+### Notes for next dev
+- Vault page uses mock data - wire to /api/vaults when DB connected
+- API endpoints ready but require DATABASE_URL to function
+- Vault cards link to /vault/[id] - detail page not yet built
+- No edit/delete vault functionality yet
+
+### Files created/modified
+- app/(dashboard)/vault/page.tsx - full Vault UI
+- app/api/vaults/route.ts - GET and POST endpoints
+- components/ui/{dialog,select,label}.tsx - new shadcn components
