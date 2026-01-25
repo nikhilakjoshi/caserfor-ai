@@ -207,7 +207,7 @@
       "Active nav item is visually highlighted",
       "Sidebar is fixed on left side of screen"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -217,7 +217,7 @@
       "Button opens dropdown or modal with create options",
       "Create options include: New Vault, New Query"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -227,7 +227,7 @@
       "Add Help link below Settings",
       "Both links navigate to respective pages"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -236,7 +236,7 @@
       "Header displays current page/section name",
       "Header is sticky at top of content area"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

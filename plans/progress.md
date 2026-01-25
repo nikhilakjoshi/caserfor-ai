@@ -53,3 +53,29 @@
 
 ### Blocked
 - "Verify streaming response works" requires actual ANTHROPIC_API_KEY
+
+## 2026-01-25: Sidebar Navigation Layout
+
+### Completed
+- Created app/(dashboard)/layout.tsx with SidebarProvider and fixed sidebar
+- Updated components/app-sidebar.tsx with correct nav items: Assistant, Vault, Workflows, History, Library
+- Added Create button dropdown at top (New Vault, New Query options)
+- Added Settings and Help links at sidebar footer
+- Active nav item highlighted via isActive prop and pathname matching
+- Created PageHeader component using portal for sticky header title
+- Created placeholder pages: /assistant, /vault, /workflows, /history, /library, /settings, /help
+- Root / redirects to /assistant
+
+### Notes for next dev
+- Uses shadcn/ui Sidebar component (already installed)
+- PageHeader uses React portal to inject into #page-header div in layout
+- Sidebar collapsible with icon mode
+- All pages use (dashboard) route group for shared layout
+
+### Files created/modified
+- app/(dashboard)/layout.tsx - dashboard layout with sidebar
+- components/app-sidebar.tsx - sidebar with navigation
+- components/page-header.tsx - portal-based header title
+- app/(dashboard)/{assistant,vault,workflows,history,library,settings,help}/page.tsx - placeholder pages
+- app/(dashboard)/page.tsx - redirects to /assistant
+- app/page.tsx - redirects to /assistant
