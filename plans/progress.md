@@ -409,3 +409,24 @@
 - PRD items marked complete reflect schema existence, not DB deployment
 - Still requires DATABASE_URL + db:push/migrate to create actual tables
 - Remaining false items: S3 storage setup, functional features requiring DB/auth
+
+## 2026-01-25: Assistant Query DB Persistence
+
+### Completed
+- POST /api/assistant/query now creates AssistantQuery record with status tracking
+- Status progression: pending -> streaming -> completed/failed
+- SourceReference records created for vault sources
+- HistoryEntry created on completion with title, type, sourcesSummary
+- ConversationId support for grouping related queries
+- Response headers include X-Query-Id and X-Conversation-Id for client tracking
+- Graceful degradation if DB unavailable (streaming still works)
+- Updated 3 PRD items to passes:true
+
+### Notes for next dev
+- Uses MOCK_USER_ID - wire to auth session when implemented
+- AI context from previous turns not yet implemented (conversationId stored but not used for context retrieval)
+- Vault content not yet used as RAG context (requires embeddings)
+- onFinish callback handles async DB updates after stream completes
+
+### Files modified
+- app/api/assistant/query/route.ts - full rewrite with DB persistence

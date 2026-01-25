@@ -346,7 +346,7 @@
       "Verify new entry appears with query title, type, and timestamp",
       "Verify source references are recorded"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -357,7 +357,7 @@
       "Verify AI maintains context from previous turn",
       "Verify conversationId groups related queries"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -368,7 +368,7 @@
       "Verify Vercel AI SDK streamText is used",
       "Verify query record created in database with status tracking"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
