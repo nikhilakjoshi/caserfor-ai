@@ -195,7 +195,7 @@
       "Set isSystem=true for all seed workflows",
       "Run seed and verify workflows exist in database"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

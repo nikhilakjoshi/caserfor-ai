@@ -370,3 +370,27 @@
 
 ### Files modified
 - app/(dashboard)/vault/page.tsx - API integration, loading/error states
+
+## 2026-01-25: Database Seed File
+
+### Completed
+- Created prisma/seed.ts with 12 system workflows
+- 7 General category workflows: Draft Client Alert, Draft from Template, Extract Timeline, Proofread, Summarize Calls, Transcribe Audio, Translate
+- 5 Transactional category workflows: Analyze Change of Control, Draft Covenants Memo, Draft Item 1.01, Extract Key Data, Extract Terms from Agreements
+- All workflows have promptTemplate and WorkflowSteps defined
+- Workflows use deterministic IDs (system-{slug}) for upsert support
+- Added db:seed script to package.json
+- Installed tsx for running TypeScript seed file
+
+### Notes for next dev
+- Run `npm run db:seed` after `npm run db:push` or `npm run db:migrate`
+- Seed can be re-run safely (uses upsert)
+- columnSchema uses Prisma.DbNull for workflows without columns
+- Mock data in UI pages matches seed data structure
+- Workflow IDs in seed differ from mock IDs (system-slug vs numeric) - update API/UI to use DB
+
+### Files created
+- prisma/seed.ts - seed file with system workflows
+
+### Files modified
+- package.json - added db:seed script, tsx devDependency
