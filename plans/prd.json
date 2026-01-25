@@ -567,7 +567,7 @@
       "Each category has header label",
       "Workflows displayed as cards in grid within category"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -578,7 +578,7 @@
       "Verify card shows output type indicator (Draft, Review table, Output)",
       "Verify card shows step count or column count as applicable"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -589,7 +589,7 @@
       "Verify search box to find workflows",
       "Filters update displayed workflows"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -656,7 +656,7 @@
       "Supports filtering by category and outputType",
       "Includes both system and custom workflows"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",

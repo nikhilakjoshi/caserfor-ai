@@ -184,3 +184,27 @@
 - app/(dashboard)/vault/[id]/page.tsx - vault detail UI
 - app/api/vaults/[id]/route.ts - GET/PATCH/DELETE endpoints
 - app/api/vaults/[id]/documents/route.ts - GET documents endpoint
+
+## 2026-01-25: Workflows Page UI
+
+### Completed
+- Built full Workflows page with categorized grid layout
+- Workflows grouped by category (General, Transactional) with section headers
+- Workflow cards show name, description, output type badge with icon
+- Cards show step count or column count as applicable
+- Output type filter dropdown (Draft, Review table, Extraction, Transformation)
+- Category filter dropdown (All, General, Transactional)
+- Search box filters by name/description
+- Empty state when no workflows match filters
+- Created GET /api/workflows endpoint with category, outputType, search, isSystem params
+- Cards link to /workflows/[id] (detail page not yet built)
+
+### Notes for next dev
+- Uses mock data - replace with Prisma query when DB connected
+- Workflow detail/execution page (/workflows/[id]) not yet implemented
+- Mock workflows match PRD seed data (7 General, 5 Transactional)
+- API endpoint includes Prisma query comments for future DB integration
+
+### Files created/modified
+- app/(dashboard)/workflows/page.tsx - full Workflows page UI
+- app/api/workflows/route.ts - GET endpoint
