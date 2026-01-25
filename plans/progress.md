@@ -79,3 +79,29 @@
 - app/(dashboard)/{assistant,vault,workflows,history,library,settings,help}/page.tsx - placeholder pages
 - app/(dashboard)/page.tsx - redirects to /assistant
 - app/page.tsx - redirects to /assistant
+
+## 2026-01-25: Assistant Page UI
+
+### Completed
+- Added shadcn components: toggle, textarea, checkbox, badge
+- Built full Assistant page with centered chat interface
+- Large title/logo at top
+- Textarea input with placeholder "Ask anything. Type @ to add sources."
+- Ask button (disabled when empty, Cmd+Enter shortcut)
+- Output type toggle: Draft document / Review table
+- Source selector with Choose vault, Files and sources, Prompts buttons
+- Vault selection dropdown with checkmark indicators
+- Selected sources displayed as badges
+- Deep analysis checkbox with label
+- Recommended workflows section with 4 workflow cards
+
+### Notes for next dev
+- Vault list uses mock data - replace with API call when /api/vaults ready
+- Recommended workflows use mock data - replace with DB query
+- Files and sources / Prompts buttons have UI but no panel functionality yet
+- Workflow card click should navigate to /workflows/[id] when ready
+- Query submission logs to console only - wire to /api/assistant/query
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - full Assistant UI
+- components/ui/{toggle,textarea,checkbox,badge}.tsx - new shadcn components

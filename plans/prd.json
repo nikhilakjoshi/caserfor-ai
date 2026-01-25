@@ -248,7 +248,7 @@
       "Verify input placeholder says 'Ask anything. Type @ to add sources.'",
       "Verify Ask button to submit query"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -259,7 +259,7 @@
       "Buttons toggle between output modes",
       "Selected mode is visually indicated"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -270,7 +270,7 @@
       "Clicking vault button adds it as a source",
       "Selected sources show visual indicator (checkmark or highlight)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -301,7 +301,7 @@
       "Toggle enables extended processing mode",
       "State persists during session"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -312,7 +312,7 @@
       "Each card shows workflow name, description, output type",
       "Clicking card navigates to workflow execution"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
