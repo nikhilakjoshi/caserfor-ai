@@ -330,3 +330,23 @@
 
 ### Files created
 - app/(dashboard)/workflows/[id]/page.tsx - workflow detail/execution UI
+
+## 2026-01-25: Assistant Files and Sources Panel
+
+### Completed
+- Added Files and sources button functionality to Assistant page
+- Button toggles file attachment panel with file count badge
+- Drag-and-drop zone with visual feedback (border color change on drag)
+- Click-to-browse via hidden file input (multiple files supported)
+- Attached files list with name, size, and remove button
+- File size formatting (B, KB, MB)
+- Panel close button
+
+### Notes for next dev
+- Files stored in component state only - not uploaded to S3 yet
+- Files not passed to AI endpoint - need to implement file content extraction
+- Supports any file type - may want to restrict to PDF/DOCX/TXT etc
+- File content not read into memory yet - just metadata stored
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - added files panel, drag-drop, file list

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useCallback } from "react"
 import { useCompletion } from "@ai-sdk/react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
@@ -23,7 +23,16 @@ import {
   Search,
   Star,
   X,
+  Upload,
+  File,
 } from "lucide-react"
+
+interface AttachedFile {
+  id: string
+  file: File
+  name: string
+  size: number
+}
 
 type OutputType = "draft" | "review_table"
 type OwnerType = "system" | "personal"
@@ -132,6 +141,12 @@ const mockPrompts: Prompt[] = [
   },
 ]
 
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
 export default function AssistantPage() {
   const [query, setQuery] = useState("")
   const [outputType, setOutputType] = useState<OutputType>("draft")
@@ -140,10 +155,56 @@ export default function AssistantPage() {
   const [showVaultSelector, setShowVaultSelector] = useState(false)
   const [showPromptSelector, setShowPromptSelector] = useState(false)
   const [promptSearchQuery, setPromptSearchQuery] = useState("")
+  const [showFilesPanel, setShowFilesPanel] = useState(false)
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
+  const [isDragging, setIsDragging] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { completion, isLoading, complete, error } = useCompletion({
     api: "/api/assistant/query",
   })
+
+  const addFiles = useCallback((files: FileList | File[]) => {
+    const newFiles: AttachedFile[] = Array.from(files).map((file) => ({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      file,
+      name: file.name,
+      size: file.size,
+    }))
+    setAttachedFiles((prev) => [...prev, ...newFiles])
+  }, [])
+
+  const removeFile = useCallback((id: string) => {
+    setAttachedFiles((prev) => prev.filter((f) => f.id !== id))
+  }, [])
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      addFiles(e.dataTransfer.files)
+    }
+  }, [addFiles])
+
+  const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      addFiles(e.target.files)
+      e.target.value = "" // Reset for re-selection
+    }
+  }, [addFiles])
 
   const toggleVault = (vaultId: string) => {
     setSelectedVaults((prev) =>
@@ -312,9 +373,20 @@ export default function AssistantPage() {
                 <Folder className="h-4 w-4" />
                 Choose vault
               </Button>
-              <Button variant="outline" size="sm" className="gap-1.5" disabled={isLoading}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilesPanel(!showFilesPanel)}
+                className="gap-1.5"
+                disabled={isLoading}
+              >
                 <Paperclip className="h-4 w-4" />
                 Files and sources
+                {attachedFiles.length > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 justify-center">
+                    {attachedFiles.length}
+                  </Badge>
+                )}
               </Button>
               <Button
                 variant="outline"
@@ -347,6 +419,93 @@ export default function AssistantPage() {
                     </Button>
                   )
                 })}
+              </div>
+            )}
+
+            {/* Files and Sources Panel */}
+            {showFilesPanel && (
+              <div className="p-3 bg-muted/50 rounded-md space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Attach files</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setShowFilesPanel(false)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileInputChange}
+                />
+
+                {/* Drop zone */}
+                <div
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`
+                    border-2 border-dashed rounded-lg p-6 text-center cursor-pointer
+                    transition-colors
+                    ${isDragging
+                      ? "border-primary bg-primary/5"
+                      : "border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/30"
+                    }
+                  `}
+                >
+                  <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    {isDragging
+                      ? "Drop files here"
+                      : "Drag and drop files here, or click to browse"
+                    }
+                  </p>
+                  <p className="text-xs text-muted-foreground/70 mt-1">
+                    PDF, DOCX, TXT, and more
+                  </p>
+                </div>
+
+                {/* Attached files list */}
+                {attachedFiles.length > 0 && (
+                  <div className="space-y-2">
+                    <span className="text-xs text-muted-foreground">
+                      {attachedFiles.length} file{attachedFiles.length !== 1 ? "s" : ""} attached
+                    </span>
+                    <div className="space-y-1 max-h-40 overflow-y-auto">
+                      {attachedFiles.map((af) => (
+                        <div
+                          key={af.id}
+                          className="flex items-center gap-2 p-2 bg-background rounded text-sm"
+                        >
+                          <File className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <span className="truncate flex-1">{af.name}</span>
+                          <span className="text-xs text-muted-foreground shrink-0">
+                            {formatFileSize(af.size)}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 shrink-0"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              removeFile(af.id)
+                            }}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

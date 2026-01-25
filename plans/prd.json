@@ -280,7 +280,7 @@
       "Clicking opens panel to attach files directly",
       "Can drag and drop files to attach"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
