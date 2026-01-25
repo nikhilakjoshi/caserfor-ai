@@ -678,7 +678,7 @@
       "Verify table with columns: Created, Title, Type, Source",
       "Verify rows sorted by date descending (newest first)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -690,7 +690,7 @@
       "Verify date range filter (Past month, etc.)",
       "Verify 'Last updated' timestamp displayed"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -701,7 +701,7 @@
       "Shows full input text and output response",
       "Shows source references used"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -710,7 +710,7 @@
       "Filter to date range with no history",
       "Verify 'No results found' message displayed"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -721,7 +721,7 @@
       "Supports search, dateFrom, dateTo, type, groupBy params",
       "Supports pagination with page and limit"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

@@ -208,3 +208,28 @@
 ### Files created/modified
 - app/(dashboard)/workflows/page.tsx - full Workflows page UI
 - app/api/workflows/route.ts - GET endpoint
+
+## 2026-01-25: History Page UI
+
+### Completed
+- Built full History page with query history table
+- Table columns: Created (date+time), Title, Type (badge with icon), Source
+- Rows sorted by date descending (newest first)
+- Search box filters by title and source summary
+- Date range filter dropdown (All time, Today, Past week, Past month, Past 3 months)
+- Group by dropdown (None, Date, Type, Source) - UI ready, grouping logic not implemented
+- Last updated timestamp displayed
+- Click row opens detail dialog with full query/response and sources
+- Empty state shows "No results found" message
+- Created GET /api/history endpoint with search, dateFrom, dateTo, type, page, limit params
+- Pagination support in API response
+
+### Notes for next dev
+- History page uses mock data - wire to /api/history when DB connected
+- Group by dropdown is UI-only - implement grouping logic if needed
+- API endpoint ready but requires DATABASE_URL to function
+- Mock data shows 5 realistic legal workflow examples
+
+### Files created/modified
+- app/(dashboard)/history/page.tsx - full History page UI
+- app/api/history/route.ts - GET endpoint with pagination
