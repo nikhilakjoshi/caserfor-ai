@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { PageHeader } from "@/components/page-header"
 import {
   Card,
@@ -45,6 +45,8 @@ import {
   List,
   ChevronDown,
   FileText,
+  Loader2,
+  AlertCircle,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -61,40 +63,6 @@ interface Vault {
   updatedAt: string
 }
 
-// Mock data - replace with API call
-const mockVaults: Vault[] = [
-  {
-    id: "1",
-    name: "M&A Deal Documents",
-    description: "Due diligence materials for Project Apollo",
-    type: "knowledge_base",
-    isShared: true,
-    fileCount: 234,
-    createdAt: "2026-01-15",
-    updatedAt: "2026-01-24",
-  },
-  {
-    id: "2",
-    name: "Contract Templates",
-    description: "Standard agreement templates",
-    type: "knowledge_base",
-    isShared: false,
-    fileCount: 45,
-    createdAt: "2026-01-10",
-    updatedAt: "2026-01-20",
-  },
-  {
-    id: "3",
-    name: "Quick Analysis",
-    description: "Temporary documents for ad-hoc review",
-    type: "sandbox",
-    isShared: false,
-    fileCount: 12,
-    createdAt: "2026-01-22",
-    updatedAt: "2026-01-25",
-  },
-]
-
 const sortOptions = [
   { value: "recent", label: "Recently viewed" },
   { value: "name", label: "Name" },
@@ -102,7 +70,9 @@ const sortOptions = [
 ]
 
 export default function VaultPage() {
-  const [vaults, setVaults] = useState<Vault[]>(mockVaults)
+  const [vaults, setVaults] = useState<Vault[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [sortBy, setSortBy] = useState("recent")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
@@ -111,6 +81,32 @@ export default function VaultPage() {
   const [newVaultDescription, setNewVaultDescription] = useState("")
   const [newVaultType, setNewVaultType] = useState<VaultType>("knowledge_base")
   const [isCreating, setIsCreating] = useState(false)
+
+  const fetchVaults = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      const params = new URLSearchParams()
+      if (searchQuery) params.set("search", searchQuery)
+      params.set("sortBy", sortBy)
+
+      const res = await fetch(`/api/vaults?${params.toString()}`)
+      if (!res.ok) {
+        throw new Error("Failed to fetch vaults")
+      }
+      const data = await res.json()
+      setVaults(data)
+    } catch (err) {
+      console.error("Failed to fetch vaults:", err)
+      setError("Failed to load vaults. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [searchQuery, sortBy])
+
+  useEffect(() => {
+    fetchVaults()
+  }, [fetchVaults])
 
   const filteredVaults = vaults.filter(
     (vault) =>
@@ -135,24 +131,34 @@ export default function VaultPage() {
 
     setIsCreating(true)
 
-    // TODO: Replace with API call
-    const newVault: Vault = {
-      id: String(Date.now()),
-      name: newVaultName,
-      description: newVaultDescription || null,
-      type: newVaultType,
-      isShared: false,
-      fileCount: 0,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
+    try {
+      const res = await fetch("/api/vaults", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newVaultName,
+          description: newVaultDescription || null,
+          type: newVaultType,
+        }),
+      })
 
-    setVaults([newVault, ...vaults])
-    setNewVaultName("")
-    setNewVaultDescription("")
-    setNewVaultType("knowledge_base")
-    setIsCreateDialogOpen(false)
-    setIsCreating(false)
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Failed to create vault")
+      }
+
+      const newVault = await res.json()
+      setVaults([newVault, ...vaults])
+      setNewVaultName("")
+      setNewVaultDescription("")
+      setNewVaultType("knowledge_base")
+      setIsCreateDialogOpen(false)
+    } catch (err) {
+      console.error("Failed to create vault:", err)
+      setError(err instanceof Error ? err.message : "Failed to create vault")
+    } finally {
+      setIsCreating(false)
+    }
   }
 
   const getVaultIcon = (type: VaultType) => {
@@ -217,7 +223,35 @@ export default function VaultPage() {
           </div>
         </div>
 
+        {/* Error state */}
+        {error && (
+          <div className="flex items-center gap-2 rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            <AlertCircle className="h-4 w-4" />
+            {error}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-auto h-auto py-1 text-destructive hover:text-destructive"
+              onClick={() => {
+                setError(null)
+                fetchVaults()
+              }}
+            >
+              Retry
+            </Button>
+          </div>
+        )}
+
+        {/* Loading state */}
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <p className="mt-2 text-sm text-muted-foreground">Loading vaults...</p>
+          </div>
+        )}
+
         {/* Vault Grid */}
+        {!isLoading && (
         <div
           className={
             viewMode === "grid"
@@ -412,8 +446,9 @@ export default function VaultPage() {
             )
           })}
         </div>
+        )}
 
-        {sortedVaults.length === 0 && searchQuery && (
+        {!isLoading && sortedVaults.length === 0 && searchQuery && (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Search className="h-12 w-12 text-muted-foreground/50" />
             <h3 className="mt-4 text-lg font-medium">No vaults found</h3>

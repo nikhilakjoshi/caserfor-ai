@@ -350,3 +350,23 @@
 
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - added files panel, drag-drop, file list
+
+## 2026-01-25: Vault Page API Integration
+
+### Completed
+- Wired Vault page to GET /api/vaults endpoint
+- Page fetches vaults on mount with search/sort params
+- handleCreateVault now POSTs to /api/vaults
+- Added loading state with spinner during fetch
+- Added error state with retry button
+- Removed mock vault data - uses API exclusively
+- Search query triggers API refetch (not client-side filter)
+
+### Notes for next dev
+- Requires DATABASE_URL to actually persist vaults
+- Without DB, API returns 500 error and error state shows
+- Edit/delete vault not yet implemented in UI
+- Vault detail page (/vault/[id]) still uses mock data
+
+### Files modified
+- app/(dashboard)/vault/page.tsx - API integration, loading/error states
