@@ -291,7 +291,7 @@
       "Can search and filter prompts",
       "Selecting prompt inserts it into input"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

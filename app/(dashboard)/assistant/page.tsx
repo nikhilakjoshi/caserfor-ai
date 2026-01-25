@@ -9,6 +9,7 @@ import { Toggle } from "@/components/ui/toggle"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import {
   FileText,
   Table2,
@@ -19,13 +20,26 @@ import {
   ArrowRight,
   Check,
   Loader2,
+  Search,
+  Star,
+  X,
 } from "lucide-react"
 
 type OutputType = "draft" | "review_table"
+type OwnerType = "system" | "personal"
 
 interface VaultSource {
   id: string
   name: string
+}
+
+interface Prompt {
+  id: string
+  name: string
+  content: string
+  ownerType: OwnerType
+  category: string | null
+  isStarred: boolean
 }
 
 // Mock data - will be replaced with API calls
@@ -66,12 +80,66 @@ const recommendedWorkflows = [
   },
 ]
 
+// Mock prompts - will be replaced with API call to /api/prompts
+const mockPrompts: Prompt[] = [
+  {
+    id: "1",
+    name: "Contract Summary",
+    content: "Summarize the key terms of this contract including parties, effective date, term, and material obligations.",
+    ownerType: "system",
+    category: "analysis",
+    isStarred: true,
+  },
+  {
+    id: "2",
+    name: "Risk Identification",
+    content: "Identify and list all potential legal risks in this document, categorized by severity (high, medium, low).",
+    ownerType: "system",
+    category: "review",
+    isStarred: false,
+  },
+  {
+    id: "3",
+    name: "Change of Control Analysis",
+    content: "Analyze all change of control provisions and their implications for the transaction.",
+    ownerType: "system",
+    category: "transactional",
+    isStarred: false,
+  },
+  {
+    id: "4",
+    name: "My Custom Review Prompt",
+    content: "Review this document for compliance with our internal policies on data retention and privacy.",
+    ownerType: "personal",
+    category: "compliance",
+    isStarred: true,
+  },
+  {
+    id: "5",
+    name: "Timeline Extraction",
+    content: "Extract all dates and deadlines from this document and present them in chronological order with context.",
+    ownerType: "system",
+    category: "extraction",
+    isStarred: false,
+  },
+  {
+    id: "6",
+    name: "Clause Comparison",
+    content: "Compare the indemnification clauses across the provided documents and highlight key differences.",
+    ownerType: "system",
+    category: "review",
+    isStarred: false,
+  },
+]
+
 export default function AssistantPage() {
   const [query, setQuery] = useState("")
   const [outputType, setOutputType] = useState<OutputType>("draft")
   const [selectedVaults, setSelectedVaults] = useState<string[]>([])
   const [deepAnalysis, setDeepAnalysis] = useState(false)
   const [showVaultSelector, setShowVaultSelector] = useState(false)
+  const [showPromptSelector, setShowPromptSelector] = useState(false)
+  const [promptSearchQuery, setPromptSearchQuery] = useState("")
 
   const { completion, isLoading, complete, error } = useCompletion({
     api: "/api/assistant/query",
@@ -104,6 +172,31 @@ export default function AssistantPage() {
   }
 
   const hasResponse = completion.length > 0
+
+  // Filter prompts based on search query
+  const filteredPrompts = mockPrompts.filter(
+    (p) =>
+      p.name.toLowerCase().includes(promptSearchQuery.toLowerCase()) ||
+      p.content.toLowerCase().includes(promptSearchQuery.toLowerCase()) ||
+      (p.category && p.category.toLowerCase().includes(promptSearchQuery.toLowerCase()))
+  )
+
+  // Get starred prompts first, then others
+  const sortedPrompts = [...filteredPrompts].sort((a, b) => {
+    if (a.isStarred && !b.isStarred) return -1
+    if (!a.isStarred && b.isStarred) return 1
+    return 0
+  })
+
+  const insertPrompt = (prompt: Prompt) => {
+    const currentQuery = query.trim()
+    const newQuery = currentQuery
+      ? `${currentQuery}\n\n${prompt.content}`
+      : prompt.content
+    setQuery(newQuery)
+    setShowPromptSelector(false)
+    setPromptSearchQuery("")
+  }
 
   return (
     <>
@@ -223,7 +316,13 @@ export default function AssistantPage() {
                 <Paperclip className="h-4 w-4" />
                 Files and sources
               </Button>
-              <Button variant="outline" size="sm" className="gap-1.5" disabled={isLoading}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPromptSelector(!showPromptSelector)}
+                className="gap-1.5"
+                disabled={isLoading}
+              >
                 <BookOpen className="h-4 w-4" />
                 Prompts
               </Button>
@@ -248,6 +347,71 @@ export default function AssistantPage() {
                     </Button>
                   )
                 })}
+              </div>
+            )}
+
+            {/* Prompt Selector Panel */}
+            {showPromptSelector && (
+              <div className="p-3 bg-muted/50 rounded-md space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Search prompts..."
+                      value={promptSearchQuery}
+                      onChange={(e) => setPromptSearchQuery(e.target.value)}
+                      className="pl-8 h-8"
+                    />
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => {
+                      setShowPromptSelector(false)
+                      setPromptSearchQuery("")
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="max-h-64 overflow-y-auto space-y-1">
+                  {sortedPrompts.length > 0 ? (
+                    sortedPrompts.map((prompt) => (
+                      <button
+                        key={prompt.id}
+                        onClick={() => insertPrompt(prompt)}
+                        className="w-full text-left p-2 rounded hover:bg-background transition-colors flex items-start gap-2"
+                      >
+                        {prompt.isStarred && (
+                          <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400 shrink-0 mt-0.5" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-sm truncate">{prompt.name}</span>
+                            {prompt.category && (
+                              <Badge variant="secondary" className="text-xs shrink-0">
+                                {prompt.category}
+                              </Badge>
+                            )}
+                            {prompt.ownerType === "personal" && (
+                              <Badge variant="outline" className="text-xs shrink-0">
+                                Personal
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                            {prompt.content}
+                          </p>
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No prompts found
+                    </p>
+                  )}
+                </div>
               </div>
             )}
 

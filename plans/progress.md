@@ -284,3 +284,22 @@
 ### Files created
 - app/api/starred/route.ts - GET and POST endpoints
 - app/api/starred/[type]/[id]/route.ts - GET and DELETE endpoints
+
+## 2026-01-25: Assistant Prompts Quick-Access Panel
+
+### Completed
+- Added Prompts button functionality to Assistant page
+- Prompts button toggles prompt selector panel
+- Search/filter prompts by name, content, or category
+- Starred prompts appear first in list
+- Clicking prompt inserts content into query textarea
+- Shows category and personal badges on prompts
+- Close button to dismiss panel
+
+### Notes for next dev
+- Uses mock prompts data - wire to /api/prompts when DB connected
+- Prompt insertion appends to existing query with double newline separator
+- Starred prompts sorted to top automatically
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - added Prompt type, mock data, selector panel
