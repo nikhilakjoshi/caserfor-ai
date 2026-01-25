@@ -424,7 +424,7 @@
       "Verify files displayed in sortable table",
       "Table columns: Name, Document type, Updated, File type, Size"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -436,7 +436,7 @@
       "Verify 'Create folder' button exists",
       "Verify 'Share' button exists"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -446,7 +446,7 @@
       "Placeholder text: 'Ask anything...'",
       "Submitting navigates to Assistant with vault pre-selected"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -533,7 +533,7 @@
       "Verify response includes array of documents",
       "Supports sorting and filtering params"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",

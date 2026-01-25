@@ -155,3 +155,32 @@
 - app/(dashboard)/vault/page.tsx - full Vault UI
 - app/api/vaults/route.ts - GET and POST endpoints
 - components/ui/{dialog,select,label}.tsx - new shadcn components
+
+## 2026-01-25: Vault Detail Page
+
+### Completed
+- Created /vault/[id] page with full files table
+- Table columns: Name, Document type, Updated, File type, Size (all sortable)
+- Document type shown as colored badge
+- Embedding status indicators (processing/pending badges)
+- Action buttons: Start a query, Create review table, Upload files, Create folder, Share
+- Quick query box in header - navigates to /assistant?vault={id}&query={text}
+- Back to Vaults button
+- Search box to filter files
+- Empty state for no files
+- Row actions dropdown (Download, Rename, Set document type, Delete)
+- Created GET /api/vaults/[id] endpoint
+- Created PATCH /api/vaults/[id] endpoint for updates
+- Created DELETE /api/vaults/[id] endpoint
+- Created GET /api/vaults/[id]/documents endpoint with search/sort params
+
+### Notes for next dev
+- Page uses mock data - wire to API when DB connected
+- Upload/Download/Delete buttons are UI only - needs S3 storage setup
+- Document type edit is UI only in dropdown - needs inline edit or modal
+- Quick query uses URL params - Assistant page should read and pre-fill
+
+### Files created
+- app/(dashboard)/vault/[id]/page.tsx - vault detail UI
+- app/api/vaults/[id]/route.ts - GET/PATCH/DELETE endpoints
+- app/api/vaults/[id]/documents/route.ts - GET documents endpoint
