@@ -732,7 +732,7 @@
       "Verify 'Prompts' section with description",
       "Verify 'Examples' section with description"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -742,7 +742,7 @@
       "Verify 'Starred examples' section displayed",
       "Empty state shows 'Your starred items will appear here'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -753,7 +753,7 @@
       "Shows system prompts and personal prompts",
       "Each prompt shows name and preview of content"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -764,7 +764,7 @@
       "Each example shows name, prompt preview, response preview",
       "Can click to view full example"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -777,7 +777,7 @@
       "Click again to unstar",
       "Verify item removed from Starred section"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -789,7 +789,7 @@
       "Verify prompt appears in personal prompts list",
       "Verify ownerType is 'personal'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -799,7 +799,7 @@
       "Verify response includes system and personal prompts",
       "Supports filtering by ownerType and category"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -809,7 +809,7 @@
       "Verify prompt created with ownerType 'personal'",
       "Verify response returns created prompt"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -819,7 +819,7 @@
       "Verify response includes examples",
       "Supports filtering by ownerType"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",

@@ -233,3 +233,33 @@
 ### Files created/modified
 - app/(dashboard)/history/page.tsx - full History page UI
 - app/api/history/route.ts - GET endpoint with pagination
+
+## 2026-01-25: Library Page UI
+
+### Completed
+- Built full Library page with home/prompts/examples view modes
+- Home view shows Prompts and Examples cards with descriptions
+- Starred prompts section with cards showing starred items
+- Starred examples section with empty state message
+- Click Prompts card opens prompt list with system/personal sections
+- Click Examples card opens examples list
+- Star/unstar toggle on all items updates starred sections
+- Prompt detail dialog shows full content with copy button
+- Example detail dialog shows prompt + response with copy button
+- Search/filter in prompts and examples views
+- Create prompt dialog for personal prompts
+- Personal prompts show edit/delete dropdown menu
+- Created GET /api/prompts endpoint (ownerType, category, search params)
+- Created POST /api/prompts endpoint for personal prompts
+- Created GET /api/examples endpoint (ownerType, search params)
+
+### Notes for next dev
+- Uses mock data - replace with Prisma queries when DB connected
+- Starring is local state only - wire to /api/starred endpoints when built
+- Edit/delete buttons are UI only - implement actual mutation
+- Personal prompts created locally - wire to POST /api/prompts
+
+### Files created/modified
+- app/(dashboard)/library/page.tsx - full Library page with 3 view modes
+- app/api/prompts/route.ts - GET and POST endpoints
+- app/api/examples/route.ts - GET endpoint
