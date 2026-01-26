@@ -883,7 +883,7 @@
       "Run npx @tiptap/cli@latest add simple-editor",
       "Verify files created in components/tiptap-templates/simple/"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -894,7 +894,7 @@
       "Match border color with existing components",
       "Ensure dark mode compatibility"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -906,7 +906,7 @@
       "Add onChange prop for content updates",
       "Export component for use in assistant page"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -1011,7 +1011,10 @@
       "Create components/assistant/chat-panel.tsx",
       "Move chat UI elements from assistant page",
       "Accept query, completion, isLoading, onSubmit as props",
-      "Maintain existing chat styling and functionality"
+      "Include query display area at top showing user's original query",
+      "Add 'Copy', 'Save prompt', 'Edit query' action buttons below query",
+      "Show 'Answering' status with 'Generating new version...' progress text when loading",
+      "Position chat input at bottom of panel"
     ],
     "passes": false
   },
@@ -1022,7 +1025,10 @@
       "Create components/assistant/editor-panel.tsx",
       "Import DocumentEditor component",
       "Accept content and onChange props",
-      "Add header with document title",
+      "Add header row with 'Draft' label on left",
+      "Include formatting toolbar (Paragraph dropdown, Bold, Italic, Underline, Strikethrough, lists, alignment, clipboard, undo/redo)",
+      "Add top-right controls: 'Version 1' dropdown, 'Sources' button, 'Export' button",
+      "Add 'Show edits' toggle below header",
       "Style panel with consistent design system"
     ],
     "passes": false
@@ -1033,8 +1039,8 @@
     "steps": [
       "Add conditional rendering based on mode state",
       "When mode='chat': render full-width ChatPanel",
-      "When mode='document': render flex container with 1/3 ChatPanel + 2/3 EditorPanel",
-      "Use Tailwind flex utilities for layout"
+      "When mode='document': render flex container with 25% ChatPanel + 75% EditorPanel",
+      "Use Tailwind flex utilities for layout (w-1/4 and w-3/4)"
     ],
     "passes": false
   },
@@ -1119,6 +1125,115 @@
       "Pass conversationId/queryId when creating document",
       "Include queryId in POST /api/documents body",
       "Verify relation is established in database"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add New Thread button to ChatPanel header",
+    "steps": [
+      "Add 'New thread' button with edit/pencil icon at top of ChatPanel",
+      "Clicking resets chat state and clears editor",
+      "Style consistently with design system"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add query display area to ChatPanel",
+    "steps": [
+      "Display user's original query text prominently in ChatPanel",
+      "Position below New Thread button",
+      "Show query in readable format with proper text styling"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add query action buttons (Copy, Save prompt, Edit query)",
+    "steps": [
+      "Add 'Copy' button that copies query to clipboard",
+      "Add 'Save prompt' button to save query as reusable prompt",
+      "Add 'Edit query' button to allow editing the original query",
+      "Position buttons below query display area",
+      "Style as subtle inline actions"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add generation status indicator to ChatPanel",
+    "steps": [
+      "Show 'Answering' label when AI is generating",
+      "Display 'Generating new version...' progress text during streaming",
+      "Hide status when generation complete",
+      "Position between query area and chat input"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add Version dropdown to EditorPanel header",
+    "steps": [
+      "Add 'Version 1' dropdown button in top-right of editor header",
+      "Dropdown shows list of document versions",
+      "Clicking version loads that version into editor",
+      "Style consistently with design system"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add Sources button to EditorPanel header",
+    "steps": [
+      "Add 'Sources' button in top-right of editor header",
+      "Clicking opens panel showing source documents used",
+      "Display source file names and relevant excerpts",
+      "Position next to Version dropdown"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add Export button to EditorPanel header",
+    "steps": [
+      "Add 'Export' button in top-right of editor header",
+      "Clicking opens export options (PDF, DOCX, etc.)",
+      "Position as rightmost header button",
+      "Style as primary action button"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add Show edits toggle to EditorPanel",
+    "steps": [
+      "Add 'Show edits' toggle/checkbox below editor header toolbar",
+      "When enabled, highlight changes from previous version",
+      "Position on right side below toolbar",
+      "Default to off"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement document versioning",
+    "steps": [
+      "Add version field to Document model in Prisma",
+      "Create new version on each AI regeneration",
+      "Store version history linked to document",
+      "Allow loading previous versions into editor"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement Save prompt functionality",
+    "steps": [
+      "Create API endpoint to save prompts",
+      "Store prompt text with user association",
+      "Make saved prompt appear in Prompts dropdown",
+      "Allow naming the saved prompt"
     ],
     "passes": false
   }

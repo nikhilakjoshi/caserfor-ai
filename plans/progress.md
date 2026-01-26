@@ -854,3 +854,30 @@
 - .env.example - updated API key variable name
 - components/page-header.tsx - fixed setState-in-effect lint error
 - package.json - @ai-sdk/anthropic removed
+
+## 2026-01-26: TipTap Editor Setup
+
+### Completed
+- Installed TipTap core packages: @tiptap/react, @tiptap/starter-kit, @tiptap/pm
+- Installed TipTap extensions: placeholder, underline, text-align, link
+- Created DocumentEditor wrapper component at components/editor/document-editor.tsx
+- Editor includes full toolbar: bold, italic, underline, strikethrough, lists, alignment, link, undo/redo
+- Controlled component pattern: content prop for value, onChange callback for updates
+- Styled to match design system: 4px border radius, no shadows, border-based elevation
+- Added TipTap-specific CSS in globals.css for placeholder, typography, prose styles
+- Dark mode compatible via CSS variables
+- Updated 3 PRD items to passes:true
+
+### Notes for next dev
+- Did not use @tiptap/cli template - installed packages manually for more control
+- DocumentEditor is ready for use in assistant page split-panel layout
+- Toolbar uses ghost variant buttons for seamless integration
+- Editor content is HTML string - use getHTML()/setContent() for serialization
+- Next priority: Document Prisma model and API endpoints
+
+### Files created
+- components/editor/document-editor.tsx - TipTap editor wrapper with toolbar
+
+### Files modified
+- app/globals.css - added TipTap/ProseMirror CSS styles
+- package.json - added TipTap dependencies
