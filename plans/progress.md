@@ -521,3 +521,23 @@
 
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - added Improve button, isImproving state, handleImprove function
+
+## 2026-01-26: Ask Button Attached Files Integration
+
+### Completed
+- Updated handleSubmit to pass attachedFiles metadata to /api/assistant/query
+- API endpoint now accepts attachedFiles array with id, name, size, source, vaultId
+- Attached files included in user prompt context (names listed)
+- SourceReference records created for attached files (sourceType: "document")
+- History entry sourcesSummary includes attached file count
+- Updated 1 PRD item to passes:true
+
+### Notes for next dev
+- File content not actually sent/processed yet - only metadata passed
+- Uploaded files (source: "upload") would need FormData/multipart for real content
+- Vault files (source: "vault") would need server-side fetch from storage
+- RAG/embeddings needed to actually use file content in AI response
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - handleSubmit passes attachedFiles
+- app/api/assistant/query/route.ts - handles attachedFiles, creates source refs, updates prompt context

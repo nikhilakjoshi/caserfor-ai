@@ -333,12 +333,22 @@ export default function AssistantPage() {
       return vault ? { id, name: vault.name } : null
     }).filter(Boolean)
 
+    // Build attached files metadata for API
+    const files = attachedFiles.map((af) => ({
+      id: af.id,
+      name: af.name,
+      size: af.size,
+      source: af.source,
+      vaultId: af.vaultId,
+    }))
+
     await complete(query, {
       body: {
         inputText: query,
         outputType,
         sources,
         deepAnalysis,
+        attachedFiles: files,
       },
     })
   }

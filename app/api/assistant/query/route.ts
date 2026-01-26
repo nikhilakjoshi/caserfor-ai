@@ -6,8 +6,16 @@ import type { AssistantQuery, QueryOutputType, SourceType } from "@prisma/client
 // TODO: Replace with actual auth when implemented
 const MOCK_USER_ID = "mock-user-id"
 
+interface AttachedFileInput {
+  id: string
+  name: string
+  size: number
+  source: "upload" | "vault"
+  vaultId?: string
+}
+
 export async function POST(req: Request) {
-  const { inputText, outputType, sources, deepAnalysis, conversationId } =
+  const { inputText, outputType, sources, deepAnalysis, conversationId, attachedFiles } =
     await req.json()
 
   if (!inputText?.trim()) {
@@ -16,6 +24,8 @@ export async function POST(req: Request) {
       headers: { "Content-Type": "application/json" },
     })
   }
+
+  const files: AttachedFileInput[] = attachedFiles || []
 
   const startTime = Date.now()
 
@@ -43,7 +53,7 @@ export async function POST(req: Request) {
 
     const queryId = query.id
 
-    // Create source references if provided
+    // Create source references for vaults
     if (sources?.length > 0) {
       await prisma.sourceReference.createMany({
         data: sources.map(
@@ -54,6 +64,18 @@ export async function POST(req: Request) {
             sourceName: s.name,
           })
         ),
+      })
+    }
+
+    // Create source references for attached files
+    if (files.length > 0) {
+      await prisma.sourceReference.createMany({
+        data: files.map((f: AttachedFileInput) => ({
+          queryId,
+          sourceType: "document" as SourceType,
+          sourceId: f.id,
+          sourceName: f.name,
+        })),
       })
     }
 
@@ -86,9 +108,20 @@ export async function POST(req: Request) {
 
   // Add source context if provided
   let userPrompt = inputText
+  const contextParts: string[] = []
+
   if (sources?.length > 0) {
     const sourceNames = sources.map((s: { name: string }) => s.name).join(", ")
-    userPrompt = `Context: Using sources from: ${sourceNames}\n\nQuery: ${inputText}`
+    contextParts.push(`Vault sources: ${sourceNames}`)
+  }
+
+  if (files.length > 0) {
+    const fileNames = files.map((f: AttachedFileInput) => f.name).join(", ")
+    contextParts.push(`Attached files: ${fileNames}`)
+  }
+
+  if (contextParts.length > 0) {
+    userPrompt = `Context: ${contextParts.join("; ")}\n\nQuery: ${inputText}`
   }
 
   const result = streamText({
@@ -115,10 +148,16 @@ export async function POST(req: Request) {
         // Create history entry
         const title =
           inputText.length > 50 ? inputText.substring(0, 50) + "..." : inputText
-        const sourcesSummary =
-          sources?.length > 0
-            ? sources.map((s: { name: string }) => s.name).join(", ")
-            : null
+
+        // Build sources summary from vaults and attached files
+        const summaryParts: string[] = []
+        if (sources?.length > 0) {
+          summaryParts.push(sources.map((s: { name: string }) => s.name).join(", "))
+        }
+        if (files.length > 0) {
+          summaryParts.push(`${files.length} file${files.length !== 1 ? "s" : ""} attached`)
+        }
+        const sourcesSummary = summaryParts.length > 0 ? summaryParts.join("; ") : null
 
         await prisma.historyEntry.create({
           data: {

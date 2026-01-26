@@ -120,7 +120,7 @@
       "Works seamlessly with attached files from vault",
       "Works seamlessly with selected/improved prompts"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
