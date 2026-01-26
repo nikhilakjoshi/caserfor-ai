@@ -296,6 +296,7 @@ export default function AssistantPage() {
   const [vaultSearchQuery, setVaultSearchQuery] = useState("");
   const [fileSortColumn, setFileSortColumn] = useState<"name" | "documentType" | "size" | "uploadedAt">("name");
   const [fileSortDirection, setFileSortDirection] = useState<"asc" | "desc">("asc");
+  const [focusedFile, setFocusedFile] = useState<VaultFile | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Create New Vault modal state
@@ -398,6 +399,7 @@ export default function AssistantPage() {
   const handleBackToVaults = () => {
     setSelectedVaultForFiles(null);
     setSelectedVaultFiles([]);
+    setFocusedFile(null);
   };
 
   const handleFileSort = (column: "name" | "documentType" | "size" | "uploadedAt") => {
@@ -1034,6 +1036,7 @@ export default function AssistantPage() {
           setSelectedVaultForFiles(null);
           setSelectedVaultFiles([]);
           setVaultSearchQuery("");
+          setFocusedFile(null);
         }
       }}>
         <DialogContent
@@ -1082,107 +1085,187 @@ export default function AssistantPage() {
           </DialogHeader>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-hidden">
             {selectedVaultForFiles ? (
-              /* File Table View */
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <TableCheckbox
-                        checked={selectedVaultFiles.length === selectedVaultForFiles.files.length && selectedVaultForFiles.files.length > 0}
-                        onCheckedChange={toggleSelectAllFiles}
-                      />
-                    </TableHead>
-                    <TableHead>
-                      <button
-                        className="flex items-center gap-1 hover:text-foreground"
-                        onClick={() => handleFileSort("name")}
-                      >
-                        File Name
-                        <ArrowUpDown className="h-3 w-3" />
-                      </button>
-                    </TableHead>
-                    <TableHead>
-                      <button
-                        className="flex items-center gap-1 hover:text-foreground"
-                        onClick={() => handleFileSort("documentType")}
-                      >
-                        File Type
-                        <ArrowUpDown className="h-3 w-3" />
-                      </button>
-                    </TableHead>
-                    <TableHead>
-                      <button
-                        className="flex items-center gap-1 hover:text-foreground"
-                        onClick={() => handleFileSort("size")}
-                      >
-                        File Size
-                        <ArrowUpDown className="h-3 w-3" />
-                      </button>
-                    </TableHead>
-                    <TableHead>
-                      <button
-                        className="flex items-center gap-1 hover:text-foreground"
-                        onClick={() => handleFileSort("uploadedAt")}
-                      >
-                        Uploaded On
-                        <ArrowUpDown className="h-3 w-3" />
-                      </button>
-                    </TableHead>
-                    <TableHead>Tags</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sortedFiles.map((file) => {
-                    const isSelected = selectedVaultFiles.includes(file.id);
-                    return (
-                      <TableRow
-                        key={file.id}
-                        className="cursor-pointer"
-                        onClick={() => toggleVaultFileSelection(file.id)}
-                        data-state={isSelected ? "selected" : undefined}
-                      >
-                        <TableCell>
+              /* File Table View with Metadata Panel */
+              <div className="flex h-full">
+                {/* File Table */}
+                <div className={`${focusedFile ? "flex-1" : "w-full"} overflow-y-auto p-6`}>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-10">
                           <TableCheckbox
-                            checked={isSelected}
-                            onCheckedChange={() => toggleVaultFileSelection(file.id)}
-                            onClick={(e) => e.stopPropagation()}
+                            checked={selectedVaultFiles.length === selectedVaultForFiles.files.length && selectedVaultForFiles.files.length > 0}
+                            onCheckedChange={toggleSelectAllFiles}
                           />
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center gap-2">
-                            <File className="h-4 w-4 text-muted-foreground" />
-                            {file.name}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">{file.documentType}</Badge>
-                        </TableCell>
-                        <TableCell>{formatFileSize(file.size)}</TableCell>
-                        <TableCell>{file.uploadedAt}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-1 flex-wrap">
-                            {file.tags.slice(0, 2).map((tag) => (
-                              <Badge key={tag} variant="outline" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                            {file.tags.length > 2 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{file.tags.length - 2}
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
+                        </TableHead>
+                        <TableHead>
+                          <button
+                            className="flex items-center gap-1 hover:text-foreground"
+                            onClick={() => handleFileSort("name")}
+                          >
+                            File Name
+                            <ArrowUpDown className="h-3 w-3" />
+                          </button>
+                        </TableHead>
+                        <TableHead>
+                          <button
+                            className="flex items-center gap-1 hover:text-foreground"
+                            onClick={() => handleFileSort("documentType")}
+                          >
+                            File Type
+                            <ArrowUpDown className="h-3 w-3" />
+                          </button>
+                        </TableHead>
+                        <TableHead>
+                          <button
+                            className="flex items-center gap-1 hover:text-foreground"
+                            onClick={() => handleFileSort("size")}
+                          >
+                            File Size
+                            <ArrowUpDown className="h-3 w-3" />
+                          </button>
+                        </TableHead>
+                        <TableHead>
+                          <button
+                            className="flex items-center gap-1 hover:text-foreground"
+                            onClick={() => handleFileSort("uploadedAt")}
+                          >
+                            Uploaded On
+                            <ArrowUpDown className="h-3 w-3" />
+                          </button>
+                        </TableHead>
+                        <TableHead>Tags</TableHead>
                       </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {sortedFiles.map((file) => {
+                        const isSelected = selectedVaultFiles.includes(file.id);
+                        const isFocused = focusedFile?.id === file.id;
+                        return (
+                          <TableRow
+                            key={file.id}
+                            className={`cursor-pointer ${isFocused ? "bg-primary/10" : ""}`}
+                            onClick={() => {
+                              toggleVaultFileSelection(file.id);
+                              setFocusedFile(file);
+                            }}
+                            data-state={isSelected ? "selected" : undefined}
+                          >
+                            <TableCell>
+                              <TableCheckbox
+                                checked={isSelected}
+                                onCheckedChange={() => toggleVaultFileSelection(file.id)}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              <div className="flex items-center gap-2">
+                                <File className="h-4 w-4 text-muted-foreground" />
+                                {file.name}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="secondary">{file.documentType}</Badge>
+                            </TableCell>
+                            <TableCell>{formatFileSize(file.size)}</TableCell>
+                            <TableCell>{file.uploadedAt}</TableCell>
+                            <TableCell>
+                              <div className="flex gap-1 flex-wrap">
+                                {file.tags.slice(0, 2).map((tag) => (
+                                  <Badge key={tag} variant="outline" className="text-xs">
+                                    {tag}
+                                  </Badge>
+                                ))}
+                                {file.tags.length > 2 && (
+                                  <Badge variant="outline" className="text-xs">
+                                    +{file.tags.length - 2}
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Metadata Panel - Right Side */}
+                {focusedFile && (
+                  <div className="w-64 border-l border-neutral-200 dark:border-neutral-700 bg-white dark:bg-background p-4 overflow-y-auto">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-medium text-sm">File Details</h3>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => setFocusedFile(null)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* File Icon and Name */}
+                      <div className="flex items-start gap-3">
+                        <div className="h-10 w-10 bg-muted flex items-center justify-center shrink-0">
+                          <File className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium break-words">{focusedFile.name}</p>
+                          <p className="text-xs text-muted-foreground uppercase">{focusedFile.fileType}</p>
+                        </div>
+                      </div>
+
+                      {/* Metadata Fields */}
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Document Type</p>
+                          <Badge variant="secondary">{focusedFile.documentType}</Badge>
+                        </div>
+
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Category</p>
+                          <p className="text-sm">{focusedFile.documentType}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">File Size</p>
+                          <p className="text-sm">{formatFileSize(focusedFile.size)}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">File Format</p>
+                          <p className="text-sm uppercase">{focusedFile.fileType}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Uploaded On</p>
+                          <p className="text-sm">{focusedFile.uploadedAt}</p>
+                        </div>
+
+                        {focusedFile.tags.length > 0 && (
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">Tags</p>
+                            <div className="flex gap-1 flex-wrap">
+                              {focusedFile.tags.map((tag) => (
+                                <Badge key={tag} variant="outline" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               /* Vault Cards View */
-              <div className="space-y-4">
+              <div className="space-y-4 p-6 overflow-y-auto h-full">
                 {/* Create New Vault option */}
                 <button
                   className="w-full p-4 border-2 border-dashed border-neutral-300 dark:border-neutral-600 bg-white dark:bg-background hover:border-primary hover:bg-primary/5 transition-colors flex items-center gap-3"

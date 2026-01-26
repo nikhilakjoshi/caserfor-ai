@@ -766,3 +766,21 @@
 ### Files modified
 - app/(dashboard)/vault/[id]/page.tsx - query banner, file selection modal, handleStartQuery
 - app/(dashboard)/assistant/page.tsx - useSearchParams, preloadedContext state, vault context UI
+
+## 2026-01-26: File Table Metadata Panel
+
+### Completed
+- Added metadata panel to right side of file table in vault selection modal
+- Panel appears when clicking/selecting a file in the table
+- Panel displays: file icon, name, file type, document type (as badge), category, file size, file format, upload date, tags
+- File row highlights with primary/10 bg when focused
+- Close button dismisses panel
+- Panel state resets when navigating back to vault list or closing modal
+- Responsive layout: table takes full width when no file selected, shrinks to flex-1 when panel shown
+- Updated 1 PRD item to passes:true
+
+### Notes for next dev
+- focusedFile state tracks which file's metadata to display
+- Panel is 256px wide (w-64) with border separator
+- Uses same VaultFile interface - all metadata fields already present in mock data
+- Category field shows documentType (same value) - real impl may have separate category field

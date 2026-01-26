@@ -16,7 +16,7 @@ This should be the one YOU decide has the highest priority - not necessarily the
 3. Update the PRD with the work that was done. \
 4. Append your progress to the @plans/progress.md file. \
 Use this to leave a note for the next person working in the codebase. \
-5. Use the 'npm run typecheck' command to check that the there are no type issues. \
+5. Use the 'npm run typecheck' and the 'npm run lint' commands to check that the there are no type issues and lint issues respectively. \
 6. Make a git commit of that feature. \
 ONLY WORK ON A SINGLE FEATURE. \
 7. Any assumptions you make, appent them to the @plans/assumptions.md file. \

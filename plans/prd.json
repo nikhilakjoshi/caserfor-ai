@@ -525,7 +525,7 @@
       "Display size in panel",
       "Display any other stored metadata"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
