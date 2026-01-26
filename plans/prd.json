@@ -245,7 +245,7 @@
       "Verify square/minimal edges render correctly",
       "Test in light and dark modes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -256,7 +256,7 @@
       "Verify square edges render correctly",
       "Test in light and dark modes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -267,7 +267,7 @@
       "Verify square edges render correctly",
       "Test in light and dark modes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -278,7 +278,7 @@
       "Verify square edges render correctly",
       "Test in light and dark modes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -289,7 +289,7 @@
       "Verify square edges render correctly",
       "Test in light and dark modes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -300,7 +300,7 @@
       "Reduce border-radius to 0-4px max on both",
       "Test in light and dark modes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -310,7 +310,7 @@
       "Remove all shadows from recommended workflow cards",
       "Verify cards have no elevation styling"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -321,7 +321,7 @@
       "Add subtle internal padding for spacing",
       "Optionally add thin bottom border divider if needed for structure"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -332,7 +332,7 @@
       "Apply flat surface styling",
       "Ensure input box has clear 1px border"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

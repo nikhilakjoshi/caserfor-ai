@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Toggle } from "@/components/ui/toggle"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import {
   FileText,
@@ -736,24 +735,24 @@ export default function AssistantPage() {
             <h2 className="text-lg font-semibold">Recommended workflows</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {recommendedWorkflows.map((workflow) => (
-                <Card
+                <div
                   key={workflow.id}
-                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  className="p-4 bg-gray-50 dark:bg-muted/50 cursor-pointer hover:bg-gray-100 dark:hover:bg-muted transition-colors"
                 >
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base">{workflow.name}</CardTitle>
-                    <CardDescription className="text-xs">
+                  <div className="space-y-1.5 pb-2">
+                    <h3 className="text-base font-semibold leading-none tracking-tight">{workflow.name}</h3>
+                    <p className="text-xs text-muted-foreground">
                       {workflow.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
+                    </p>
+                  </div>
+                  <div>
                     <Badge variant="outline" className="text-xs">
                       {workflow.outputType === "draft" && "Draft"}
                       {workflow.outputType === "review_table" && "Review table"}
                       {workflow.outputType === "extraction" && "Extraction"}
                     </Badge>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ))}
             </div>
           </div>

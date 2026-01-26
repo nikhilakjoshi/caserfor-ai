@@ -621,3 +621,22 @@
 
 ### Files modified
 - app/globals.css - updated --radius and radius scale values
+
+## 2026-01-26: Recommended Workflow Cards Redesign
+
+### Completed
+- Replaced Card component with plain div for workflow cards
+- Removed all borders from workflow cards
+- Applied bg-gray-50 background (light mode) and bg-muted/50 (dark mode)
+- Hover state uses bg-gray-100 (light) and bg-muted (dark)
+- Removed unused Card component imports from assistant page
+- Verified chat input box already has flat square-edged styling
+- Updated 9 PRD items to passes:true (3 workflow/input cards + 6 border-radius items)
+
+### Notes for next dev
+- Workflow cards now use simple div with Tailwind classes instead of Card component
+- All border-radius PRD items now complete via global CSS (--radius capped at 4px)
+- All UI components use the global radius vars, no per-component overrides needed
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - replaced Card with div for workflow cards
