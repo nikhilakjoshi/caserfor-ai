@@ -9,7 +9,6 @@ import { Toggle } from "@/components/ui/toggle"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
 import {
   FileText,
   Table2,
@@ -20,7 +19,6 @@ import {
   ArrowRight,
   Check,
   Loader2,
-  Search,
   Star,
   X,
   Upload,
@@ -221,20 +219,20 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+const DEFAULT_PLACEHOLDER = "Ask anything. Type @ to add sources."
+
 export default function AssistantPage() {
   const [query, setQuery] = useState("")
   const [outputType, setOutputType] = useState<OutputType>("draft")
   const [selectedVaults, setSelectedVaults] = useState<string[]>([])
   const [deepAnalysis, setDeepAnalysis] = useState(false)
   const [showVaultSelector, setShowVaultSelector] = useState(false)
-  const [showPromptSelector, setShowPromptSelector] = useState(false)
-  const [promptSearchQuery, setPromptSearchQuery] = useState("")
-  const [showFilesPanel, setShowFilesPanel] = useState(false)
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const [showVaultModal, setShowVaultModal] = useState(false)
   const [selectedVaultForFiles, setSelectedVaultForFiles] = useState<Vault | null>(null)
   const [selectedVaultFiles, setSelectedVaultFiles] = useState<string[]>([])
+  const [hoveredPrompt, setHoveredPrompt] = useState<Prompt | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { completion, isLoading, complete, error } = useCompletion({
@@ -345,16 +343,8 @@ export default function AssistantPage() {
 
   const hasResponse = completion.length > 0
 
-  // Filter prompts based on search query
-  const filteredPrompts = mockPrompts.filter(
-    (p) =>
-      p.name.toLowerCase().includes(promptSearchQuery.toLowerCase()) ||
-      p.content.toLowerCase().includes(promptSearchQuery.toLowerCase()) ||
-      (p.category && p.category.toLowerCase().includes(promptSearchQuery.toLowerCase()))
-  )
-
   // Get starred prompts first, then others
-  const sortedPrompts = [...filteredPrompts].sort((a, b) => {
+  const sortedPrompts = [...mockPrompts].sort((a, b) => {
     if (a.isStarred && !b.isStarred) return -1
     if (!a.isStarred && b.isStarred) return 1
     return 0
@@ -366,9 +356,13 @@ export default function AssistantPage() {
       ? `${currentQuery}\n\n${prompt.content}`
       : prompt.content
     setQuery(newQuery)
-    setShowPromptSelector(false)
-    setPromptSearchQuery("")
+    setHoveredPrompt(null)
   }
+
+  // Compute placeholder - shows hovered prompt preview or default
+  const textareaPlaceholder = hoveredPrompt
+    ? hoveredPrompt.content.slice(0, 100) + (hoveredPrompt.content.length > 100 ? "..." : "")
+    : DEFAULT_PLACEHOLDER
 
   return (
     <>
@@ -413,7 +407,7 @@ export default function AssistantPage() {
           {/* Query Input */}
           <div className="relative">
             <Textarea
-              placeholder="Ask anything. Type @ to add sources."
+              placeholder={textareaPlaceholder}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="min-h-[120px] resize-none pr-20 text-base"
@@ -519,16 +513,47 @@ export default function AssistantPage() {
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowPromptSelector(!showPromptSelector)}
-                className="gap-1.5"
-                disabled={isLoading}
-              >
-                <BookOpen className="h-4 w-4" />
-                Prompts
-              </Button>
+              <DropdownMenu onOpenChange={(open) => !open && setHoveredPrompt(null)}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    disabled={isLoading}
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    Prompts
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-72 max-h-80 overflow-y-auto">
+                  <DropdownMenuLabel>Saved Prompts</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {sortedPrompts.map((prompt) => (
+                    <DropdownMenuItem
+                      key={prompt.id}
+                      onClick={() => insertPrompt(prompt)}
+                      onMouseEnter={() => setHoveredPrompt(prompt)}
+                      onMouseLeave={() => setHoveredPrompt(null)}
+                      className="flex flex-col items-start gap-1 cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        {prompt.isStarred && (
+                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 shrink-0" />
+                        )}
+                        <span className="font-medium text-sm truncate">{prompt.name}</span>
+                        {prompt.ownerType === "personal" && (
+                          <Badge variant="outline" className="text-xs ml-auto shrink-0">
+                            Personal
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-1 w-full">
+                        {prompt.content}
+                      </p>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Vault Selection Dropdown */}
@@ -591,71 +616,6 @@ export default function AssistantPage() {
                       </Button>
                     </div>
                   ))}
-                </div>
-              </div>
-            )}
-
-            {/* Prompt Selector Panel */}
-            {showPromptSelector && (
-              <div className="p-3 bg-muted/50 rounded-md space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      placeholder="Search prompts..."
-                      value={promptSearchQuery}
-                      onChange={(e) => setPromptSearchQuery(e.target.value)}
-                      className="pl-8 h-8"
-                    />
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => {
-                      setShowPromptSelector(false)
-                      setPromptSearchQuery("")
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="max-h-64 overflow-y-auto space-y-1">
-                  {sortedPrompts.length > 0 ? (
-                    sortedPrompts.map((prompt) => (
-                      <button
-                        key={prompt.id}
-                        onClick={() => insertPrompt(prompt)}
-                        className="w-full text-left p-2 rounded hover:bg-background transition-colors flex items-start gap-2"
-                      >
-                        {prompt.isStarred && (
-                          <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400 shrink-0 mt-0.5" />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm truncate">{prompt.name}</span>
-                            {prompt.category && (
-                              <Badge variant="secondary" className="text-xs shrink-0">
-                                {prompt.category}
-                              </Badge>
-                            )}
-                            {prompt.ownerType === "personal" && (
-                              <Badge variant="outline" className="text-xs shrink-0">
-                                Personal
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
-                            {prompt.content}
-                          </p>
-                        </div>
-                      </button>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      No prompts found
-                    </p>
-                  )}
                 </div>
               </div>
             )}

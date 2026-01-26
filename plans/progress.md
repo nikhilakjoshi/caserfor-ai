@@ -477,3 +477,24 @@
 
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - dropdown menu, vault modal, updated AttachedFile type
+
+## 2026-01-26: Prompts Dropdown with Hover Preview
+
+### Completed
+- Converted Prompts button from expandable panel to dropdown menu
+- Dropdown shows all saved prompts with starred items first
+- Prompts display name, preview text, and Personal badge where applicable
+- Hover preview updates textarea placeholder with truncated prompt content
+- Placeholder reverts to default when hover ends or dropdown closes
+- Clicking prompt inserts content into query textarea
+- Removed unused Input component and Search icon imports
+- Updated 3 PRD items to passes:true
+
+### Notes for next dev
+- Uses mock prompts data - wire to /api/prompts when DB connected
+- Hover preview truncates at 100 chars with ellipsis
+- Starred prompts use yellow star icon and sort to top
+- No search in dropdown (simpler UX than panel) - may add if list grows large
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - dropdown menu, hover preview state
