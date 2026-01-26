@@ -943,3 +943,26 @@
 
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - mode state, split-panel layout, auto-switch logic
+
+## 2026-01-26: AI Mode Classification and Response Routing
+
+### Completed
+- Updated system prompt to instruct AI to prefix responses with [MODE:chat] or [MODE:document]
+- System prompt defines criteria: document mode for drafts/memos/letters, chat mode for Q&A
+- Added useMemo-based parsedResponse to extract mode prefix from AI completion
+- Mode regex matches [MODE:chat] or [MODE:document] at start of response
+- Strips mode prefix from displayed content automatically
+- useEffect switches mode state based on AI-detected mode
+- displayContent variable used for cleaned content in both layouts
+- Removed hardcoded outputType-based mode switching (AI now decides)
+- Updated 3 PRD items to passes:true
+
+### Notes for next dev
+- AI determines mode via prefix - user's outputType selection is a hint, not deterministic
+- Streaming works: mode can switch mid-stream when prefix is detected
+- Content stripping removes prefix + leading newlines for clean display
+- Next priorities: streaming into TipTap, debounced auto-save, document versioning
+
+### Files modified
+- app/api/assistant/query/route.ts - updated system prompt with mode classification
+- app/(dashboard)/assistant/page.tsx - parsedResponse, displayContent, mode auto-switch

@@ -93,17 +93,37 @@ export async function POST(req: Request) {
   const model = deepAnalysis ? analysisModel : defaultModel
 
   // Build system prompt based on output type
-  let systemPrompt = "You are a legal document assistant. "
+  let systemPrompt = `You are a legal document assistant.
+
+IMPORTANT: You MUST prefix your response with a mode tag on the first line.
+- Use [MODE:document] when generating document drafts, memos, letters, contracts, or any substantive written content that the user would edit.
+- Use [MODE:chat] when answering questions, providing explanations, giving advice, or having a conversation.
+
+The mode tag should appear alone on the first line, followed by a blank line, then your actual response.
+
+Example for document mode:
+[MODE:document]
+
+Dear Client,
+
+This letter is to inform you...
+
+Example for chat mode:
+[MODE:chat]
+
+Based on my analysis, the key considerations are...
+
+`
 
   if (outputType === "draft") {
     systemPrompt +=
-      "Generate well-structured, professional document drafts. Use clear headings, proper formatting, and professional legal language."
+      "The user has selected 'draft document' output. Generate well-structured, professional document drafts. Use clear headings, proper formatting, and professional legal language. You should respond with [MODE:document]."
   } else if (outputType === "review_table") {
     systemPrompt +=
-      "Extract and organize information into a structured table format. Use markdown tables with clear column headers."
+      "Extract and organize information into a structured table format. Use markdown tables with clear column headers. You may use either [MODE:document] for complex tables or [MODE:chat] for simple responses."
   } else {
     systemPrompt +=
-      "Provide helpful, accurate responses to legal research questions."
+      "Provide helpful, accurate responses to legal research questions. Determine the appropriate mode based on whether you are generating a document or answering a question."
   }
 
   // Add source context if provided

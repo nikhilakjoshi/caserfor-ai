@@ -1063,7 +1063,7 @@
       "Instruct AI to prefix response with [MODE:chat] or [MODE:document]",
       "Define criteria: document mode for drafts/generation, chat mode for Q&A"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -1074,7 +1074,7 @@
       "Strip prefix from displayed content",
       "Update mode state based on parsed value"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -1084,7 +1084,7 @@
       "If mode='document', pass content to EditorPanel",
       "Handle mode switching during streaming if needed"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

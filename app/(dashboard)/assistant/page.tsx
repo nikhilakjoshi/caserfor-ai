@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useCompletion } from "@ai-sdk/react";
 import { useSearchParams } from "next/navigation";
 import { useDropzone } from "react-dropzone";
@@ -317,6 +317,23 @@ export default function AssistantPage() {
     api: "/api/assistant/query",
   });
 
+  // Parse mode and content from AI response
+  const parsedResponse = useMemo(() => {
+    if (!completion) return { mode: null, content: "" };
+
+    // Check for mode prefix: [MODE:chat] or [MODE:document]
+    const modeMatch = completion.match(/^\[MODE:(chat|document)\]\s*/);
+    if (modeMatch) {
+      const detectedMode = modeMatch[1] as "chat" | "document";
+      // Strip the mode prefix and any leading whitespace/newlines
+      const content = completion.slice(modeMatch[0].length).replace(/^\n+/, "");
+      return { mode: detectedMode, content };
+    }
+
+    // No mode prefix found, return raw completion
+    return { mode: null, content: completion };
+  }, [completion]);
+
   // Read URL params and set up preloaded vault context (runs once on mount)
   useEffect(() => {
     const vaultId = searchParams.get("vault");
@@ -511,21 +528,20 @@ export default function AssistantPage() {
         attachedFiles: files,
       },
     });
-
-    // If outputType is draft, switch to document mode after response
-    if (outputType === "draft") {
-      setMode("document");
-    }
   };
 
-  // Sync completion to editor content when in document mode
+  // Switch mode based on AI-detected mode prefix and sync content
   useEffect(() => {
-    if (mode === "document" && completion) {
-      setEditorContent(completion);
+    if (parsedResponse.mode) {
+      setMode(parsedResponse.mode);
     }
-  }, [completion, mode]);
+    if (parsedResponse.content) {
+      setEditorContent(parsedResponse.content);
+    }
+  }, [parsedResponse.mode, parsedResponse.content]);
 
   const hasResponse = completion.length > 0;
+  const displayContent = parsedResponse.content;
 
   // Get starred prompts first, then others
   const sortedPrompts = [...mockPrompts].sort((a, b) => {
@@ -841,7 +857,7 @@ export default function AssistantPage() {
           <div className="w-1/4 min-w-[280px] border-r transition-all duration-300">
             <ChatPanel
               query={submittedQuery}
-              completion={completion}
+              completion={displayContent}
               isLoading={isLoading}
               onQueryChange={setQuery}
               onSubmit={handleSubmit}
@@ -1400,7 +1416,7 @@ export default function AssistantPage() {
               <p>{submittedQuery}</p>
             </div>
             <div className="prose prose-sm max-w-none dark:prose-invert">
-              <div className="whitespace-pre-wrap">{completion}</div>
+              <div className="whitespace-pre-wrap">{displayContent}</div>
               {isLoading && (
                 <span className="inline-flex items-center gap-1 text-muted-foreground">
                   <Loader2 className="h-3 w-3 animate-spin" />
