@@ -727,7 +727,7 @@
       "Category field available in upload UI",
       "Category persisted with file metadata"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -740,7 +740,7 @@
       "Store tags in metadata",
       "Store vault association in metadata"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

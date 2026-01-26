@@ -604,6 +604,7 @@ export default function AssistantPage() {
 
     setIsCreatingVault(true);
     try {
+      // 1. Create the vault
       const response = await fetch("/api/vaults", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -618,12 +619,36 @@ export default function AssistantPage() {
         throw new Error("Failed to create vault");
       }
 
-      // TODO: Upload files to created vault via separate endpoint
-      // For now, just close the modal and reset state
+      const vault = await response.json();
+
+      // 2. Upload files if any
+      if (newVaultFiles.length > 0) {
+        const formData = new FormData();
+
+        // Build categories map: { filename: category }
+        const categories: Record<string, string> = {};
+        newVaultFiles.forEach((f) => {
+          formData.append("files", f.file);
+          if (f.category) {
+            categories[f.name] = f.category;
+          }
+        });
+
+        formData.append("categories", JSON.stringify(categories));
+
+        const uploadResponse = await fetch(`/api/vaults/${vault.id}/documents`, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!uploadResponse.ok) {
+          console.error("Failed to upload files, but vault was created");
+        }
+      }
+
       setShowCreateVaultModal(false);
       setNewVaultName("");
       setNewVaultFiles([]);
-      // Optionally refresh vault list or show success message
     } catch (error) {
       console.error("Error creating vault:", error);
     } finally {

@@ -808,3 +808,26 @@
 - app/(dashboard)/workflows/[id]/page.tsx - lint fixes, OutputTypeIcon component
 - app/api/starred/[type]/[id]/route.ts - commented unused variable
 - components/page-header.tsx - fixed setState-in-effect pattern
+
+## 2026-01-26: File Upload Endpoint and Metadata Persistence
+
+### Completed
+- Created POST /api/vaults/[id]/documents endpoint for file upload
+- Endpoint accepts multipart FormData with files, categories, and tags
+- Creates Document records in Prisma with all metadata fields populated
+- Stores file content as base64 in metadata JSON (no S3 dependency)
+- Generates unique storageKey for each file (vaults/{vaultId}/{uuid}.{ext})
+- Wired Create New Vault modal to upload files after vault creation
+- Files with custom categories now persist to database
+- Updated 2 PRD items to passes:true (file metadata persistence)
+- All PRD items now complete (passes:true)
+
+### Notes for next dev
+- File content stored in metadata.content as base64 - replace with S3 in prod
+- storageKey field populated but not used yet - ready for S3 migration
+- Tags support in endpoint but UI doesn't expose tag input yet
+- embeddingStatus defaults to pending - embedding pipeline not implemented
+
+### Files modified
+- app/api/vaults/[id]/documents/route.ts - added POST endpoint
+- app/(dashboard)/assistant/page.tsx - wired Create Vault to upload files

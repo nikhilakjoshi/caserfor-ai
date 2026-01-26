@@ -24,3 +24,8 @@
 ## React Hooks
 - useCompletion/useChat from @ai-sdk/react package (not ai/react)
 - ai v6+ split React hooks into separate @ai-sdk/react package
+
+## File Storage
+- File content stored as base64 in Document.metadata.content field (no S3)
+- storageKey field populated with path format: vaults/{vaultId}/{uuid}.{ext}
+- Production should migrate to S3 - remove content from metadata, use storageKey for S3 get
