@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useCompletion } from "@ai-sdk/react";
+import { useSearchParams } from "next/navigation";
 import { useDropzone } from "react-dropzone";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -269,9 +270,18 @@ function formatFileSize(bytes: number): string {
 }
 
 const DEFAULT_PLACEHOLDER = "Ask anything. Type @ to add sources.";
+const VAULT_CONTEXT_PLACEHOLDER = "Ask a question about your selected vault files...";
+
+interface PreloadedVaultContext {
+  vaultId: string;
+  vaultName: string;
+  fileIds: string[];
+}
 
 export default function AssistantPage() {
+  const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
+  const [preloadedContext, setPreloadedContext] = useState<PreloadedVaultContext | null>(null);
   const [outputType, setOutputType] = useState<OutputType>("draft");
   const [selectedVaults, setSelectedVaults] = useState<string[]>([]);
   const [deepAnalysis, setDeepAnalysis] = useState(false);
@@ -297,6 +307,55 @@ export default function AssistantPage() {
   const { completion, isLoading, complete, error } = useCompletion({
     api: "/api/assistant/query",
   });
+
+  // Read URL params and set up preloaded vault context (runs once on mount)
+  useEffect(() => {
+    const vaultId = searchParams.get("vault");
+    const vaultName = searchParams.get("vaultName");
+    const filesParam = searchParams.get("files");
+    const queryParam = searchParams.get("query");
+
+    if (vaultId && filesParam) {
+      const fileIds = filesParam.split(",");
+      setPreloadedContext({
+        vaultId,
+        vaultName: vaultName || "Vault",
+        fileIds,
+      });
+
+      // Add vault files to attached files as references
+      // Find files from mock data that match the IDs
+      const vault = mockVaultsWithFiles.find((v) => v.id === vaultId);
+      if (vault) {
+        const filesToAdd: AttachedFile[] = vault.files
+          .filter((f) => fileIds.includes(f.id))
+          .map((f) => ({
+            id: `vault-${f.id}`,
+            file: null,
+            name: f.name,
+            size: f.size,
+            source: "vault" as const,
+            vaultId: vaultId,
+          }));
+        setAttachedFiles(filesToAdd);
+        // Add vault to selected vaults for context
+        setSelectedVaults((prev) => prev.includes(vaultId) ? prev : [vaultId]);
+      }
+    } else if (vaultId) {
+      // Just vault selected, no specific files
+      setPreloadedContext({
+        vaultId,
+        vaultName: vaultName || "Vault",
+        fileIds: [],
+      });
+      setSelectedVaults((prev) => prev.includes(vaultId) ? prev : [vaultId]);
+    }
+
+    // Pre-fill query if provided
+    if (queryParam) {
+      setQuery(queryParam);
+    }
+  }, [searchParams]);
 
   const addFiles = useCallback((files: FileList | File[]) => {
     const newFiles: AttachedFile[] = Array.from(files).map((file) => ({
@@ -494,11 +553,13 @@ export default function AssistantPage() {
     }
   };
 
-  // Compute placeholder - shows hovered prompt preview or default
+  // Compute placeholder - shows hovered prompt preview, vault context, or default
   const textareaPlaceholder = hoveredPrompt
     ? hoveredPrompt.content.slice(0, 100) +
       (hoveredPrompt.content.length > 100 ? "..." : "")
-    : DEFAULT_PLACEHOLDER;
+    : preloadedContext && preloadedContext.fileIds.length > 0
+      ? VAULT_CONTEXT_PLACEHOLDER
+      : DEFAULT_PLACEHOLDER;
 
   // Create New Vault dropzone
   const onDropNewVaultFiles = useCallback((acceptedFiles: File[]) => {
@@ -845,6 +906,23 @@ export default function AssistantPage() {
               className="hidden"
               onChange={handleFileInputChange}
             />
+
+            {/* Preloaded Vault Context Display */}
+            {preloadedContext && (
+              <div className="p-3 bg-primary/5 border border-primary/20 rounded-md space-y-2">
+                <div className="flex items-center gap-2">
+                  <Database className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">
+                    Querying: {preloadedContext.vaultName}
+                  </span>
+                  {preloadedContext.fileIds.length > 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      {preloadedContext.fileIds.length} file{preloadedContext.fileIds.length !== 1 ? "s" : ""}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Attached files display */}
             {attachedFiles.length > 0 && (

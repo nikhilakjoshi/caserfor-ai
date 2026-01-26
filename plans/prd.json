@@ -657,7 +657,7 @@
       "Hide banner when vault is empty",
       "Position banner prominently on vault detail page"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -667,7 +667,7 @@
       "Add 'Start a Query' button to banner",
       "Style banner with square-edge design system"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -677,7 +677,7 @@
       "Modal displays files from current vault",
       "Modal uses same styling as other modals (50%, centered, square)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -687,7 +687,7 @@
       "Selection state visually indicated",
       "Add 'Go' button to confirm selection"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -697,7 +697,7 @@
       "Vault is preloaded as context in new session",
       "Selected files attached as sources"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -707,7 +707,7 @@
       "Display selected files as chips/resources",
       "Update input placeholder to reflect file context"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -717,7 +717,7 @@
       "Placeholder reflects file-driven context",
       "Placeholder updates based on selected sources"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

@@ -739,3 +739,30 @@
 
 ### Files modified
 - components/app-sidebar.tsx - added collapsible vault list with fetch logic
+
+## 2026-01-26: Start a Query Flow from Vault Detail Page
+
+### Completed
+- Added query banner to vault detail page (visible only when vault has 1+ files)
+- Banner text: "Start querying your knowledge base" with "Start a Query" button
+- Banner styled with bg-gray-50, 1px border, Sparkles icon
+- "Start a Query" button (both in banner and action buttons) opens file selection modal
+- File selection modal: 50% viewport, centered, square-edge design
+- Modal uses shadcn Table with checkbox column, file name, type badge, size
+- Sort by name/type/size columns, select all via header checkbox
+- "Go" button navigates to /assistant with vault context in URL params
+- Assistant page reads URL params: vault, vaultName, files, query
+- Preloaded files automatically attached to chat session
+- Vault context displayed in dedicated section with Database icon
+- Placeholder text changes to "Ask a question about your selected vault files..."
+- Updated 7 PRD items to passes:true
+
+### Notes for next dev
+- File IDs passed via comma-separated URL param (?files=f1,f2,f3)
+- Mock data used for file lookup - wire to /api/vaults/[id]/documents when DB connected
+- preloadedContext state tracks vault context from URL for UI display
+- URL also supports ?query= param for pre-filled query text
+
+### Files modified
+- app/(dashboard)/vault/[id]/page.tsx - query banner, file selection modal, handleStartQuery
+- app/(dashboard)/assistant/page.tsx - useSearchParams, preloadedContext state, vault context UI

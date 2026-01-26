@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Table,
   TableBody,
@@ -21,6 +22,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
   Database,
   FolderOpen,
   MessageSquare,
@@ -30,10 +37,12 @@ import {
   FileText,
   ArrowUpDown,
   MoreVertical,
-  ChevronDown,
   Search,
   TableIcon,
   ArrowLeft,
+  Sparkles,
+  X,
+  File,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -167,6 +176,10 @@ export default function VaultDetailPage() {
   const [quickQuery, setQuickQuery] = useState("")
   const [sortField, setSortField] = useState<SortField>("updatedAt")
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
+  const [showQueryModal, setShowQueryModal] = useState(false)
+  const [selectedFileIds, setSelectedFileIds] = useState<string[]>([])
+  const [queryModalSortField, setQueryModalSortField] = useState<SortField>("name")
+  const [queryModalSortDirection, setQueryModalSortDirection] = useState<SortDirection>("asc")
 
   useEffect(() => {
     // TODO: Replace with API call to GET /api/vaults/[id]
@@ -195,6 +208,65 @@ export default function VaultDetailPage() {
     // Navigate to assistant with vault pre-selected
     router.push(`/assistant?vault=${vaultId}&query=${encodeURIComponent(quickQuery)}`)
   }
+
+  const handleOpenQueryModal = () => {
+    setSelectedFileIds([])
+    setShowQueryModal(true)
+  }
+
+  const handleQueryModalSort = (field: SortField) => {
+    if (queryModalSortField === field) {
+      setQueryModalSortDirection(queryModalSortDirection === "asc" ? "desc" : "asc")
+    } else {
+      setQueryModalSortField(field)
+      setQueryModalSortDirection("asc")
+    }
+  }
+
+  const toggleFileSelection = (fileId: string) => {
+    setSelectedFileIds((prev) =>
+      prev.includes(fileId) ? prev.filter((id) => id !== fileId) : [...prev, fileId]
+    )
+  }
+
+  const toggleSelectAllFiles = () => {
+    if (selectedFileIds.length === documents.length) {
+      setSelectedFileIds([])
+    } else {
+      setSelectedFileIds(documents.map((d) => d.id))
+    }
+  }
+
+  const handleStartQuery = () => {
+    if (selectedFileIds.length === 0) return
+    // Navigate to assistant with vault and selected files
+    const fileIdsParam = encodeURIComponent(selectedFileIds.join(","))
+    router.push(`/assistant?vault=${vaultId}&vaultName=${encodeURIComponent(vault?.name || "")}&files=${fileIdsParam}`)
+    setShowQueryModal(false)
+  }
+
+  // Sort documents for query modal
+  const queryModalSortedDocs = [...documents].sort((a, b) => {
+    let comparison = 0
+    switch (queryModalSortField) {
+      case "name":
+        comparison = a.name.localeCompare(b.name)
+        break
+      case "documentType":
+        comparison = (a.documentType || "").localeCompare(b.documentType || "")
+        break
+      case "updatedAt":
+        comparison = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+        break
+      case "fileType":
+        comparison = a.fileType.localeCompare(b.fileType)
+        break
+      case "sizeBytes":
+        comparison = a.sizeBytes - b.sizeBytes
+        break
+    }
+    return queryModalSortDirection === "asc" ? comparison : -comparison
+  })
 
   const filteredDocuments = documents.filter((doc) =>
     doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -294,14 +366,26 @@ export default function VaultDetailPage() {
           </div>
         </div>
 
+        {/* Query Banner - only show when vault has files */}
+        {documents.length > 0 && (
+          <div className="p-4 bg-gray-50 dark:bg-muted/50 border border-neutral-200 dark:border-neutral-700 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <span className="font-medium">Start querying your knowledge base</span>
+            </div>
+            <Button onClick={handleOpenQueryModal}>
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Start a Query
+            </Button>
+          </div>
+        )}
+
         {/* Action buttons */}
         <div className="flex items-center gap-2">
-          <Link href={`/assistant?vault=${vaultId}`}>
-            <Button>
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Start a query
-            </Button>
-          </Link>
+          <Button onClick={handleOpenQueryModal}>
+            <MessageSquare className="mr-2 h-4 w-4" />
+            Start a query
+          </Button>
           <Button variant="outline">
             <TableIcon className="mr-2 h-4 w-4" />
             Create review table
@@ -482,6 +566,146 @@ export default function VaultDetailPage() {
           </Table>
         </div>
       </div>
+
+      {/* File Selection Modal for Start a Query */}
+      <Dialog open={showQueryModal} onOpenChange={(open) => {
+        setShowQueryModal(open)
+        if (!open) setSelectedFileIds([])
+      }}>
+        <DialogContent
+          className="w-[50vw] max-w-[50vw] h-[50vh] max-h-[50vh] bg-gray-50 dark:bg-muted/50 border border-neutral-200 dark:border-neutral-700 p-0 flex flex-col overflow-hidden"
+          showCloseButton={false}
+        >
+          {/* Header */}
+          <DialogHeader className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-background">
+            <div className="flex items-center justify-between">
+              <DialogTitle>Select files to query</DialogTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setShowQueryModal(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </DialogHeader>
+
+          {/* Content - File Table */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={selectedFileIds.length === documents.length && documents.length > 0}
+                      onCheckedChange={toggleSelectAllFiles}
+                    />
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="-ml-3 h-8"
+                      onClick={() => handleQueryModalSort("name")}
+                    >
+                      File Name
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="-ml-3 h-8"
+                      onClick={() => handleQueryModalSort("documentType")}
+                    >
+                      Type
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="-ml-3 h-8"
+                      onClick={() => handleQueryModalSort("sizeBytes")}
+                    >
+                      Size
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {queryModalSortedDocs.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center">
+                      <div className="text-muted-foreground">No files in this vault</div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  queryModalSortedDocs.map((doc) => {
+                    const isSelected = selectedFileIds.includes(doc.id)
+                    return (
+                      <TableRow
+                        key={doc.id}
+                        className="cursor-pointer"
+                        onClick={() => toggleFileSelection(doc.id)}
+                        data-state={isSelected ? "selected" : undefined}
+                      >
+                        <TableCell>
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={() => toggleFileSelection(doc.id)}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <File className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">{doc.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {doc.documentType ? (
+                            <Badge
+                              variant="secondary"
+                              className={documentTypeColors[doc.documentType] || ""}
+                            >
+                              {doc.documentType}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatBytes(doc.sizeBytes)}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-neutral-200 dark:border-neutral-700 bg-white dark:bg-background flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">
+              {selectedFileIds.length} file{selectedFileIds.length !== 1 ? "s" : ""} selected
+            </span>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowQueryModal(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleStartQuery} disabled={selectedFileIds.length === 0}>
+                Go
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
