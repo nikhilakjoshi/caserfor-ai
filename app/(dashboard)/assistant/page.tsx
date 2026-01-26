@@ -24,6 +24,7 @@ import {
   Upload,
   File,
   Database,
+  Wand2,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -233,6 +234,7 @@ export default function AssistantPage() {
   const [selectedVaultForFiles, setSelectedVaultForFiles] = useState<Vault | null>(null)
   const [selectedVaultFiles, setSelectedVaultFiles] = useState<string[]>([])
   const [hoveredPrompt, setHoveredPrompt] = useState<Prompt | null>(null)
+  const [isImproving, setIsImproving] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { completion, isLoading, complete, error } = useCompletion({
@@ -357,6 +359,41 @@ export default function AssistantPage() {
       : prompt.content
     setQuery(newQuery)
     setHoveredPrompt(null)
+  }
+
+  const handleImprove = async () => {
+    if (!query.trim() || isImproving || isLoading) return
+
+    setIsImproving(true)
+    try {
+      const response = await fetch("/api/assistant/improve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inputText: query }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to improve prompt")
+      }
+
+      // Stream the response and build up the improved prompt
+      const reader = response.body?.getReader()
+      if (!reader) throw new Error("No response body")
+
+      const decoder = new TextDecoder()
+      let improvedText = ""
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        improvedText += decoder.decode(value, { stream: true })
+        setQuery(improvedText)
+      }
+    } catch (error) {
+      console.error("Error improving prompt:", error)
+    } finally {
+      setIsImproving(false)
+    }
   }
 
   // Compute placeholder - shows hovered prompt preview or default
@@ -554,6 +591,25 @@ export default function AssistantPage() {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                disabled={isLoading || isImproving || !query.trim()}
+                onClick={handleImprove}
+              >
+                {isImproving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Improving
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="h-4 w-4" />
+                    Improve
+                  </>
+                )}
+              </Button>
             </div>
 
             {/* Vault Selection Dropdown */}

@@ -98,7 +98,7 @@
       "Style consistently with other input area buttons",
       "Position appropriately in input area layout"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -109,7 +109,7 @@
       "Replaces or updates input with improved prompt",
       "Functions as integrated prompt refiner/generator"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

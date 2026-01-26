@@ -498,3 +498,26 @@
 
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - dropdown menu, hover preview state
+
+## 2026-01-26: Improve Button Feature
+
+### Completed
+- Added Improve button to assistant input area next to Prompts button
+- Created POST /api/assistant/improve endpoint for prompt refinement
+- Button disabled when textarea empty or during loading/improving
+- Streams improved prompt directly into textarea, replacing original text
+- Loading state shows spinner with "Improving" text
+- Uses Wand2 icon consistent with "magic" UI patterns
+- Updated 2 PRD items to passes:true
+
+### Notes for next dev
+- Improve endpoint uses defaultModel (claude-sonnet-4-20250514)
+- No DB persistence for improve requests (stateless)
+- Streaming updates textarea in real-time as response arrives
+- Original query is fully replaced, not appended
+
+### Files created
+- app/api/assistant/improve/route.ts - streaming prompt improvement endpoint
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - added Improve button, isImproving state, handleImprove function
