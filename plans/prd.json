@@ -1002,7 +1002,7 @@
       "Default mode to 'chat'",
       "Add setter function to update mode"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1016,7 +1016,7 @@
       "Show 'Answering' status with 'Generating new version...' progress text when loading",
       "Position chat input at bottom of panel"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1031,7 +1031,7 @@
       "Add 'Show edits' toggle below header",
       "Style panel with consistent design system"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1042,7 +1042,7 @@
       "When mode='document': render flex container with 25% ChatPanel + 75% EditorPanel",
       "Use Tailwind flex utilities for layout (w-1/4 and w-3/4)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1052,7 +1052,7 @@
       "Animate width changes smoothly",
       "Ensure content reflows gracefully during transition"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

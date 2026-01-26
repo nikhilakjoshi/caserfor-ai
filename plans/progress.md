@@ -910,3 +910,36 @@
 
 ### Files modified
 - prisma/schema.prisma - added EditorDocument model, updated AssistantQuery relation
+
+## 2026-01-26: Split-Panel Layout for Document Editing
+
+### Completed
+- Added mode state to assistant page ('chat' | 'document')
+- Created ChatPanel component at components/assistant/chat-panel.tsx
+- ChatPanel includes: query display, Copy/Save prompt/Edit query buttons, generation status, follow-up input
+- Created EditorPanel component at components/assistant/editor-panel.tsx
+- EditorPanel includes: Draft header, Version dropdown, Sources button, Export button, Show edits toggle
+- Added shadcn Switch component for Show edits toggle
+- Implemented split-panel layout: 25% ChatPanel + 75% EditorPanel in document mode
+- Full-width chat layout when in chat mode (no response yet)
+- Auto-switch to document mode when outputType is 'draft' after AI response
+- Added CSS transitions (transition-all duration-300) for smooth layout changes
+- Synced AI completion to editor content in document mode
+- New thread button resets to chat mode
+- Updated 5 PRD items to passes:true
+
+### Notes for next dev
+- Mode auto-switches to 'document' when outputType='draft' and response arrives
+- EditorPanel receives content via props - editor is controlled component
+- ChatPanel compact prop hides completion display (shown in editor instead)
+- Version dropdown, Sources panel, Export functionality are UI placeholders
+- Show edits toggle state exists but diff highlighting not implemented
+- Next priorities: system prompt classification, mode parsing from AI response
+
+### Files created
+- components/assistant/chat-panel.tsx - ChatPanel component
+- components/assistant/editor-panel.tsx - EditorPanel component
+- components/ui/switch.tsx - shadcn Switch component
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - mode state, split-panel layout, auto-switch logic

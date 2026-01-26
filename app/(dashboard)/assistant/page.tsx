@@ -11,6 +11,8 @@ import { Toggle } from "@/components/ui/toggle";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { ChatPanel } from "@/components/assistant/chat-panel";
+import { EditorPanel } from "@/components/assistant/editor-panel";
 import {
   FileText,
   Table2,
@@ -106,6 +108,7 @@ interface Vault {
 
 type OutputType = "draft" | "review_table";
 type OwnerType = "system" | "personal";
+type AssistantMode = "chat" | "document";
 
 interface VaultSource {
   id: string;
@@ -299,6 +302,11 @@ export default function AssistantPage() {
   const [focusedFile, setFocusedFile] = useState<VaultFile | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Mode state for split-panel layout
+  const [mode, setMode] = useState<AssistantMode>("chat");
+  const [editorContent, setEditorContent] = useState("");
+  const [submittedQuery, setSubmittedQuery] = useState("");
+
   // Create New Vault modal state
   const [showCreateVaultModal, setShowCreateVaultModal] = useState(false);
   const [newVaultName, setNewVaultName] = useState("");
@@ -491,6 +499,9 @@ export default function AssistantPage() {
       vaultId: af.vaultId,
     }));
 
+    // Store the query that was submitted
+    setSubmittedQuery(query);
+
     await complete(query, {
       body: {
         inputText: query,
@@ -500,7 +511,19 @@ export default function AssistantPage() {
         attachedFiles: files,
       },
     });
+
+    // If outputType is draft, switch to document mode after response
+    if (outputType === "draft") {
+      setMode("document");
+    }
   };
+
+  // Sync completion to editor content when in document mode
+  useEffect(() => {
+    if (mode === "document" && completion) {
+      setEditorContent(completion);
+    }
+  }, [completion, mode]);
 
   const hasResponse = completion.length > 0;
 
@@ -662,399 +685,199 @@ export default function AssistantPage() {
     setNewVaultFiles([]);
   };
 
+  const handleNewThread = () => {
+    setQuery("");
+    setSubmittedQuery("");
+    setEditorContent("");
+    setMode("chat");
+  };
+
   // Calculate total size of files being uploaded to new vault
   const newVaultTotalSize = newVaultFiles.reduce((sum, f) => sum + f.size, 0);
   const MAX_STORAGE_GB = 100;
   const MAX_FILE_COUNT = 100000;
 
-  return (
+  // Render input controls for chat panel
+  const renderInputControls = () => (
     <>
-      <PageHeader title="Assistant" />
-      <div className="flex flex-col items-center min-h-[60vh] gap-8 px-4 py-8">
-        {/* Title/Logo - only show when no response */}
-        {!hasResponse && (
-          <div className="text-center space-y-2 mt-[10vh]">
-            <h1 className="text-4xl font-bold tracking-tight">
-              Legal Workflow
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              AI-powered legal document analysis
-            </p>
-          </div>
-        )}
-
-        {/* Response Area */}
-        {hasResponse && (
-          <div className="w-full max-w-3xl">
-            <div className="mb-4 p-4 bg-muted/30 rounded-lg">
-              <p className="text-sm text-muted-foreground mb-2">Query:</p>
-              <p>{query}</p>
-            </div>
-            <div className="prose prose-sm max-w-none dark:prose-invert">
-              <div className="whitespace-pre-wrap">{completion}</div>
-              {isLoading && (
-                <span className="inline-flex items-center gap-1 text-muted-foreground">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Error Display */}
-        {error && (
-          <div className="w-full max-w-2xl p-4 bg-destructive/10 text-destructive rounded-lg">
-            <p className="font-medium">Error</p>
-            <p className="text-sm">{error.message}</p>
-          </div>
-        )}
-
-        {/* Main Input Area */}
-        <div
-          className={`w-full max-w-4xl space-y-4 ${hasResponse ? "mt-auto" : ""}`}
-        >
-          {/* Unified Chat Input Container */}
-          <div className="border rounded bg-background">
-            {/* Textarea */}
-            <Textarea
-              placeholder={textareaPlaceholder}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="min-h-[100px] resize-none text-base border-0 focus-visible:ring-0 rounded-b-none"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                  handleSubmit();
-                }
-              }}
-              disabled={isLoading}
-            />
-            {/* Embedded Button Row */}
-            <div className="flex items-center gap-2 p-2 border-t bg-muted/30">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="inline"
-                    size="sm"
-                    className="gap-1.5 h-8"
-                    disabled={isLoading}
-                  >
-                    <Paperclip className="h-4 w-4" />
-                    Files & Sources
-                    {attachedFiles.length > 0 && (
-                      <Badge
-                        variant="secondary"
-                        className="ml-1 h-5 w-5 p-0 justify-center"
-                      >
-                        {attachedFiles.length}
-                      </Badge>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56">
-                  <DropdownMenuLabel>File Actions</DropdownMenuLabel>
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Upload className="h-4 w-4" />
-                      Upload Files
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuLabel>Sources</DropdownMenuLabel>
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={() => setShowVaultModal(true)}>
-                      <Database className="h-4 w-4" />
-                      Add From Vault
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <DropdownMenu
-                onOpenChange={(open) => !open && setHoveredPrompt(null)}
-              >
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="inline"
-                    size="sm"
-                    className="gap-1.5 h-8"
-                    disabled={isLoading}
-                  >
-                    <BookOpen className="h-4 w-4" />
-                    Prompts
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className="w-72 max-h-80 overflow-y-auto"
-                >
-                  <DropdownMenuLabel>Saved Prompts</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {sortedPrompts.map((prompt) => (
-                    <DropdownMenuItem
-                      key={prompt.id}
-                      onClick={() => insertPrompt(prompt)}
-                      onMouseEnter={() => setHoveredPrompt(prompt)}
-                      onMouseLeave={() => setHoveredPrompt(null)}
-                      className="flex flex-col items-start gap-1 cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2 w-full">
-                        {prompt.isStarred && (
-                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 shrink-0" />
-                        )}
-                        <span className="font-medium text-sm truncate">
-                          {prompt.name}
-                        </span>
-                        {prompt.ownerType === "personal" && (
-                          <Badge
-                            variant="outline"
-                            className="text-xs ml-auto shrink-0"
-                          >
-                            Personal
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground line-clamp-1 w-full">
-                        {prompt.content}
-                      </p>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Button
-                variant="inline"
-                size="sm"
-                className="gap-1.5 h-8"
-                disabled={isLoading || isImproving || !query.trim()}
-                onClick={handleImprove}
-              >
-                {isImproving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Improving
-                  </>
-                ) : (
-                  <>
-                    <Wand2 className="h-4 w-4" />
-                    Improve
-                  </>
-                )}
-              </Button>
-              {/* Spacer */}
-              <div className="flex-1" />
-              {/* Ask Button - right aligned */}
-              <Button
-                onClick={handleSubmit}
-                disabled={!query.trim() || isLoading}
-                size="sm"
-                className="h-8"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-                    Generating
-                  </>
-                ) : (
-                  <>Ask</>
-                )}
-              </Button>
-            </div>
-          </div>
-
-          {/* Output Type Toggle */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Output:</span>
-            <div className="flex gap-1">
-              <Toggle
-                pressed={outputType === "draft"}
-                onPressedChange={() => setOutputType("draft")}
-                size="sm"
-                className="gap-1.5"
-                disabled={isLoading}
-              >
-                <FileText className="h-4 w-4" />
-                Draft document
-              </Toggle>
-              <Toggle
-                pressed={outputType === "review_table"}
-                onPressedChange={() => setOutputType("review_table")}
-                size="sm"
-                className="gap-1.5"
-                disabled={isLoading}
-              >
-                <Table2 className="h-4 w-4" />
-                Review table
-              </Toggle>
-            </div>
-          </div>
-
-          {/* Source Selector */}
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowVaultSelector(!showVaultSelector)}
-                className="gap-1.5"
-                disabled={isLoading}
-              >
-                <Folder className="h-4 w-4" />
-                Choose vault
-              </Button>
-            </div>
-
-            {/* Vault Selection Dropdown */}
-            {showVaultSelector && (
-              <div className="flex flex-wrap gap-2 p-3 bg-muted/50 rounded-md">
-                {mockVaults.map((vault) => {
-                  const isSelected = selectedVaults.includes(vault.id);
-                  return (
-                    <Button
-                      key={vault.id}
-                      variant={isSelected ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => toggleVault(vault.id)}
-                      className="gap-1.5"
-                      disabled={isLoading}
-                    >
-                      {isSelected && <Check className="h-3 w-3" />}
-                      {vault.name}
-                    </Button>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Hidden file input for Upload Files action */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              className="hidden"
-              onChange={handleFileInputChange}
-            />
-
-            {/* Preloaded Vault Context Display */}
-            {preloadedContext && (
-              <div className="p-3 bg-primary/5 border border-primary/20 rounded-md space-y-2">
-                <div className="flex items-center gap-2">
-                  <Database className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium">
-                    Querying: {preloadedContext.vaultName}
-                  </span>
-                  {preloadedContext.fileIds.length > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {preloadedContext.fileIds.length} file{preloadedContext.fileIds.length !== 1 ? "s" : ""}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Attached files display */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="inline"
+            size="sm"
+            className="gap-1.5 h-8"
+            disabled={isLoading}
+          >
+            <Paperclip className="h-4 w-4" />
+            Files & Sources
             {attachedFiles.length > 0 && (
-              <div className="p-3 bg-muted/50 rounded-md space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">
-                    {attachedFiles.length} file
-                    {attachedFiles.length !== 1 ? "s" : ""} attached
-                  </span>
-                </div>
-                <div className="space-y-1 max-h-40 overflow-y-auto">
-                  {attachedFiles.map((af) => (
-                    <div
-                      key={af.id}
-                      className="flex items-center gap-2 p-2 bg-background rounded text-sm"
-                    >
-                      <File className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <span className="truncate flex-1">{af.name}</span>
-                      <span className="text-xs text-muted-foreground shrink-0">
-                        {formatFileSize(af.size)}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 shrink-0"
-                        onClick={() => removeFile(af.id)}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <Badge
+                variant="secondary"
+                className="ml-1 h-5 w-5 p-0 justify-center"
+              >
+                {attachedFiles.length}
+              </Badge>
             )}
-
-            {/* Selected Sources Indicator */}
-            {selectedVaults.length > 0 && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>Sources:</span>
-                {selectedVaults.map((id) => {
-                  const vault = mockVaults.find((v) => v.id === id);
-                  return vault ? (
-                    <Badge key={id} variant="secondary">
-                      {vault.name}
-                    </Badge>
-                  ) : null;
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Deep Analysis Toggle */}
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="deep-analysis"
-              checked={deepAnalysis}
-              onCheckedChange={(checked) => setDeepAnalysis(checked === true)}
-              disabled={isLoading}
-            />
-            <label
-              htmlFor="deep-analysis"
-              className="text-sm flex items-center gap-1.5 cursor-pointer"
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-56">
+          <DropdownMenuLabel>File Actions</DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              onClick={() => fileInputRef.current?.click()}
             >
-              <Sparkles className="h-4 w-4" />
-              Deep analysis
-            </label>
-            <span className="text-xs text-muted-foreground">
-              (Extended processing for complex queries)
-            </span>
+              <Upload className="h-4 w-4" />
+              Upload Files
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuLabel>Sources</DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <DropdownMenuItem onClick={() => setShowVaultModal(true)}>
+              <Database className="h-4 w-4" />
+              Add From Vault
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <DropdownMenu
+        onOpenChange={(open) => !open && setHoveredPrompt(null)}
+      >
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="inline"
+            size="sm"
+            className="gap-1.5 h-8"
+            disabled={isLoading}
+          >
+            <BookOpen className="h-4 w-4" />
+            Prompts
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="start"
+          className="w-72 max-h-80 overflow-y-auto"
+        >
+          <DropdownMenuLabel>Saved Prompts</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {sortedPrompts.map((prompt) => (
+            <DropdownMenuItem
+              key={prompt.id}
+              onClick={() => insertPrompt(prompt)}
+              onMouseEnter={() => setHoveredPrompt(prompt)}
+              onMouseLeave={() => setHoveredPrompt(null)}
+              className="flex flex-col items-start gap-1 cursor-pointer"
+            >
+              <div className="flex items-center gap-2 w-full">
+                {prompt.isStarred && (
+                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 shrink-0" />
+                )}
+                <span className="font-medium text-sm truncate">
+                  {prompt.name}
+                </span>
+                {prompt.ownerType === "personal" && (
+                  <Badge
+                    variant="outline"
+                    className="text-xs ml-auto shrink-0"
+                  >
+                    Personal
+                  </Badge>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground line-clamp-1 w-full">
+                {prompt.content}
+              </p>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <Button
+        variant="inline"
+        size="sm"
+        className="gap-1.5 h-8"
+        disabled={isLoading || isImproving || !query.trim()}
+        onClick={handleImprove}
+      >
+        {isImproving ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Improving
+          </>
+        ) : (
+          <>
+            <Wand2 className="h-4 w-4" />
+            Improve
+          </>
+        )}
+      </Button>
+      {/* Spacer */}
+      <div className="flex-1" />
+      {/* Ask Button - right aligned */}
+      <Button
+        onClick={handleSubmit}
+        disabled={!query.trim() || isLoading}
+        size="sm"
+        className="h-8"
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+            Generating
+          </>
+        ) : (
+          <>Ask</>
+        )}
+      </Button>
+    </>
+  );
+
+  // Render the split-panel layout when in document mode
+  if (mode === "document" && hasResponse) {
+    return (
+      <>
+        <PageHeader title="Assistant" />
+        <div className="flex h-[calc(100vh-4rem)] transition-all duration-300">
+          {/* Chat Panel - 25% width */}
+          <div className="w-1/4 min-w-[280px] border-r transition-all duration-300">
+            <ChatPanel
+              query={submittedQuery}
+              completion={completion}
+              isLoading={isLoading}
+              onQueryChange={setQuery}
+              onSubmit={handleSubmit}
+              onNewThread={handleNewThread}
+              inputControls={renderInputControls()}
+              compact
+            />
+          </div>
+          {/* Editor Panel - 75% width */}
+          <div className="flex-1 transition-all duration-300">
+            <EditorPanel
+              content={editorContent}
+              onChange={setEditorContent}
+              isStreaming={isLoading}
+            />
           </div>
         </div>
 
-        {/* Recommended Workflows - only show when no response */}
-        {!hasResponse && (
-          <div className="w-full space-y-4 mt-8">
-            <h2 className="text-lg font-semibold">Recommended workflows</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {recommendedWorkflows.map((workflow) => (
-                <div
-                  key={workflow.id}
-                  className="p-4 bg-gray-50 dark:bg-muted/50 cursor-pointer hover:bg-gray-100 dark:hover:bg-muted transition-colors"
-                >
-                  <div className="space-y-1.5 pb-2">
-                    <h3 className="text-base font-semibold leading-none tracking-tight">
-                      {workflow.name}
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      {workflow.description}
-                    </p>
-                  </div>
-                  <div>
-                    <Badge variant="outline" className="text-xs">
-                      {workflow.outputType === "draft" && "Draft"}
-                      {workflow.outputType === "review_table" && "Review table"}
-                      {workflow.outputType === "extraction" && "Extraction"}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+        {/* Modals */}
+        {renderVaultModal()}
+        {renderCreateVaultModal()}
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={handleFileInputChange}
+        />
+      </>
+    );
+  }
 
-      {/* Vault Selection Modal */}
+  // Render vault modal
+  function renderVaultModal() {
+    return (
       <Dialog open={showVaultModal} onOpenChange={(open) => {
         setShowVaultModal(open);
         if (!open) {
@@ -1390,8 +1213,12 @@ export default function AssistantPage() {
           </div>
         </DialogContent>
       </Dialog>
+    );
+  }
 
-      {/* Create New Vault Modal */}
+  // Render create vault modal
+  function renderCreateVaultModal() {
+    return (
       <Dialog open={showCreateVaultModal} onOpenChange={(open) => {
         if (!open) resetCreateVaultModal();
         else setShowCreateVaultModal(open);
@@ -1545,6 +1372,273 @@ export default function AssistantPage() {
           </div>
         </DialogContent>
       </Dialog>
+    );
+  }
+
+  // Default chat mode layout (full width)
+  return (
+    <>
+      <PageHeader title="Assistant" />
+      <div className="flex flex-col items-center min-h-[60vh] gap-8 px-4 py-8 transition-all duration-300">
+        {/* Title/Logo - only show when no response */}
+        {!hasResponse && (
+          <div className="text-center space-y-2 mt-[10vh]">
+            <h1 className="text-4xl font-bold tracking-tight">
+              Legal Workflow
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              AI-powered legal document analysis
+            </p>
+          </div>
+        )}
+
+        {/* Response Area - only in chat mode */}
+        {hasResponse && mode === "chat" && (
+          <div className="w-full max-w-3xl">
+            <div className="mb-4 p-4 bg-muted/30 rounded-lg">
+              <p className="text-sm text-muted-foreground mb-2">Query:</p>
+              <p>{submittedQuery}</p>
+            </div>
+            <div className="prose prose-sm max-w-none dark:prose-invert">
+              <div className="whitespace-pre-wrap">{completion}</div>
+              {isLoading && (
+                <span className="inline-flex items-center gap-1 text-muted-foreground">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Error Display */}
+        {error && (
+          <div className="w-full max-w-2xl p-4 bg-destructive/10 text-destructive rounded-lg">
+            <p className="font-medium">Error</p>
+            <p className="text-sm">{error.message}</p>
+          </div>
+        )}
+
+        {/* Main Input Area */}
+        <div
+          className={`w-full max-w-4xl space-y-4 ${hasResponse ? "mt-auto" : ""}`}
+        >
+          {/* Unified Chat Input Container */}
+          <div className="border rounded bg-background">
+            {/* Textarea */}
+            <Textarea
+              placeholder={textareaPlaceholder}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="min-h-[100px] resize-none text-base border-0 focus-visible:ring-0 rounded-b-none"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                  handleSubmit();
+                }
+              }}
+              disabled={isLoading}
+            />
+            {/* Embedded Button Row */}
+            <div className="flex items-center gap-2 p-2 border-t bg-muted/30">
+              {renderInputControls()}
+            </div>
+          </div>
+
+          {/* Output Type Toggle */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Output:</span>
+            <div className="flex gap-1">
+              <Toggle
+                pressed={outputType === "draft"}
+                onPressedChange={() => setOutputType("draft")}
+                size="sm"
+                className="gap-1.5"
+                disabled={isLoading}
+              >
+                <FileText className="h-4 w-4" />
+                Draft document
+              </Toggle>
+              <Toggle
+                pressed={outputType === "review_table"}
+                onPressedChange={() => setOutputType("review_table")}
+                size="sm"
+                className="gap-1.5"
+                disabled={isLoading}
+              >
+                <Table2 className="h-4 w-4" />
+                Review table
+              </Toggle>
+            </div>
+          </div>
+
+          {/* Source Selector */}
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowVaultSelector(!showVaultSelector)}
+                className="gap-1.5"
+                disabled={isLoading}
+              >
+                <Folder className="h-4 w-4" />
+                Choose vault
+              </Button>
+            </div>
+
+            {/* Vault Selection Dropdown */}
+            {showVaultSelector && (
+              <div className="flex flex-wrap gap-2 p-3 bg-muted/50 rounded-md">
+                {mockVaults.map((vault) => {
+                  const isSelected = selectedVaults.includes(vault.id);
+                  return (
+                    <Button
+                      key={vault.id}
+                      variant={isSelected ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => toggleVault(vault.id)}
+                      className="gap-1.5"
+                      disabled={isLoading}
+                    >
+                      {isSelected && <Check className="h-3 w-3" />}
+                      {vault.name}
+                    </Button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Hidden file input for Upload Files action */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={handleFileInputChange}
+            />
+
+            {/* Preloaded Vault Context Display */}
+            {preloadedContext && (
+              <div className="p-3 bg-primary/5 border border-primary/20 rounded-md space-y-2">
+                <div className="flex items-center gap-2">
+                  <Database className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">
+                    Querying: {preloadedContext.vaultName}
+                  </span>
+                  {preloadedContext.fileIds.length > 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      {preloadedContext.fileIds.length} file{preloadedContext.fileIds.length !== 1 ? "s" : ""}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Attached files display */}
+            {attachedFiles.length > 0 && (
+              <div className="p-3 bg-muted/50 rounded-md space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">
+                    {attachedFiles.length} file
+                    {attachedFiles.length !== 1 ? "s" : ""} attached
+                  </span>
+                </div>
+                <div className="space-y-1 max-h-40 overflow-y-auto">
+                  {attachedFiles.map((af) => (
+                    <div
+                      key={af.id}
+                      className="flex items-center gap-2 p-2 bg-background rounded text-sm"
+                    >
+                      <File className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span className="truncate flex-1">{af.name}</span>
+                      <span className="text-xs text-muted-foreground shrink-0">
+                        {formatFileSize(af.size)}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 shrink-0"
+                        onClick={() => removeFile(af.id)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Selected Sources Indicator */}
+            {selectedVaults.length > 0 && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Sources:</span>
+                {selectedVaults.map((id) => {
+                  const vault = mockVaults.find((v) => v.id === id);
+                  return vault ? (
+                    <Badge key={id} variant="secondary">
+                      {vault.name}
+                    </Badge>
+                  ) : null;
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Deep Analysis Toggle */}
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="deep-analysis"
+              checked={deepAnalysis}
+              onCheckedChange={(checked) => setDeepAnalysis(checked === true)}
+              disabled={isLoading}
+            />
+            <label
+              htmlFor="deep-analysis"
+              className="text-sm flex items-center gap-1.5 cursor-pointer"
+            >
+              <Sparkles className="h-4 w-4" />
+              Deep analysis
+            </label>
+            <span className="text-xs text-muted-foreground">
+              (Extended processing for complex queries)
+            </span>
+          </div>
+        </div>
+
+        {/* Recommended Workflows - only show when no response */}
+        {!hasResponse && (
+          <div className="w-full space-y-4 mt-8">
+            <h2 className="text-lg font-semibold">Recommended workflows</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {recommendedWorkflows.map((workflow) => (
+                <div
+                  key={workflow.id}
+                  className="p-4 bg-gray-50 dark:bg-muted/50 cursor-pointer hover:bg-gray-100 dark:hover:bg-muted transition-colors"
+                >
+                  <div className="space-y-1.5 pb-2">
+                    <h3 className="text-base font-semibold leading-none tracking-tight">
+                      {workflow.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {workflow.description}
+                    </p>
+                  </div>
+                  <div>
+                    <Badge variant="outline" className="text-xs">
+                      {workflow.outputType === "draft" && "Draft"}
+                      {workflow.outputType === "review_table" && "Review table"}
+                      {workflow.outputType === "extraction" && "Extraction"}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Modals */}
+      {renderVaultModal()}
+      {renderCreateVaultModal()}
     </>
   );
 }
