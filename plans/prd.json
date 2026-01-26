@@ -535,7 +535,7 @@
       "Set modal height to 50% of screen",
       "Center modal on screen"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -546,7 +546,7 @@
       "Set background to gray-50",
       "Add 1px neutral border"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -555,7 +555,7 @@
       "Add header section to modal",
       "Set title text to 'Create a Vault'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -565,7 +565,7 @@
       "Label input appropriately",
       "Style with square-edge design system"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -575,7 +575,7 @@
       "Zone accepts multiple file uploads",
       "Visual feedback on drag enter/leave"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -585,7 +585,7 @@
       "Each file row shows file name and size",
       "Add remove button for each file"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -595,7 +595,7 @@
       "User can assign custom category during upload",
       "Category stored as file metadata"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -606,7 +606,7 @@
       "Display file count: '0 of 100,000 files' format",
       "Position stats on left side of footer"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -616,7 +616,7 @@
       "Add Create button on right side of footer",
       "Style buttons with square-edge design system"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -627,7 +627,7 @@
       "Create button saves vault with uploaded files",
       "Modal closes on successful creation"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

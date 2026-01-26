@@ -689,3 +689,31 @@
 
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - complete vault modal redesign
+
+## 2026-01-26: Create New Vault Modal
+
+### Completed
+- Installed react-dropzone for drag-and-drop file uploads
+- Added Create New Vault modal with 50% viewport dimensions
+- Modal styling: bg-gray-50, 1px border, no shadows, square edges (0-4px radius via global system)
+- Header with "Create a Vault" title and close button
+- Vault name single-line text input with label
+- Drag-and-drop upload zone using react-dropzone (accepts PDF, DOC, DOCX, TXT)
+- Visual feedback on drag enter/leave (border color + bg change)
+- Uploaded files list with file name, size, remove button
+- Category dropdown per file (Contract, Template, Agreement, Memo, Policy, Research, Other)
+- Footer with usage stats (storage used, file count) on left
+- Footer with Cancel/Create buttons on right
+- Create action validates vault name, POSTs to /api/vaults, closes modal on success
+- Wired "Create New Vault" button in vault selection modal to open this modal
+- Updated 10 PRD items to passes:true
+
+### Notes for next dev
+- File upload to S3 not implemented - files held in client state only
+- API only creates vault record, doesn't upload files - needs separate file upload endpoint
+- Category stored in client state but not persisted - needs to be sent with file upload
+- After creation, vault list doesn't refresh (no refetch logic) - may want to add
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - added Create New Vault modal, react-dropzone integration
+- package.json - added react-dropzone dependency

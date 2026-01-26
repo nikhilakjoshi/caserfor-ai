@@ -2,12 +2,14 @@
 
 import { useState, useRef, useCallback } from "react";
 import { useCompletion } from "@ai-sdk/react";
+import { useDropzone } from "react-dropzone";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
   FileText,
   Table2,
@@ -29,6 +31,7 @@ import {
   HardDrive,
   Calendar,
   ArrowUpDown,
+  Trash2,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -55,6 +58,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox as TableCheckbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AttachedFile {
   id: string;
@@ -63,6 +73,14 @@ interface AttachedFile {
   size: number;
   source: "upload" | "vault";
   vaultId?: string;
+}
+
+interface NewVaultFile {
+  id: string;
+  file: File;
+  name: string;
+  size: number;
+  category: string;
 }
 
 interface VaultFile {
@@ -270,6 +288,12 @@ export default function AssistantPage() {
   const [fileSortDirection, setFileSortDirection] = useState<"asc" | "desc">("asc");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Create New Vault modal state
+  const [showCreateVaultModal, setShowCreateVaultModal] = useState(false);
+  const [newVaultName, setNewVaultName] = useState("");
+  const [newVaultFiles, setNewVaultFiles] = useState<NewVaultFile[]>([]);
+  const [isCreatingVault, setIsCreatingVault] = useState(false);
+
   const { completion, isLoading, complete, error } = useCompletion({
     api: "/api/assistant/query",
   });
@@ -475,6 +499,85 @@ export default function AssistantPage() {
     ? hoveredPrompt.content.slice(0, 100) +
       (hoveredPrompt.content.length > 100 ? "..." : "")
     : DEFAULT_PLACEHOLDER;
+
+  // Create New Vault dropzone
+  const onDropNewVaultFiles = useCallback((acceptedFiles: File[]) => {
+    const newFiles: NewVaultFile[] = acceptedFiles.map((file) => ({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      file,
+      name: file.name,
+      size: file.size,
+      category: "",
+    }));
+    setNewVaultFiles((prev) => [...prev, ...newFiles]);
+  }, []);
+
+  const {
+    getRootProps: getNewVaultRootProps,
+    getInputProps: getNewVaultInputProps,
+    isDragActive: isNewVaultDragActive,
+  } = useDropzone({
+    onDrop: onDropNewVaultFiles,
+    accept: {
+      "application/pdf": [".pdf"],
+      "application/msword": [".doc"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+      "text/plain": [".txt"],
+    },
+  });
+
+  const removeNewVaultFile = (id: string) => {
+    setNewVaultFiles((prev) => prev.filter((f) => f.id !== id));
+  };
+
+  const updateNewVaultFileCategory = (id: string, category: string) => {
+    setNewVaultFiles((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, category } : f))
+    );
+  };
+
+  const handleCreateVault = async () => {
+    if (!newVaultName.trim() || isCreatingVault) return;
+
+    setIsCreatingVault(true);
+    try {
+      const response = await fetch("/api/vaults", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newVaultName,
+          type: "knowledge_base",
+          description: "",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create vault");
+      }
+
+      // TODO: Upload files to created vault via separate endpoint
+      // For now, just close the modal and reset state
+      setShowCreateVaultModal(false);
+      setNewVaultName("");
+      setNewVaultFiles([]);
+      // Optionally refresh vault list or show success message
+    } catch (error) {
+      console.error("Error creating vault:", error);
+    } finally {
+      setIsCreatingVault(false);
+    }
+  };
+
+  const resetCreateVaultModal = () => {
+    setShowCreateVaultModal(false);
+    setNewVaultName("");
+    setNewVaultFiles([]);
+  };
+
+  // Calculate total size of files being uploaded to new vault
+  const newVaultTotalSize = newVaultFiles.reduce((sum, f) => sum + f.size, 0);
+  const MAX_STORAGE_GB = 100;
+  const MAX_FILE_COUNT = 100000;
 
   return (
     <>
@@ -1006,8 +1109,7 @@ export default function AssistantPage() {
                 <button
                   className="w-full p-4 border-2 border-dashed border-neutral-300 dark:border-neutral-600 bg-white dark:bg-background hover:border-primary hover:bg-primary/5 transition-colors flex items-center gap-3"
                   onClick={() => {
-                    // TODO: Open create vault modal
-                    console.log("Create new vault clicked");
+                    setShowCreateVaultModal(true);
                   }}
                 >
                   <div className="h-10 w-10 bg-primary/10 flex items-center justify-center">
@@ -1098,6 +1200,161 @@ export default function AssistantPage() {
                   File{selectedVaultFiles.length !== 1 ? "s" : ""}
                 </Button>
               )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create New Vault Modal */}
+      <Dialog open={showCreateVaultModal} onOpenChange={(open) => {
+        if (!open) resetCreateVaultModal();
+        else setShowCreateVaultModal(open);
+      }}>
+        <DialogContent
+          className="w-[50vw] max-w-[50vw] h-[50vh] max-h-[50vh] bg-gray-50 dark:bg-muted/50 border border-neutral-200 dark:border-neutral-700 p-0 flex flex-col overflow-hidden"
+          showCloseButton={false}
+        >
+          {/* Header */}
+          <DialogHeader className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-background">
+            <div className="flex items-center justify-between">
+              <DialogTitle>Create a Vault</DialogTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={resetCreateVaultModal}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </DialogHeader>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {/* Vault Name Input */}
+            <div className="space-y-2">
+              <Label htmlFor="vault-name" className="text-sm font-medium">
+                Vault Name
+              </Label>
+              <Input
+                id="vault-name"
+                placeholder="Enter vault name..."
+                value={newVaultName}
+                onChange={(e) => setNewVaultName(e.target.value)}
+                className="bg-white dark:bg-background"
+              />
+            </div>
+
+            {/* Drag-and-Drop Upload Zone */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Upload Files</Label>
+              <div
+                {...getNewVaultRootProps()}
+                className={`
+                  border-2 border-dashed p-8 text-center cursor-pointer transition-colors bg-white dark:bg-background
+                  ${isNewVaultDragActive
+                    ? "border-primary bg-primary/5"
+                    : "border-neutral-300 dark:border-neutral-600 hover:border-primary/50"
+                  }
+                `}
+              >
+                <input {...getNewVaultInputProps()} />
+                <Upload className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
+                {isNewVaultDragActive ? (
+                  <p className="text-sm text-primary">Drop files here...</p>
+                ) : (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      Drag and drop files here, or click to browse
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Supports PDF, DOC, DOCX, TXT
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Uploaded Files List */}
+            {newVaultFiles.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">
+                  Files ({newVaultFiles.length})
+                </Label>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {newVaultFiles.map((file) => (
+                    <div
+                      key={file.id}
+                      className="flex items-center gap-3 p-3 bg-white dark:bg-background border border-neutral-200 dark:border-neutral-700"
+                    >
+                      <File className="h-5 w-5 text-muted-foreground shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{file.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatFileSize(file.size)}
+                        </p>
+                      </div>
+                      <Select
+                        value={file.category}
+                        onValueChange={(value) => updateNewVaultFileCategory(file.id, value)}
+                      >
+                        <SelectTrigger className="w-32 h-8 text-xs bg-white dark:bg-background">
+                          <SelectValue placeholder="Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="contract">Contract</SelectItem>
+                          <SelectItem value="template">Template</SelectItem>
+                          <SelectItem value="agreement">Agreement</SelectItem>
+                          <SelectItem value="memo">Memo</SelectItem>
+                          <SelectItem value="policy">Policy</SelectItem>
+                          <SelectItem value="research">Research</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
+                        onClick={() => removeNewVaultFile(file.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-neutral-200 dark:border-neutral-700 bg-white dark:bg-background flex items-center justify-between">
+            {/* Usage stats - left side */}
+            <div className="flex gap-6 text-xs text-muted-foreground">
+              <span>
+                {formatFileSize(newVaultTotalSize)} of {MAX_STORAGE_GB} GB
+              </span>
+              <span>
+                {newVaultFiles.length} of {MAX_FILE_COUNT.toLocaleString()} files
+              </span>
+            </div>
+            {/* Action buttons - right side */}
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={resetCreateVaultModal}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateVault}
+                disabled={!newVaultName.trim() || isCreatingVault}
+              >
+                {isCreatingVault ? (
+                  <>
+                    <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                    Creating
+                  </>
+                ) : (
+                  "Create"
+                )}
+              </Button>
             </div>
           </div>
         </DialogContent>
