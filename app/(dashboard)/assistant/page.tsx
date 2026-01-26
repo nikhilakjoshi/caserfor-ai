@@ -451,13 +451,14 @@ export default function AssistantPage() {
 
         {/* Main Input Area */}
         <div className={`w-full max-w-2xl space-y-4 ${hasResponse ? "mt-auto" : ""}`}>
-          {/* Query Input */}
-          <div className="relative">
+          {/* Unified Chat Input Container */}
+          <div className="border rounded bg-background">
+            {/* Textarea */}
             <Textarea
               placeholder={textareaPlaceholder}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="min-h-[120px] resize-none pr-20 text-base"
+              className="min-h-[100px] resize-none text-base border-0 focus-visible:ring-0 rounded-b-none"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                   handleSubmit()
@@ -465,24 +466,125 @@ export default function AssistantPage() {
               }}
               disabled={isLoading}
             />
-            <Button
-              onClick={handleSubmit}
-              disabled={!query.trim() || isLoading}
-              className="absolute bottom-3 right-3"
-              size="sm"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-                  Generating
-                </>
-              ) : (
-                <>
-                  Ask
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </>
-              )}
-            </Button>
+            {/* Embedded Button Row */}
+            <div className="flex items-center gap-2 p-2 border-t bg-muted/30">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1.5 h-8"
+                    disabled={isLoading}
+                  >
+                    <Paperclip className="h-4 w-4" />
+                    Files & Sources
+                    {attachedFiles.length > 0 && (
+                      <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 justify-center">
+                        {attachedFiles.length}
+                      </Badge>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <DropdownMenuLabel>File Actions</DropdownMenuLabel>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+                      <Upload className="h-4 w-4" />
+                      Upload Files
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Sources</DropdownMenuLabel>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onClick={() => setShowVaultModal(true)}>
+                      <Database className="h-4 w-4" />
+                      Add From Vault
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <DropdownMenu onOpenChange={(open) => !open && setHoveredPrompt(null)}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1.5 h-8"
+                    disabled={isLoading}
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    Prompts
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-72 max-h-80 overflow-y-auto">
+                  <DropdownMenuLabel>Saved Prompts</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {sortedPrompts.map((prompt) => (
+                    <DropdownMenuItem
+                      key={prompt.id}
+                      onClick={() => insertPrompt(prompt)}
+                      onMouseEnter={() => setHoveredPrompt(prompt)}
+                      onMouseLeave={() => setHoveredPrompt(null)}
+                      className="flex flex-col items-start gap-1 cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        {prompt.isStarred && (
+                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 shrink-0" />
+                        )}
+                        <span className="font-medium text-sm truncate">{prompt.name}</span>
+                        {prompt.ownerType === "personal" && (
+                          <Badge variant="outline" className="text-xs ml-auto shrink-0">
+                            Personal
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-1 w-full">
+                        {prompt.content}
+                      </p>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1.5 h-8"
+                disabled={isLoading || isImproving || !query.trim()}
+                onClick={handleImprove}
+              >
+                {isImproving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Improving
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="h-4 w-4" />
+                    Improve
+                  </>
+                )}
+              </Button>
+              {/* Spacer */}
+              <div className="flex-1" />
+              {/* Ask Button - right aligned */}
+              <Button
+                onClick={handleSubmit}
+                disabled={!query.trim() || isLoading}
+                size="sm"
+                className="h-8"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                    Generating
+                  </>
+                ) : (
+                  <>
+                    Ask
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
 
           {/* Output Type Toggle */}
@@ -524,101 +626,6 @@ export default function AssistantPage() {
               >
                 <Folder className="h-4 w-4" />
                 Choose vault
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-1.5"
-                    disabled={isLoading}
-                  >
-                    <Paperclip className="h-4 w-4" />
-                    Files & Sources
-                    {attachedFiles.length > 0 && (
-                      <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 justify-center">
-                        {attachedFiles.length}
-                      </Badge>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56">
-                  <DropdownMenuLabel>File Actions</DropdownMenuLabel>
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
-                      <Upload className="h-4 w-4" />
-                      Upload Files
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuLabel>Sources</DropdownMenuLabel>
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={() => setShowVaultModal(true)}>
-                      <Database className="h-4 w-4" />
-                      Add From Vault
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <DropdownMenu onOpenChange={(open) => !open && setHoveredPrompt(null)}>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-1.5"
-                    disabled={isLoading}
-                  >
-                    <BookOpen className="h-4 w-4" />
-                    Prompts
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-72 max-h-80 overflow-y-auto">
-                  <DropdownMenuLabel>Saved Prompts</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {sortedPrompts.map((prompt) => (
-                    <DropdownMenuItem
-                      key={prompt.id}
-                      onClick={() => insertPrompt(prompt)}
-                      onMouseEnter={() => setHoveredPrompt(prompt)}
-                      onMouseLeave={() => setHoveredPrompt(null)}
-                      className="flex flex-col items-start gap-1 cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2 w-full">
-                        {prompt.isStarred && (
-                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 shrink-0" />
-                        )}
-                        <span className="font-medium text-sm truncate">{prompt.name}</span>
-                        {prompt.ownerType === "personal" && (
-                          <Badge variant="outline" className="text-xs ml-auto shrink-0">
-                            Personal
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground line-clamp-1 w-full">
-                        {prompt.content}
-                      </p>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-                disabled={isLoading || isImproving || !query.trim()}
-                onClick={handleImprove}
-              >
-                {isImproving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Improving
-                  </>
-                ) : (
-                  <>
-                    <Wand2 className="h-4 w-4" />
-                    Improve
-                  </>
-                )}
               </Button>
             </div>
 

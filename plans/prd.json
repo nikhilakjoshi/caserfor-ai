@@ -224,5 +224,124 @@
       "Document shadow-free design system approach"
     ],
     "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Chat input container with embedded button row",
+    "steps": [
+      "Ensure Files & Sources, Prompts, Improve buttons are inside chat input box",
+      "Ask button positioned right-aligned within same container",
+      "All controls appear as single unified input surface",
+      "Buttons visually integrate as toolbar controls inside input"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Reduce border radius to 0-4px on Card components",
+    "steps": [
+      "Identify all Card components with large border radius (16-20px)",
+      "Reduce border-radius to 0-4px max",
+      "Verify square/minimal edges render correctly",
+      "Test in light and dark modes"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Reduce border radius to 0-4px on Dropdown components",
+    "steps": [
+      "Identify all Dropdown components with rounded corners",
+      "Reduce border-radius to 0-4px max",
+      "Verify square edges render correctly",
+      "Test in light and dark modes"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Reduce border radius to 0-4px on Button components",
+    "steps": [
+      "Identify all Button components with pill-shaped or large radius",
+      "Reduce border-radius to 0-4px max",
+      "Verify square edges render correctly",
+      "Test in light and dark modes"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Reduce border radius to 0-4px on Modal components",
+    "steps": [
+      "Identify all Modal/Dialog components with rounded corners",
+      "Reduce border-radius to 0-4px max",
+      "Verify square edges render correctly",
+      "Test in light and dark modes"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Reduce border radius to 0-4px on Input/Search components",
+    "steps": [
+      "Identify all Input and Search bar components with rounded corners",
+      "Reduce border-radius to 0-4px max",
+      "Verify square edges render correctly",
+      "Test in light and dark modes"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Reduce border radius to 0-4px on vault/file selection tiles",
+    "steps": [
+      "Identify vault selection tiles with rounded corners",
+      "Identify file selection tiles with rounded corners",
+      "Reduce border-radius to 0-4px max on both",
+      "Test in light and dark modes"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Redesign recommended workflow cards - remove borders and shadows",
+    "steps": [
+      "Remove all borders from recommended workflow cards",
+      "Remove all shadows from recommended workflow cards",
+      "Verify cards have no elevation styling"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Redesign recommended workflow cards - square edges and bg-gray-50",
+    "steps": [
+      "Set border-radius to 0-4px on workflow cards",
+      "Change background to bg-gray-50",
+      "Add subtle internal padding for spacing",
+      "Optionally add thin bottom border divider if needed for structure"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Chat input box styling - flat and square-edged",
+    "steps": [
+      "Remove shadows from chat input container",
+      "Set border-radius to 0-4px on input container",
+      "Apply flat surface styling",
+      "Ensure input box has clear 1px border"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Update global Tailwind config for 0-4px border radius default",
+    "steps": [
+      "Review Tailwind config for default border-radius values",
+      "Update rounded-* utilities to use 0-4px max",
+      "Document square-edge design system approach"
+    ],
+    "passes": false
   }
 ]

@@ -582,3 +582,23 @@
 - components/ui/sheet.tsx - removed shadow-lg
 - components/ui/sidebar.tsx - removed shadow-sm, converted outline shadow to border
 - components/ui/checkbox.tsx - removed shadow-xs
+
+## 2026-01-26: Embedded Chat Input Button Row
+
+### Completed
+- Restructured assistant page chat input into unified container
+- Textarea and button row now inside single bordered container
+- Files & Sources, Prompts, Improve buttons in bottom toolbar
+- Ask button right-aligned within same container
+- Buttons use ghost variant for seamless toolbar integration
+- Button row has subtle border-t separator and bg-muted/30 background
+- Updated 1 PRD item to passes:true
+
+### Notes for next dev
+- Textarea has border-0 and no ring to blend with container
+- Button row uses flex with spacer for right-aligned Ask button
+- Choose vault button remains outside container (separate from input actions)
+- Container uses rounded corners (will be updated in border-radius PRD items)
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - restructured input layout
