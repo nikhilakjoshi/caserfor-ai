@@ -342,6 +342,6 @@
       "Update rounded-* utilities to use 0-4px max",
       "Document square-edge design system approach"
     ],
-    "passes": false
+    "passes": true
   }
 ]

@@ -602,3 +602,22 @@
 
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - restructured input layout
+
+## 2026-01-26: Square-Edge Design System (0-4px Border Radius)
+
+### Completed
+- Changed base --radius from 0.625rem (10px) to 0.25rem (4px)
+- Updated radius scale in @theme inline block to cap at 4px max
+- --radius-sm: 0.0625rem (1px), --radius-md: 0.125rem (2px), --radius-lg: 4px
+- --radius-xl through --radius-4xl all capped at 4px (same as --radius)
+- All rounded-* utilities now globally limited to square-edge design
+- Updated 1 PRD item to passes:true
+
+### Notes for next dev
+- Tailwind v4 uses @theme inline block (not tailwind.config.js)
+- Remaining border-radius PRD items (Card, Dropdown, Button, Modal, Input, vault tiles) now automatically apply
+- Components using rounded-lg, rounded-xl etc will all render at 4px max
+- Verify individual components visually if specific adjustments needed
+
+### Files modified
+- app/globals.css - updated --radius and radius scale values
