@@ -1136,7 +1136,7 @@
       "Clicking resets chat state and clears editor",
       "Style consistently with design system"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1146,7 +1146,7 @@
       "Position below New Thread button",
       "Show query in readable format with proper text styling"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1158,7 +1158,7 @@
       "Position buttons below query display area",
       "Style as subtle inline actions"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1169,7 +1169,7 @@
       "Hide status when generation complete",
       "Position between query area and chat input"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1180,7 +1180,7 @@
       "Clicking version loads that version into editor",
       "Style consistently with design system"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1191,7 +1191,7 @@
       "Display source file names and relevant excerpts",
       "Position next to Version dropdown"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1202,7 +1202,7 @@
       "Position as rightmost header button",
       "Style as primary action button"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1213,7 +1213,7 @@
       "Position on right side below toolbar",
       "Default to off"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -1235,6 +1235,6 @@
       "Make saved prompt appear in Prompts dropdown",
       "Allow naming the saved prompt"
     ],
-    "passes": false
+    "passes": true
   }
 ]

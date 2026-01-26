@@ -1016,3 +1016,23 @@
 - app/(dashboard)/assistant/page.tsx - auto-save state, custom fetch, debounced save
 - components/assistant/editor-panel.tsx - isSaving prop, saving indicator UI
 - package.json - added use-debounce dependency
+
+## 2026-01-26: Save Prompt Functionality
+
+### Completed
+- Added Save Prompt dialog to ChatPanel component
+- Dialog allows naming the prompt before saving
+- Default name generated from first 30 chars of query
+- Wired to POST /api/prompts endpoint
+- Success indicator shows briefly after save
+- Updated 9 PRD items to passes:true (ChatPanel UI + EditorPanel UI + Save prompt)
+
+### Notes for next dev
+- ChatPanel UI was already implemented but PRD items weren't marked complete
+- EditorPanel UI was already implemented but PRD items weren't marked complete
+- Saved prompts use category "personal" and ownerType is set by API
+- Prompts dropdown in assistant page uses mock data - needs refetch after save
+- Remaining false PRD items: Test endpoints (3), Document versioning (1)
+
+### Files modified
+- components/assistant/chat-panel.tsx - added save prompt dialog, API call, states

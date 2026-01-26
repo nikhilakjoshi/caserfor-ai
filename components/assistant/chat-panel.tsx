@@ -7,9 +7,19 @@ import {
   Pencil,
   Loader2,
   PenSquare,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface ChatPanelProps {
   query: string;
@@ -34,6 +44,10 @@ export function ChatPanel({
 }: ChatPanelProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedQuery, setEditedQuery] = useState(query);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [promptName, setPromptName] = useState("");
+  const [isSavingPrompt, setIsSavingPrompt] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const hasResponse = completion.length > 0;
 
   const handleCopy = () => {
@@ -41,8 +55,46 @@ export function ChatPanel({
   };
 
   const handleSavePrompt = () => {
-    // TODO: wire to /api/prompts POST
-    console.log("Save prompt:", query);
+    // Generate a default name from first 30 chars of query
+    const defaultName = query.trim().length > 30
+      ? query.trim().slice(0, 30) + "..."
+      : query.trim() || "My Prompt";
+    setPromptName(defaultName);
+    setShowSaveDialog(true);
+    setSaveSuccess(false);
+  };
+
+  const handleConfirmSavePrompt = async () => {
+    if (!promptName.trim() || isSavingPrompt) return;
+
+    setIsSavingPrompt(true);
+    try {
+      const response = await fetch("/api/prompts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: promptName.trim(),
+          content: query,
+          category: "personal",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save prompt");
+      }
+
+      setSaveSuccess(true);
+      // Close dialog after brief success indication
+      setTimeout(() => {
+        setShowSaveDialog(false);
+        setPromptName("");
+        setSaveSuccess(false);
+      }, 1000);
+    } catch (error) {
+      console.error("Error saving prompt:", error);
+    } finally {
+      setIsSavingPrompt(false);
+    }
   };
 
   const handleEditQuery = () => {
@@ -179,6 +231,64 @@ export function ChatPanel({
           )}
         </div>
       </div>
+
+      {/* Save Prompt Dialog */}
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Save Prompt</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="prompt-name">Prompt Name</Label>
+              <Input
+                id="prompt-name"
+                value={promptName}
+                onChange={(e) => setPromptName(e.target.value)}
+                placeholder="Enter a name for this prompt..."
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleConfirmSavePrompt();
+                  }
+                }}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-muted-foreground">Content Preview</Label>
+              <div className="p-3 bg-muted/30 rounded text-sm max-h-32 overflow-y-auto">
+                {query}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowSaveDialog(false)}
+              disabled={isSavingPrompt}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmSavePrompt}
+              disabled={!promptName.trim() || isSavingPrompt}
+            >
+              {saveSuccess ? (
+                <>
+                  <Check className="h-4 w-4 mr-1" />
+                  Saved
+                </>
+              ) : isSavingPrompt ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  Saving
+                </>
+              ) : (
+                "Save Prompt"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
