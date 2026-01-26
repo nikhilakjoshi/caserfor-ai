@@ -791,5 +791,335 @@
       "Style headers and rows with flat design"
     ],
     "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Install Google AI SDK package",
+    "steps": [
+      "Run npm install @ai-sdk/google",
+      "Verify package added to package.json dependencies"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Uninstall Anthropic AI SDK package",
+    "steps": [
+      "Run npm uninstall @ai-sdk/anthropic",
+      "Verify package removed from package.json"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Update lib/ai.ts - import Google provider",
+    "steps": [
+      "Remove import { createAnthropic } from @ai-sdk/anthropic",
+      "Add import { createGoogleGenerativeAI } from @ai-sdk/google"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Update lib/ai.ts - configure Gemini provider",
+    "steps": [
+      "Create google provider with createGoogleGenerativeAI()",
+      "Pass apiKey from process.env.GOOGLE_GENERATIVE_AI_API_KEY",
+      "Remove anthropic provider configuration"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Update lib/ai.ts - export Gemini models",
+    "steps": [
+      "Export defaultModel as google('gemini-2.5-flash')",
+      "Export analysisModel as google('gemini-2.5-pro')"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Update .env.example with Google API key",
+    "steps": [
+      "Add GOOGLE_GENERATIVE_AI_API_KEY='' to .env.example",
+      "Remove ANTHROPIC_API_KEY from .env.example"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Test /api/assistant/query endpoint with Gemini",
+    "steps": [
+      "Start dev server with npm run dev",
+      "Send test query to /api/assistant/query",
+      "Verify streaming response works correctly"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Test /api/assistant/improve endpoint with Gemini",
+    "steps": [
+      "Send test prompt to /api/assistant/improve",
+      "Verify improved prompt is returned",
+      "Check streaming response works"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Test /api/test-ai endpoint with Gemini",
+    "steps": [
+      "Send GET request to /api/test-ai",
+      "Verify Gemini response is returned"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Install TipTap simple-editor template",
+    "steps": [
+      "Run npx @tiptap/cli@latest add simple-editor",
+      "Verify files created in components/tiptap-templates/simple/"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Style TipTap editor to match design system",
+    "steps": [
+      "Set border-radius to 4px on editor container",
+      "Remove any shadows from editor",
+      "Match border color with existing components",
+      "Ensure dark mode compatibility"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create DocumentEditor wrapper component",
+    "steps": [
+      "Create components/editor/document-editor.tsx",
+      "Import SimpleEditor from tiptap-templates",
+      "Add controlled value prop for content",
+      "Add onChange prop for content updates",
+      "Export component for use in assistant page"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Add Document model to Prisma schema",
+    "steps": [
+      "Open prisma/schema.prisma",
+      "Add Document model with id, title, content (Json), queryId, createdAt, updatedAt",
+      "Add @unique constraint on queryId",
+      "Add relation to AssistantQuery model"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Add document relation to AssistantQuery model",
+    "steps": [
+      "Open prisma/schema.prisma",
+      "Add document Document? field to AssistantQuery model",
+      "Ensure bidirectional relation is configured"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Run Prisma migration for Document model",
+    "steps": [
+      "Run npx prisma db push or npx prisma migrate dev",
+      "Verify Document table created in database",
+      "Regenerate Prisma client"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Create POST /api/documents endpoint",
+    "steps": [
+      "Create app/api/documents/route.ts",
+      "Add POST handler that accepts title, content, queryId in body",
+      "Create document in database using Prisma",
+      "Return created document as JSON response"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Create GET /api/documents endpoint",
+    "steps": [
+      "Add GET handler to app/api/documents/route.ts",
+      "Query documents from database",
+      "Support optional pagination parameters",
+      "Return document list as JSON"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Create GET /api/documents/[id] endpoint",
+    "steps": [
+      "Create app/api/documents/[id]/route.ts",
+      "Add GET handler that accepts id from params",
+      "Query single document by id from database",
+      "Return 404 if not found, otherwise return document JSON"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Create PUT /api/documents/[id] endpoint",
+    "steps": [
+      "Add PUT handler to app/api/documents/[id]/route.ts",
+      "Accept title and content in request body",
+      "Update document in database using Prisma",
+      "Return updated document as JSON"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Create DELETE /api/documents/[id] endpoint",
+    "steps": [
+      "Add DELETE handler to app/api/documents/[id]/route.ts",
+      "Delete document from database by id",
+      "Return success response or 404 if not found"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Add mode state to assistant page",
+    "steps": [
+      "Open app/(dashboard)/assistant/page.tsx",
+      "Add useState for mode: 'chat' | 'document'",
+      "Default mode to 'chat'",
+      "Add setter function to update mode"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Extract ChatPanel component from assistant page",
+    "steps": [
+      "Create components/assistant/chat-panel.tsx",
+      "Move chat UI elements from assistant page",
+      "Accept query, completion, isLoading, onSubmit as props",
+      "Maintain existing chat styling and functionality"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create EditorPanel component",
+    "steps": [
+      "Create components/assistant/editor-panel.tsx",
+      "Import DocumentEditor component",
+      "Accept content and onChange props",
+      "Add header with document title",
+      "Style panel with consistent design system"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Implement split-panel layout in assistant page",
+    "steps": [
+      "Add conditional rendering based on mode state",
+      "When mode='chat': render full-width ChatPanel",
+      "When mode='document': render flex container with 1/3 ChatPanel + 2/3 EditorPanel",
+      "Use Tailwind flex utilities for layout"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add CSS transitions for panel layout changes",
+    "steps": [
+      "Add transition-all duration-300 to panel containers",
+      "Animate width changes smoothly",
+      "Ensure content reflows gracefully during transition"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Update system prompt to classify chat vs document intent",
+    "steps": [
+      "Open app/api/assistant/query/route.ts",
+      "Update system prompt to include mode classification instruction",
+      "Instruct AI to prefix response with [MODE:chat] or [MODE:document]",
+      "Define criteria: document mode for drafts/generation, chat mode for Q&A"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Parse mode prefix from AI response",
+    "steps": [
+      "In assistant page, check first line of completion for [MODE:document] or [MODE:chat]",
+      "Extract mode value from prefix",
+      "Strip prefix from displayed content",
+      "Update mode state based on parsed value"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Route content to appropriate panel based on mode",
+    "steps": [
+      "If mode='chat', display content in ChatPanel completion area",
+      "If mode='document', pass content to EditorPanel",
+      "Handle mode switching during streaming if needed"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Handle streaming content into TipTap editor",
+    "steps": [
+      "Convert streamed markdown/text to TipTap-compatible format",
+      "Update editor content progressively as stream arrives",
+      "Maintain cursor position during updates",
+      "Ensure editor remains fully editable after stream completes"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement debounced auto-save for editor",
+    "steps": [
+      "Add useDebouncedCallback hook with 2-3 second delay",
+      "Call debounced save function on editor onChange",
+      "Show subtle saving indicator during save"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Save document to database on editor change",
+    "steps": [
+      "Track documentId in component state",
+      "If no documentId exists, POST to /api/documents to create",
+      "If documentId exists, PUT to /api/documents/[id] to update",
+      "Store returned documentId in state for subsequent saves"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Link document to AssistantQuery",
+    "steps": [
+      "Pass conversationId/queryId when creating document",
+      "Include queryId in POST /api/documents body",
+      "Verify relation is established in database"
+    ],
+    "passes": false
   }
 ]

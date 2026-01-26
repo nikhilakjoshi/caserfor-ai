@@ -831,3 +831,26 @@
 ### Files modified
 - app/api/vaults/[id]/documents/route.ts - added POST endpoint
 - app/(dashboard)/assistant/page.tsx - wired Create Vault to upload files
+
+## 2026-01-26: Google AI SDK Migration
+
+### Completed
+- Replaced Anthropic provider with Google Generative AI provider in lib/ai.ts
+- Uninstalled @ai-sdk/anthropic package
+- Updated .env.example to use GOOGLE_GENERATIVE_AI_API_KEY instead of ANTHROPIC_API_KEY
+- defaultModel now uses google('gemini-2.5-flash')
+- analysisModel now uses google('gemini-2.5-pro')
+- Fixed page-header.tsx lint error using useSyncExternalStore pattern
+- Updated 6 PRD items to passes:true
+
+### Notes for next dev
+- @ai-sdk/google was already installed - only needed to wire it up
+- API routes unchanged - they import from lib/ai which now exports Google models
+- Testing PRD items (3 remaining false) require GOOGLE_GENERATIVE_AI_API_KEY to verify
+- TipTap editor feature is next priority for document editing
+
+### Files modified
+- lib/ai.ts - replaced Anthropic with Google Generative AI
+- .env.example - updated API key variable name
+- components/page-header.tsx - fixed setState-in-effect lint error
+- package.json - @ai-sdk/anthropic removed

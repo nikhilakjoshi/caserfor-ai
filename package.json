@@ -17,7 +17,7 @@
     "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.23",
+    "@ai-sdk/google": "^3.0.13",
     "@ai-sdk/react": "^3.0.51",
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",

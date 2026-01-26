@@ -16,9 +16,9 @@
 - This avoids Prisma's limitation with shared foreign key columns
 
 ## AI Provider
-- Anthropic Claude is the primary AI provider
-- Dev will provide their own ANTHROPIC_API_KEY
-- Using claude-sonnet-4-20250514 as default model
+- Google Gemini is the primary AI provider
+- Dev will provide their own GOOGLE_GENERATIVE_AI_API_KEY
+- Using gemini-2.5-flash as default model, gemini-2.5-pro for analysis
 - toTextStreamResponse() used (not toDataStreamResponse which doesn't exist in current ai SDK)
 
 ## React Hooks

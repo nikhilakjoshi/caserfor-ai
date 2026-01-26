@@ -1,27 +1,26 @@
 "use client"
 
-import { useLayoutEffect, useRef } from "react"
+import { useSyncExternalStore } from "react"
 import { createPortal } from "react-dom"
 
 interface PageHeaderProps {
   title: string
 }
 
+function getContainer() {
+  if (typeof document === "undefined") return null
+  return document.getElementById("page-header")
+}
+
+function subscribe(callback: () => void) {
+  // Portal target is static, only need initial render
+  callback()
+  return () => {}
+}
+
 export function PageHeader({ title }: PageHeaderProps) {
-  const containerRef = useRef<HTMLElement | null>(null)
+  const container = useSyncExternalStore(subscribe, getContainer, () => null)
 
-  // Use useLayoutEffect to avoid hydration mismatch - runs synchronously after DOM mutations
-  useLayoutEffect(() => {
-    containerRef.current = document.getElementById("page-header")
-  }, [])
-
-  // On first render before layout effect runs, container is null
-  // After layout effect, we need a way to trigger re-render - use a trick with key or just render conditionally
-  if (typeof window === "undefined") {
-    return null
-  }
-
-  const container = document.getElementById("page-header")
   if (!container) {
     return null
   }
