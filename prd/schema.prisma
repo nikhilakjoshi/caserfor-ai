@@ -1,0 +1,276 @@
+// schema.prisma
+// Standalone Legal AI Platform - Single Tenant
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum VaultType {
+  knowledge_base
+  sandbox
+}
+
+enum EmbeddingStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+enum WorkflowOutputType {
+  draft
+  review_table
+  extraction
+  transformation
+}
+
+enum WorkflowStepAction {
+  input
+  process
+  review
+  output
+}
+
+enum OwnerType {
+  system
+  personal
+}
+
+enum QueryOutputType {
+  chat
+  draft
+  review_table
+  analysis
+}
+
+enum QueryStatus {
+  pending
+  streaming
+  completed
+  failed
+}
+
+enum SourceType {
+  vault
+  external_database
+  system_knowledge
+}
+
+enum StarredItemType {
+  prompt
+  example
+}
+
+// ============================================
+// MODELS
+// ============================================
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  queries        AssistantQuery[]
+  prompts        Prompt[]
+  starredItems   StarredItem[]
+  historyEntries HistoryEntry[]
+
+  @@map("users")
+}
+
+model Vault {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  type        VaultType @default(knowledge_base)
+  isShared    Boolean   @default(false)
+  maxFiles    Int       @default(100000)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  documents Document[]
+
+  @@map("vaults")
+}
+
+model Document {
+  id              String          @id @default(cuid())
+  vaultId         String
+  name            String
+  documentType    String?
+  fileType        String
+  storageKey      String
+  sizeBytes       Int
+  pageCount       Int?
+  metadata        Json            @default("{}")
+  embeddingStatus EmbeddingStatus @default(pending)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  // Relations
+  vault Vault @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+
+  @@index([vaultId])
+  @@index([documentType])
+  @@index([embeddingStatus])
+  @@map("documents")
+}
+
+model Workflow {
+  id             String             @id @default(cuid())
+  name           String
+  description    String
+  category       String
+  outputType     WorkflowOutputType
+  stepCount      Int?
+  columnSchema   Json?
+  promptTemplate String             @db.Text
+  isSystem       Boolean            @default(false)
+  isActive       Boolean            @default(true)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  // Relations
+  steps WorkflowStep[]
+
+  @@index([category])
+  @@index([isSystem])
+  @@map("workflows")
+}
+
+model WorkflowStep {
+  id         String             @id @default(cuid())
+  workflowId String
+  order      Int
+  name       String
+  action     WorkflowStepAction
+  config     Json               @default("{}")
+
+  // Relations
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
+  @@map("workflow_steps")
+}
+
+model Prompt {
+  id        String    @id @default(cuid())
+  userId    String?
+  name      String
+  content   String    @db.Text
+  ownerType OwnerType
+  category  String?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations
+  user      User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  starredBy StarredItem[]
+
+  @@index([userId])
+  @@index([ownerType])
+  @@map("prompts")
+}
+
+model Example {
+  id          String    @id @default(cuid())
+  name        String
+  promptText  String    @db.Text
+  documentRef String?
+  response    String    @db.Text
+  ownerType   OwnerType
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  starredBy StarredItem[]
+
+  @@map("examples")
+}
+
+model AssistantQuery {
+  id             String          @id @default(cuid())
+  userId         String
+  conversationId String?
+  inputText      String          @db.Text
+  outputText     String?         @db.Text
+  outputType     QueryOutputType @default(chat)
+  deepAnalysis   Boolean         @default(false)
+  tokenCount     Int?
+  latencyMs      Int?
+  status         QueryStatus     @default(pending)
+  createdAt      DateTime        @default(now())
+
+  // Relations
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sources      SourceReference[]
+  historyEntry HistoryEntry?
+
+  @@index([userId])
+  @@index([conversationId])
+  @@index([createdAt])
+  @@map("assistant_queries")
+}
+
+model SourceReference {
+  id         String     @id @default(cuid())
+  queryId    String
+  sourceType SourceType
+  sourceId   String
+  sourceName String
+
+  // Relations
+  query AssistantQuery @relation(fields: [queryId], references: [id], onDelete: Cascade)
+
+  @@index([queryId])
+  @@map("source_references")
+}
+
+model HistoryEntry {
+  id             String   @id @default(cuid())
+  userId         String
+  queryId        String   @unique
+  title          String
+  type           String
+  sourcesSummary String?
+  createdAt      DateTime @default(now())
+
+  // Relations
+  user  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  query AssistantQuery @relation(fields: [queryId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("history_entries")
+}
+
+model StarredItem {
+  id        String          @id @default(cuid())
+  userId    String
+  itemType  StarredItemType
+  itemId    String
+  createdAt DateTime        @default(now())
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prompt  Prompt?  @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  example Example? @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemType, itemId])
+  @@index([userId])
+  @@map("starred_items")
+}
