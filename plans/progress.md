@@ -640,3 +640,22 @@
 
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - replaced Card with div for workflow cards
+
+## 2026-01-26: Input Bar Floating Inline Icons
+
+### Completed
+- Added 'inline' button variant to button.tsx for floating inline icons
+- Variant uses text-muted-foreground default, hover:text-foreground for icon color change
+- Minimal background tint on hover (hover:bg-muted/50)
+- Updated Files & Sources, Prompts, Improve buttons to use inline variant
+- Buttons now appear seamlessly integrated into input surface
+- Updated 2 PRD items to passes:true
+
+### Notes for next dev
+- 'inline' variant designed for toolbar/input area icons
+- Differs from 'ghost' by starting with muted text color and having subtler hover
+- Matches Harvey/Lex visual style for embedded input controls
+
+### Files modified
+- components/ui/button.tsx - added inline variant
+- app/(dashboard)/assistant/page.tsx - changed buttons from ghost to inline variant

@@ -343,5 +343,453 @@
       "Document square-edge design system approach"
     ],
     "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Input bar buttons styled as floating inline icons",
+    "steps": [
+      "Style Files & Sources, Prompts, Improve as floating inline icons",
+      "Remove background behind buttons so they appear part of input surface",
+      "Match Harvey/Lex visual style"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Input bar button hover states",
+    "steps": [
+      "Add hover state that alters icon color",
+      "Optionally add minimal background tint on hover",
+      "Ensure hover feedback is subtle but visible"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Vault selection modal - dimensions and positioning",
+    "steps": [
+      "Set modal max-width to 50% of screen",
+      "Set modal max-height to 50% of screen",
+      "Center modal on screen"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Vault selection modal - styling",
+    "steps": [
+      "Remove all shadows from modal",
+      "Set border-radius to 0-4px (square edges)",
+      "Add 1px neutral border",
+      "Set background to gray-50"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Vault selection modal - header",
+    "steps": [
+      "Add header section to modal",
+      "Set title text to 'Choose a Vault'"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Vault selection modal - Create New Vault option",
+    "steps": [
+      "Add 'Create New Vault' as first element in modal",
+      "Style as prominent actionable option",
+      "Clicking opens Create New Vault modal"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Vault selection modal - search bar",
+    "steps": [
+      "Add search bar positioned top-right above vault cards",
+      "Search filters vault list by name",
+      "Style consistently with square-edge design system"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Vault selection modal - vault cards layout",
+    "steps": [
+      "Display vaults as large square-edged cards",
+      "Arrange cards in grid or list format",
+      "Ensure cards are clickable"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Vault selection modal - vault card metadata display",
+    "steps": [
+      "Display vault name on card",
+      "Display created date on card",
+      "Display number of files on card",
+      "Display storage used on card"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Vault selection modal - vault click reveals file table",
+    "steps": [
+      "Clicking vault card transitions to file table view",
+      "File table replaces or overlays vault list",
+      "Back navigation available to return to vault list"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "File table - use shadcn table component",
+    "steps": [
+      "Implement file table using shadcn table",
+      "Style table with square-edge design system",
+      "Remove any shadows from table"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "File table - checkbox column",
+    "steps": [
+      "Add checkbox column as first column",
+      "Checkboxes enable multi-select",
+      "Header checkbox toggles select all"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "File table - File Name column",
+    "steps": [
+      "Add File Name column to table",
+      "Display original upload filename",
+      "Allow sorting by file name"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "File table - File Type column",
+    "steps": [
+      "Add File Type column to table",
+      "Display custom category assigned at upload",
+      "Allow filtering by file type"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "File table - File Size column",
+    "steps": [
+      "Add File Size column to table",
+      "Display size in KB/MB format",
+      "Allow sorting by file size"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "File table - Uploaded On column",
+    "steps": [
+      "Add Uploaded On column to table",
+      "Display upload timestamp",
+      "Allow sorting by upload date"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "File table - Tags column",
+    "steps": [
+      "Add Tags column to table",
+      "Display free-form or auto-populated tags",
+      "Allow filtering by tags"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "File table - metadata panel",
+    "steps": [
+      "Add metadata panel on right side of file table",
+      "Display file type in panel",
+      "Display category in panel",
+      "Display size in panel",
+      "Display any other stored metadata"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create New Vault modal - dimensions and positioning",
+    "steps": [
+      "Set modal width to 50% of screen",
+      "Set modal height to 50% of screen",
+      "Center modal on screen"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create New Vault modal - styling",
+    "steps": [
+      "Remove all shadows from modal",
+      "Set border-radius to 0-4px",
+      "Set background to gray-50",
+      "Add 1px neutral border"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create New Vault modal - header",
+    "steps": [
+      "Add header section to modal",
+      "Set title text to 'Create a Vault'"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create New Vault modal - vault name input",
+    "steps": [
+      "Add single-line text input for vault name",
+      "Label input appropriately",
+      "Style with square-edge design system"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create New Vault modal - drag-and-drop upload zone",
+    "steps": [
+      "Add drag-and-drop upload zone using React Dropzone",
+      "Zone accepts multiple file uploads",
+      "Visual feedback on drag enter/leave"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create New Vault modal - uploaded files list",
+    "steps": [
+      "Display list of selected/uploaded files",
+      "Each file row shows file name and size",
+      "Add remove button for each file"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Create New Vault modal - custom category per file",
+    "steps": [
+      "Add category input/dropdown per file",
+      "User can assign custom category during upload",
+      "Category stored as file metadata"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create New Vault modal - footer usage stats",
+    "steps": [
+      "Add footer section to modal",
+      "Display usage: '0 KB of 100 GB' format",
+      "Display file count: '0 of 100,000 files' format",
+      "Position stats on left side of footer"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create New Vault modal - footer action buttons",
+    "steps": [
+      "Add Cancel button on right side of footer",
+      "Add Create button on right side of footer",
+      "Style buttons with square-edge design system"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Create New Vault modal - create action",
+    "steps": [
+      "Cancel button closes modal without saving",
+      "Create button validates vault name is not empty",
+      "Create button saves vault with uploaded files",
+      "Modal closes on successful creation"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Sidebar vault list - max 10 vaults displayed",
+    "steps": [
+      "Limit sidebar vault list to max 10 vaults",
+      "Show most recent or most used vaults",
+      "Style list with square, flat, shadowless design"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Sidebar vault list - expand to full list",
+    "steps": [
+      "Clicking vault parent item expands to full vault list",
+      "No separate 'View All' control needed",
+      "Expanded view shows all user vaults"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Vault detail page - query banner visibility",
+    "steps": [
+      "Show banner only when vault has 1 or more files",
+      "Hide banner when vault is empty",
+      "Position banner prominently on vault detail page"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Vault detail page - query banner content",
+    "steps": [
+      "Set banner text to 'Start querying your knowledge base'",
+      "Add 'Start a Query' button to banner",
+      "Style banner with square-edge design system"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Start a Query - opens file selection modal",
+    "steps": [
+      "Clicking 'Start a Query' opens file selection modal",
+      "Modal displays files from current vault",
+      "Modal uses same styling as other modals (50%, centered, square)"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Start a Query - file selection in modal",
+    "steps": [
+      "User can select one or more files using checkboxes",
+      "Selection state visually indicated",
+      "Add 'Go' button to confirm selection"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Start a Query - creates new Assistant session",
+    "steps": [
+      "Clicking 'Go' opens new Assistant chat session",
+      "Vault is preloaded as context in new session",
+      "Selected files attached as sources"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "New Assistant session - vault context in UI",
+    "steps": [
+      "Display vault name in Sources section",
+      "Display selected files as chips/resources",
+      "Update input placeholder to reflect file context"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "New Assistant session - placeholder text",
+    "steps": [
+      "Set placeholder to 'Ask a question about your selected vault files...'",
+      "Placeholder reflects file-driven context",
+      "Placeholder updates based on selected sources"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "File metadata - custom category assignment at upload",
+    "steps": [
+      "Allow users to assign custom category during file upload",
+      "Category field available in upload UI",
+      "Category persisted with file metadata"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "File metadata - persistent storage fields",
+    "steps": [
+      "Store file name in metadata",
+      "Store file type (custom category) in metadata",
+      "Store upload timestamp in metadata",
+      "Store file size in metadata",
+      "Store tags in metadata",
+      "Store vault association in metadata"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Apply bg-gray-50 to vault cards",
+    "steps": [
+      "Set background color to bg-gray-50 on vault cards",
+      "Ensure contrast with surrounding UI",
+      "Test in light and dark modes"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Apply bg-gray-50 to modal surfaces",
+    "steps": [
+      "Set background to bg-gray-50 on vault modals",
+      "Set background to bg-gray-50 on file selection modals",
+      "Maintain white for main content areas if needed"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Remove elevation styling from all components",
+    "steps": [
+      "Audit all components for elevation tokens",
+      "Remove Material/AntD elevation if present",
+      "Replace with flat surface styling"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Sidebar vault list - square flat shadowless styling",
+    "steps": [
+      "Remove shadows from sidebar vault items",
+      "Set border-radius to 0-4px on vault list items",
+      "Apply flat surface styling to sidebar"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Table component - shadowless styling",
+    "steps": [
+      "Remove shadows from table components",
+      "Add 1px border for table structure",
+      "Style headers and rows with flat design"
+    ],
+    "passes": false
   }
 ]

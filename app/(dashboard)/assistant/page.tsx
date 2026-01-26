@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { useState, useRef, useCallback } from "react"
-import { useCompletion } from "@ai-sdk/react"
-import { PageHeader } from "@/components/page-header"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Toggle } from "@/components/ui/toggle"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Badge } from "@/components/ui/badge"
+import { useState, useRef, useCallback } from "react";
+import { useCompletion } from "@ai-sdk/react";
+import { PageHeader } from "@/components/page-header";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Toggle } from "@/components/ui/toggle";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import {
   FileText,
   Table2,
@@ -24,7 +24,7 @@ import {
   File,
   Database,
   Wand2,
-} from "lucide-react"
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,54 +33,54 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 
 interface AttachedFile {
-  id: string
-  file: File | null  // null for vault file references
-  name: string
-  size: number
-  source: "upload" | "vault"
-  vaultId?: string
+  id: string;
+  file: File | null; // null for vault file references
+  name: string;
+  size: number;
+  source: "upload" | "vault";
+  vaultId?: string;
 }
 
 interface VaultFile {
-  id: string
-  name: string
-  type: string
-  size: number
+  id: string;
+  name: string;
+  type: string;
+  size: number;
 }
 
 interface Vault {
-  id: string
-  name: string
-  type: "knowledge_base" | "sandbox"
-  fileCount: number
-  files: VaultFile[]
+  id: string;
+  name: string;
+  type: "knowledge_base" | "sandbox";
+  fileCount: number;
+  files: VaultFile[];
 }
 
-type OutputType = "draft" | "review_table"
-type OwnerType = "system" | "personal"
+type OutputType = "draft" | "review_table";
+type OwnerType = "system" | "personal";
 
 interface VaultSource {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
 
 interface Prompt {
-  id: string
-  name: string
-  content: string
-  ownerType: OwnerType
-  category: string | null
-  isStarred: boolean
+  id: string;
+  name: string;
+  content: string;
+  ownerType: OwnerType;
+  category: string | null;
+  isStarred: boolean;
 }
 
 // Mock data - will be replaced with API calls
@@ -88,7 +88,7 @@ const mockVaults: VaultSource[] = [
   { id: "1", name: "Client Documents" },
   { id: "2", name: "Legal Templates" },
   { id: "3", name: "Research Papers" },
-]
+];
 
 // Mock vaults with files for vault selection modal
 const mockVaultsWithFiles: Vault[] = [
@@ -128,7 +128,7 @@ const mockVaultsWithFiles: Vault[] = [
       { id: "f12", name: "Regulatory_Review.docx", type: "docx", size: 89000 },
     ],
   },
-]
+];
 
 const recommendedWorkflows = [
   {
@@ -159,14 +159,15 @@ const recommendedWorkflows = [
     outputType: "review_table" as const,
     category: "Transactional",
   },
-]
+];
 
 // Mock prompts - will be replaced with API call to /api/prompts
 const mockPrompts: Prompt[] = [
   {
     id: "1",
     name: "Contract Summary",
-    content: "Summarize the key terms of this contract including parties, effective date, term, and material obligations.",
+    content:
+      "Summarize the key terms of this contract including parties, effective date, term, and material obligations.",
     ownerType: "system",
     category: "analysis",
     isStarred: true,
@@ -174,7 +175,8 @@ const mockPrompts: Prompt[] = [
   {
     id: "2",
     name: "Risk Identification",
-    content: "Identify and list all potential legal risks in this document, categorized by severity (high, medium, low).",
+    content:
+      "Identify and list all potential legal risks in this document, categorized by severity (high, medium, low).",
     ownerType: "system",
     category: "review",
     isStarred: false,
@@ -182,7 +184,8 @@ const mockPrompts: Prompt[] = [
   {
     id: "3",
     name: "Change of Control Analysis",
-    content: "Analyze all change of control provisions and their implications for the transaction.",
+    content:
+      "Analyze all change of control provisions and their implications for the transaction.",
     ownerType: "system",
     category: "transactional",
     isStarred: false,
@@ -190,7 +193,8 @@ const mockPrompts: Prompt[] = [
   {
     id: "4",
     name: "My Custom Review Prompt",
-    content: "Review this document for compliance with our internal policies on data retention and privacy.",
+    content:
+      "Review this document for compliance with our internal policies on data retention and privacy.",
     ownerType: "personal",
     category: "compliance",
     isStarred: true,
@@ -198,7 +202,8 @@ const mockPrompts: Prompt[] = [
   {
     id: "5",
     name: "Timeline Extraction",
-    content: "Extract all dates and deadlines from this document and present them in chronological order with context.",
+    content:
+      "Extract all dates and deadlines from this document and present them in chronological order with context.",
     ownerType: "system",
     category: "extraction",
     isStarred: false,
@@ -206,39 +211,41 @@ const mockPrompts: Prompt[] = [
   {
     id: "6",
     name: "Clause Comparison",
-    content: "Compare the indemnification clauses across the provided documents and highlight key differences.",
+    content:
+      "Compare the indemnification clauses across the provided documents and highlight key differences.",
     ownerType: "system",
     category: "review",
     isStarred: false,
   },
-]
+];
 
 function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-const DEFAULT_PLACEHOLDER = "Ask anything. Type @ to add sources."
+const DEFAULT_PLACEHOLDER = "Ask anything. Type @ to add sources.";
 
 export default function AssistantPage() {
-  const [query, setQuery] = useState("")
-  const [outputType, setOutputType] = useState<OutputType>("draft")
-  const [selectedVaults, setSelectedVaults] = useState<string[]>([])
-  const [deepAnalysis, setDeepAnalysis] = useState(false)
-  const [showVaultSelector, setShowVaultSelector] = useState(false)
-  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
-  const [isDragging, setIsDragging] = useState(false)
-  const [showVaultModal, setShowVaultModal] = useState(false)
-  const [selectedVaultForFiles, setSelectedVaultForFiles] = useState<Vault | null>(null)
-  const [selectedVaultFiles, setSelectedVaultFiles] = useState<string[]>([])
-  const [hoveredPrompt, setHoveredPrompt] = useState<Prompt | null>(null)
-  const [isImproving, setIsImproving] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [query, setQuery] = useState("");
+  const [outputType, setOutputType] = useState<OutputType>("draft");
+  const [selectedVaults, setSelectedVaults] = useState<string[]>([]);
+  const [deepAnalysis, setDeepAnalysis] = useState(false);
+  const [showVaultSelector, setShowVaultSelector] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [showVaultModal, setShowVaultModal] = useState(false);
+  const [selectedVaultForFiles, setSelectedVaultForFiles] =
+    useState<Vault | null>(null);
+  const [selectedVaultFiles, setSelectedVaultFiles] = useState<string[]>([]);
+  const [hoveredPrompt, setHoveredPrompt] = useState<Prompt | null>(null);
+  const [isImproving, setIsImproving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { completion, isLoading, complete, error } = useCompletion({
     api: "/api/assistant/query",
-  })
+  });
 
   const addFiles = useCallback((files: FileList | File[]) => {
     const newFiles: AttachedFile[] = Array.from(files).map((file) => ({
@@ -247,65 +254,71 @@ export default function AssistantPage() {
       name: file.name,
       size: file.size,
       source: "upload" as const,
-    }))
-    setAttachedFiles((prev) => [...prev, ...newFiles])
-  }, [])
+    }));
+    setAttachedFiles((prev) => [...prev, ...newFiles]);
+  }, []);
 
   const removeFile = useCallback((id: string) => {
-    setAttachedFiles((prev) => prev.filter((f) => f.id !== id))
-  }, [])
+    setAttachedFiles((prev) => prev.filter((f) => f.id !== id));
+  }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragging(true)
-  }, [])
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragging(false)
-  }, [])
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragging(false)
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      addFiles(e.dataTransfer.files)
-    }
-  }, [addFiles])
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        addFiles(e.dataTransfer.files);
+      }
+    },
+    [addFiles],
+  );
 
-  const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      addFiles(e.target.files)
-      e.target.value = "" // Reset for re-selection
-    }
-  }, [addFiles])
+  const handleFileInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files.length > 0) {
+        addFiles(e.target.files);
+        e.target.value = ""; // Reset for re-selection
+      }
+    },
+    [addFiles],
+  );
 
   const toggleVault = (vaultId: string) => {
     setSelectedVaults((prev) =>
       prev.includes(vaultId)
         ? prev.filter((id) => id !== vaultId)
-        : [...prev, vaultId]
-    )
-  }
+        : [...prev, vaultId],
+    );
+  };
 
   const handleVaultSelect = (vault: Vault) => {
-    setSelectedVaultForFiles(vault)
-    setSelectedVaultFiles([])
-  }
+    setSelectedVaultForFiles(vault);
+    setSelectedVaultFiles([]);
+  };
 
   const toggleVaultFileSelection = (fileId: string) => {
     setSelectedVaultFiles((prev) =>
       prev.includes(fileId)
         ? prev.filter((id) => id !== fileId)
-        : [...prev, fileId]
-    )
-  }
+        : [...prev, fileId],
+    );
+  };
 
   const confirmVaultFileSelection = () => {
-    if (!selectedVaultForFiles) return
+    if (!selectedVaultForFiles) return;
 
     const filesToAdd: AttachedFile[] = selectedVaultForFiles.files
       .filter((f) => selectedVaultFiles.includes(f.id))
@@ -316,21 +329,23 @@ export default function AssistantPage() {
         size: f.size,
         source: "vault" as const,
         vaultId: selectedVaultForFiles.id,
-      }))
+      }));
 
-    setAttachedFiles((prev) => [...prev, ...filesToAdd])
-    setShowVaultModal(false)
-    setSelectedVaultForFiles(null)
-    setSelectedVaultFiles([])
-  }
+    setAttachedFiles((prev) => [...prev, ...filesToAdd]);
+    setShowVaultModal(false);
+    setSelectedVaultForFiles(null);
+    setSelectedVaultFiles([]);
+  };
 
   const handleSubmit = async () => {
-    if (!query.trim() || isLoading) return
+    if (!query.trim() || isLoading) return;
 
-    const sources = selectedVaults.map((id) => {
-      const vault = mockVaults.find((v) => v.id === id)
-      return vault ? { id, name: vault.name } : null
-    }).filter(Boolean)
+    const sources = selectedVaults
+      .map((id) => {
+        const vault = mockVaults.find((v) => v.id === id);
+        return vault ? { id, name: vault.name } : null;
+      })
+      .filter(Boolean);
 
     // Build attached files metadata for API
     const files = attachedFiles.map((af) => ({
@@ -339,7 +354,7 @@ export default function AssistantPage() {
       size: af.size,
       source: af.source,
       vaultId: af.vaultId,
-    }))
+    }));
 
     await complete(query, {
       body: {
@@ -349,66 +364,67 @@ export default function AssistantPage() {
         deepAnalysis,
         attachedFiles: files,
       },
-    })
-  }
+    });
+  };
 
-  const hasResponse = completion.length > 0
+  const hasResponse = completion.length > 0;
 
   // Get starred prompts first, then others
   const sortedPrompts = [...mockPrompts].sort((a, b) => {
-    if (a.isStarred && !b.isStarred) return -1
-    if (!a.isStarred && b.isStarred) return 1
-    return 0
-  })
+    if (a.isStarred && !b.isStarred) return -1;
+    if (!a.isStarred && b.isStarred) return 1;
+    return 0;
+  });
 
   const insertPrompt = (prompt: Prompt) => {
-    const currentQuery = query.trim()
+    const currentQuery = query.trim();
     const newQuery = currentQuery
       ? `${currentQuery}\n\n${prompt.content}`
-      : prompt.content
-    setQuery(newQuery)
-    setHoveredPrompt(null)
-  }
+      : prompt.content;
+    setQuery(newQuery);
+    setHoveredPrompt(null);
+  };
 
   const handleImprove = async () => {
-    if (!query.trim() || isImproving || isLoading) return
+    if (!query.trim() || isImproving || isLoading) return;
 
-    setIsImproving(true)
+    setIsImproving(true);
     try {
       const response = await fetch("/api/assistant/improve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ inputText: query }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to improve prompt")
+        throw new Error("Failed to improve prompt");
       }
 
       // Stream the response and build up the improved prompt
-      const reader = response.body?.getReader()
-      if (!reader) throw new Error("No response body")
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No response body");
 
-      const decoder = new TextDecoder()
-      let improvedText = ""
+      const decoder = new TextDecoder();
+      let improvedText = "";
 
       while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        improvedText += decoder.decode(value, { stream: true })
-        setQuery(improvedText)
+        const { done, value } = await reader.read();
+        if (done) break;
+        improvedText += decoder.decode(value, { stream: true });
+        setQuery(improvedText);
       }
     } catch (error) {
-      console.error("Error improving prompt:", error)
+      console.error("Error improving prompt:", error);
     } finally {
-      setIsImproving(false)
+      setIsImproving(false);
     }
-  }
+  };
 
   // Compute placeholder - shows hovered prompt preview or default
   const textareaPlaceholder = hoveredPrompt
-    ? hoveredPrompt.content.slice(0, 100) + (hoveredPrompt.content.length > 100 ? "..." : "")
-    : DEFAULT_PLACEHOLDER
+    ? hoveredPrompt.content.slice(0, 100) +
+      (hoveredPrompt.content.length > 100 ? "..." : "")
+    : DEFAULT_PLACEHOLDER;
 
   return (
     <>
@@ -417,8 +433,12 @@ export default function AssistantPage() {
         {/* Title/Logo - only show when no response */}
         {!hasResponse && (
           <div className="text-center space-y-2 mt-[10vh]">
-            <h1 className="text-4xl font-bold tracking-tight">Legal Workflow</h1>
-            <p className="text-lg text-muted-foreground">AI-powered legal document analysis</p>
+            <h1 className="text-4xl font-bold tracking-tight">
+              Legal Workflow
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              AI-powered legal document analysis
+            </p>
           </div>
         )}
 
@@ -449,7 +469,9 @@ export default function AssistantPage() {
         )}
 
         {/* Main Input Area */}
-        <div className={`w-full max-w-2xl space-y-4 ${hasResponse ? "mt-auto" : ""}`}>
+        <div
+          className={`w-full max-w-4xl space-y-4 ${hasResponse ? "mt-auto" : ""}`}
+        >
           {/* Unified Chat Input Container */}
           <div className="border rounded bg-background">
             {/* Textarea */}
@@ -460,7 +482,7 @@ export default function AssistantPage() {
               className="min-h-[100px] resize-none text-base border-0 focus-visible:ring-0 rounded-b-none"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                  handleSubmit()
+                  handleSubmit();
                 }
               }}
               disabled={isLoading}
@@ -470,7 +492,7 @@ export default function AssistantPage() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant="ghost"
+                    variant="inline"
                     size="sm"
                     className="gap-1.5 h-8"
                     disabled={isLoading}
@@ -478,7 +500,10 @@ export default function AssistantPage() {
                     <Paperclip className="h-4 w-4" />
                     Files & Sources
                     {attachedFiles.length > 0 && (
-                      <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 justify-center">
+                      <Badge
+                        variant="secondary"
+                        className="ml-1 h-5 w-5 p-0 justify-center"
+                      >
                         {attachedFiles.length}
                       </Badge>
                     )}
@@ -487,7 +512,9 @@ export default function AssistantPage() {
                 <DropdownMenuContent align="start" className="w-56">
                   <DropdownMenuLabel>File Actions</DropdownMenuLabel>
                   <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+                    <DropdownMenuItem
+                      onClick={() => fileInputRef.current?.click()}
+                    >
                       <Upload className="h-4 w-4" />
                       Upload Files
                     </DropdownMenuItem>
@@ -502,10 +529,12 @@ export default function AssistantPage() {
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <DropdownMenu onOpenChange={(open) => !open && setHoveredPrompt(null)}>
+              <DropdownMenu
+                onOpenChange={(open) => !open && setHoveredPrompt(null)}
+              >
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant="ghost"
+                    variant="inline"
                     size="sm"
                     className="gap-1.5 h-8"
                     disabled={isLoading}
@@ -514,7 +543,10 @@ export default function AssistantPage() {
                     Prompts
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-72 max-h-80 overflow-y-auto">
+                <DropdownMenuContent
+                  align="start"
+                  className="w-72 max-h-80 overflow-y-auto"
+                >
                   <DropdownMenuLabel>Saved Prompts</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {sortedPrompts.map((prompt) => (
@@ -529,9 +561,14 @@ export default function AssistantPage() {
                         {prompt.isStarred && (
                           <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 shrink-0" />
                         )}
-                        <span className="font-medium text-sm truncate">{prompt.name}</span>
+                        <span className="font-medium text-sm truncate">
+                          {prompt.name}
+                        </span>
                         {prompt.ownerType === "personal" && (
-                          <Badge variant="outline" className="text-xs ml-auto shrink-0">
+                          <Badge
+                            variant="outline"
+                            className="text-xs ml-auto shrink-0"
+                          >
                             Personal
                           </Badge>
                         )}
@@ -544,7 +581,7 @@ export default function AssistantPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button
-                variant="ghost"
+                variant="inline"
                 size="sm"
                 className="gap-1.5 h-8"
                 disabled={isLoading || isImproving || !query.trim()}
@@ -577,10 +614,7 @@ export default function AssistantPage() {
                     Generating
                   </>
                 ) : (
-                  <>
-                    Ask
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </>
+                  <>Ask</>
                 )}
               </Button>
             </div>
@@ -632,7 +666,7 @@ export default function AssistantPage() {
             {showVaultSelector && (
               <div className="flex flex-wrap gap-2 p-3 bg-muted/50 rounded-md">
                 {mockVaults.map((vault) => {
-                  const isSelected = selectedVaults.includes(vault.id)
+                  const isSelected = selectedVaults.includes(vault.id);
                   return (
                     <Button
                       key={vault.id}
@@ -645,7 +679,7 @@ export default function AssistantPage() {
                       {isSelected && <Check className="h-3 w-3" />}
                       {vault.name}
                     </Button>
-                  )
+                  );
                 })}
               </div>
             )}
@@ -664,7 +698,8 @@ export default function AssistantPage() {
               <div className="p-3 bg-muted/50 rounded-md space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">
-                    {attachedFiles.length} file{attachedFiles.length !== 1 ? "s" : ""} attached
+                    {attachedFiles.length} file
+                    {attachedFiles.length !== 1 ? "s" : ""} attached
                   </span>
                 </div>
                 <div className="space-y-1 max-h-40 overflow-y-auto">
@@ -697,12 +732,12 @@ export default function AssistantPage() {
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <span>Sources:</span>
                 {selectedVaults.map((id) => {
-                  const vault = mockVaults.find((v) => v.id === id)
+                  const vault = mockVaults.find((v) => v.id === id);
                   return vault ? (
                     <Badge key={id} variant="secondary">
                       {vault.name}
                     </Badge>
-                  ) : null
+                  ) : null;
                 })}
               </div>
             )}
@@ -731,7 +766,7 @@ export default function AssistantPage() {
 
         {/* Recommended Workflows - only show when no response */}
         {!hasResponse && (
-          <div className="w-full max-w-4xl space-y-4 mt-8">
+          <div className="w-full space-y-4 mt-8">
             <h2 className="text-lg font-semibold">Recommended workflows</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {recommendedWorkflows.map((workflow) => (
@@ -740,7 +775,9 @@ export default function AssistantPage() {
                   className="p-4 bg-gray-50 dark:bg-muted/50 cursor-pointer hover:bg-gray-100 dark:hover:bg-muted transition-colors"
                 >
                   <div className="space-y-1.5 pb-2">
-                    <h3 className="text-base font-semibold leading-none tracking-tight">{workflow.name}</h3>
+                    <h3 className="text-base font-semibold leading-none tracking-tight">
+                      {workflow.name}
+                    </h3>
                     <p className="text-xs text-muted-foreground">
                       {workflow.description}
                     </p>
@@ -802,19 +839,27 @@ export default function AssistantPage() {
               {selectedVaultForFiles ? (
                 <div className="space-y-1">
                   {selectedVaultForFiles.files.map((file) => {
-                    const isSelected = selectedVaultFiles.includes(file.id)
+                    const isSelected = selectedVaultFiles.includes(file.id);
                     return (
                       <button
                         key={file.id}
                         onClick={() => toggleVaultFileSelection(file.id)}
                         className={`w-full text-left p-2 rounded text-sm transition-colors flex items-center gap-2 ${
-                          isSelected ? "bg-primary/10 border border-primary" : "hover:bg-muted border border-transparent"
+                          isSelected
+                            ? "bg-primary/10 border border-primary"
+                            : "hover:bg-muted border border-transparent"
                         }`}
                       >
-                        <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
-                          isSelected ? "bg-primary border-primary" : "border-muted-foreground/30"
-                        }`}>
-                          {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
+                        <div
+                          className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
+                            isSelected
+                              ? "bg-primary border-primary"
+                              : "border-muted-foreground/30"
+                          }`}
+                        >
+                          {isSelected && (
+                            <Check className="h-3 w-3 text-primary-foreground" />
+                          )}
                         </div>
                         <File className="h-4 w-4 text-muted-foreground shrink-0" />
                         <span className="truncate flex-1">{file.name}</span>
@@ -822,7 +867,7 @@ export default function AssistantPage() {
                           {formatFileSize(file.size)}
                         </span>
                       </button>
-                    )
+                    );
                   })}
                 </div>
               ) : (
@@ -836,15 +881,16 @@ export default function AssistantPage() {
           {/* Footer with actions */}
           <div className="flex items-center justify-between pt-4 border-t">
             <span className="text-sm text-muted-foreground">
-              {selectedVaultFiles.length} file{selectedVaultFiles.length !== 1 ? "s" : ""} selected
+              {selectedVaultFiles.length} file
+              {selectedVaultFiles.length !== 1 ? "s" : ""} selected
             </span>
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 onClick={() => {
-                  setShowVaultModal(false)
-                  setSelectedVaultForFiles(null)
-                  setSelectedVaultFiles([])
+                  setShowVaultModal(false);
+                  setSelectedVaultForFiles(null);
+                  setSelectedVaultFiles([]);
                 }}
               >
                 Cancel
@@ -853,12 +899,16 @@ export default function AssistantPage() {
                 onClick={confirmVaultFileSelection}
                 disabled={selectedVaultFiles.length === 0}
               >
-                Add {selectedVaultFiles.length > 0 ? `${selectedVaultFiles.length} ` : ""}File{selectedVaultFiles.length !== 1 ? "s" : ""}
+                Add{" "}
+                {selectedVaultFiles.length > 0
+                  ? `${selectedVaultFiles.length} `
+                  : ""}
+                File{selectedVaultFiles.length !== 1 ? "s" : ""}
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }
