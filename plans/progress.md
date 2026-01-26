@@ -541,3 +541,44 @@
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - handleSubmit passes attachedFiles
 - app/api/assistant/query/route.ts - handles attachedFiles, creates source refs, updates prompt context
+
+## 2026-01-26: Zero-Shadow Design System
+
+### Completed
+- Added global CSS override in globals.css to neutralize all shadow utilities
+- Removed shadow-sm from Card component
+- Removed shadow-lg from Dialog and AlertDialog components
+- Removed shadow-md/shadow-lg from DropdownMenu and DropdownMenuSubContent
+- Removed shadow-xs from SelectTrigger and shadow-md from SelectContent
+- Removed shadow-xs from Button outline variant
+- Removed shadow-xs from Toggle outline variant
+- Removed shadow-xs from Input component
+- Removed shadow-xs from Textarea component
+- Removed shadow-lg from Sheet component
+- Removed shadow-sm from Sidebar floating variant and SidebarInset
+- Converted SidebarMenuButton outline variant from custom shadow to border
+- Removed shadow-none from SidebarInput (redundant)
+- Removed shadow-xs from Checkbox component
+- Updated 9 PRD items to passes:true
+
+### Notes for next dev
+- Global CSS layer overrides all shadow-* utilities to empty
+- Components rely on existing border classes for elevation/separation
+- SidebarMenuButton outline variant uses border-sidebar-border instead of shadow
+- SidebarInset uses border instead of shadow-sm for inset variant
+- All changes work in both light and dark modes via existing CSS variables
+
+### Files modified
+- app/globals.css - added @layer utilities block for shadow override
+- components/ui/card.tsx - removed shadow-sm
+- components/ui/dialog.tsx - removed shadow-lg
+- components/ui/alert-dialog.tsx - removed shadow-lg
+- components/ui/dropdown-menu.tsx - removed shadow-md, shadow-lg
+- components/ui/select.tsx - removed shadow-xs, shadow-md
+- components/ui/button.tsx - removed shadow-xs from outline variant
+- components/ui/toggle.tsx - removed shadow-xs from outline variant
+- components/ui/input.tsx - removed shadow-xs
+- components/ui/textarea.tsx - removed shadow-xs
+- components/ui/sheet.tsx - removed shadow-lg
+- components/ui/sidebar.tsx - removed shadow-sm, converted outline shadow to border
+- components/ui/checkbox.tsx - removed shadow-xs

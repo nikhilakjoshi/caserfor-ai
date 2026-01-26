@@ -131,7 +131,7 @@
       "Replace with 1px solid border (light neutral like #E5E7EB)",
       "Ensure styling works in both light and dark modes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -143,7 +143,7 @@
       "Ensure proper z-index stacking context",
       "Verify works in light and dark modes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -155,7 +155,7 @@
       "Ensure proper z-index stacking context",
       "Verify works in light and dark modes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -166,7 +166,7 @@
       "Replace with border or background contrast styling",
       "Verify works in light and dark modes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -177,7 +177,7 @@
       "Replace with 1px solid borders",
       "Verify works in light and dark modes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -189,7 +189,7 @@
       "Ensure proper z-index stacking",
       "Verify works in light and dark modes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -200,7 +200,7 @@
       "Replace with borders or background contrast",
       "Verify works in light and dark modes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -212,7 +212,7 @@
       "Replace with borders and spacing-based elevation",
       "Verify works in light and dark modes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -223,6 +223,6 @@
       "Establish border-based elevation pattern as default",
       "Document shadow-free design system approach"
     ],
-    "passes": false
+    "passes": true
   }
 ]
