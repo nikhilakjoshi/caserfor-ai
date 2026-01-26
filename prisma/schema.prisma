@@ -211,9 +211,10 @@ model AssistantQuery {
   createdAt      DateTime        @default(now())
 
   // Relations
-  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sources      SourceReference[]
-  historyEntry HistoryEntry?
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sources        SourceReference[]
+  historyEntry   HistoryEntry?
+  editorDocument EditorDocument?
 
   @@index([userId])
   @@index([conversationId])
@@ -266,4 +267,20 @@ model StarredItem {
   @@unique([userId, itemType, itemId])
   @@index([userId])
   @@map("starred_items")
+}
+
+model EditorDocument {
+  id        String   @id @default(cuid())
+  title     String
+  content   Json
+  queryId   String   @unique
+  version   Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  query AssistantQuery @relation(fields: [queryId], references: [id], onDelete: Cascade)
+
+  @@index([queryId])
+  @@map("editor_documents")
 }

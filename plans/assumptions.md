@@ -29,3 +29,9 @@
 - File content stored as base64 in Document.metadata.content field (no S3)
 - storageKey field populated with path format: vaults/{vaultId}/{uuid}.{ext}
 - Production should migrate to S3 - remove content from metadata, use storageKey for S3 get
+
+## EditorDocument Model
+- Named EditorDocument to avoid collision with existing Document model (vault files)
+- PRD says "Document" but that name was taken - EditorDocument used instead
+- One-to-one with AssistantQuery via unique queryId
+- Content field stores TipTap editor JSON format

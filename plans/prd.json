@@ -917,7 +917,7 @@
       "Add @unique constraint on queryId",
       "Add relation to AssistantQuery model"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -927,7 +927,7 @@
       "Add document Document? field to AssistantQuery model",
       "Ensure bidirectional relation is configured"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -937,7 +937,7 @@
       "Verify Document table created in database",
       "Regenerate Prisma client"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -948,7 +948,7 @@
       "Create document in database using Prisma",
       "Return created document as JSON response"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -959,7 +959,7 @@
       "Support optional pagination parameters",
       "Return document list as JSON"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -970,7 +970,7 @@
       "Query single document by id from database",
       "Return 404 if not found, otherwise return document JSON"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -981,7 +981,7 @@
       "Update document in database using Prisma",
       "Return updated document as JSON"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -991,7 +991,7 @@
       "Delete document from database by id",
       "Return success response or 404 if not found"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

@@ -881,3 +881,32 @@
 ### Files modified
 - app/globals.css - added TipTap/ProseMirror CSS styles
 - package.json - added TipTap dependencies
+
+## 2026-01-26: EditorDocument Model and API Endpoints
+
+### Completed
+- Added EditorDocument model to Prisma schema for editor drafts
+- Model has: id, title, content (Json), queryId (unique), version, createdAt, updatedAt
+- Added editorDocument relation to AssistantQuery model
+- Regenerated Prisma client
+- Created GET /api/documents endpoint with pagination (page, limit params)
+- Created POST /api/documents endpoint (title, content, queryId body)
+- Created GET /api/documents/[id] endpoint with query relation
+- Created PUT /api/documents/[id] endpoint for title/content updates
+- Created DELETE /api/documents/[id] endpoint
+- Updated 8 PRD items to passes:true
+
+### Notes for next dev
+- EditorDocument is separate from Document model (vault files)
+- queryId is unique - one document per query
+- POST returns 409 if document already exists for query
+- Content stored as Json (TipTap editor JSON format)
+- Version field ready for versioning feature (default 1)
+- Requires db:push after setting DATABASE_URL
+
+### Files created
+- app/api/documents/route.ts - GET and POST endpoints
+- app/api/documents/[id]/route.ts - GET, PUT, DELETE endpoints
+
+### Files modified
+- prisma/schema.prisma - added EditorDocument model, updated AssistantQuery relation
