@@ -770,7 +770,7 @@
       "Remove Material/AntD elevation if present",
       "Replace with flat surface styling"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

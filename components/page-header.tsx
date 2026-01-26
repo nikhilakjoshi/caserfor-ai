@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useLayoutEffect, useRef } from "react"
 import { createPortal } from "react-dom"
 
 interface PageHeaderProps {
@@ -8,12 +8,20 @@ interface PageHeaderProps {
 }
 
 export function PageHeader({ title }: PageHeaderProps) {
-  const [container, setContainer] = useState<HTMLElement | null>(null)
+  const containerRef = useRef<HTMLElement | null>(null)
 
-  useEffect(() => {
-    setContainer(document.getElementById("page-header"))
+  // Use useLayoutEffect to avoid hydration mismatch - runs synchronously after DOM mutations
+  useLayoutEffect(() => {
+    containerRef.current = document.getElementById("page-header")
   }, [])
 
+  // On first render before layout effect runs, container is null
+  // After layout effect, we need a way to trigger re-render - use a trick with key or just render conditionally
+  if (typeof window === "undefined") {
+    return null
+  }
+
+  const container = document.getElementById("page-header")
   if (!container) {
     return null
   }

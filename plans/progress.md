@@ -784,3 +784,27 @@
 - Panel is 256px wide (w-64) with border separator
 - Uses same VaultFile interface - all metadata fields already present in mock data
 - Category field shows documentType (same value) - real impl may have separate category field
+
+## 2026-01-26: Elevation Styling Audit and Lint Fixes
+
+### Completed
+- Audited entire codebase for elevation tokens (Material/AntD patterns)
+- Confirmed no elevation tokens exist - codebase uses flat surface styling throughout
+- Global shadow override in globals.css already neutralizes all shadow utilities
+- Fixed ESLint errors in workflows/[id]/page.tsx:
+  - Removed unused CircleDot import
+  - Created OutputTypeIcon component to avoid creating components during render
+- Fixed ESLint warning in starred/[type]/[id]/route.ts (commented unused userId)
+- Fixed page-header.tsx setState-in-effect warning by using direct DOM lookup
+- Updated 1 PRD item to passes:true (Remove elevation styling from all components)
+
+### Notes for next dev
+- Codebase uses border-based elevation pattern (no shadows anywhere)
+- Remaining false PRD items require DATABASE_URL (file metadata persistence)
+- ESLint now passes clean (0 errors, 0 warnings)
+- TypeScript check passes clean
+
+### Files modified
+- app/(dashboard)/workflows/[id]/page.tsx - lint fixes, OutputTypeIcon component
+- app/api/starred/[type]/[id]/route.ts - commented unused variable
+- components/page-header.tsx - fixed setState-in-effect pattern

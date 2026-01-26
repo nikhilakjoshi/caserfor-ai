@@ -15,7 +15,7 @@ export async function DELETE(
   }
 
   // TODO: Get userId from auth session
-  const userId = "mock-user-id"
+  // const userId = "mock-user-id"
 
   // TODO: Replace with Prisma delete
   // const deleted = await prisma.starredItem.deleteMany({
@@ -37,7 +37,7 @@ export async function DELETE(
   // in the other file, so we just return success
   // In production with Prisma, this would actually delete
 
-  return NextResponse.json({ success: true, itemType, itemId, userId })
+  return NextResponse.json({ success: true, itemType, itemId, userId: "mock-user-id" })
 }
 
 // GET /api/starred/[type]/[id] - Check if item is starred
@@ -55,7 +55,7 @@ export async function GET(
   }
 
   // TODO: Get userId from auth session
-  const userId = "mock-user-id"
+  // const userId = "mock-user-id"
 
   // TODO: Replace with Prisma query
   // const starred = await prisma.starredItem.findUnique({
