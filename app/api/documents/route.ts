@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         title,
         content: content || {},
         queryId,
-        version: 1,
+        currentVersion: 1,
       },
     })
 

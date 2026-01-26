@@ -1224,7 +1224,7 @@
       "Store version history linked to document",
       "Allow loading previous versions into editor"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

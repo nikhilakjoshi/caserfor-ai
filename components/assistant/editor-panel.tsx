@@ -27,6 +27,7 @@ interface EditorPanelProps {
   version?: number;
   onVersionChange?: (version: number) => void;
   versions?: number[];
+  isLoadingVersion?: boolean;
 }
 
 export function EditorPanel({
@@ -37,6 +38,7 @@ export function EditorPanel({
   version = 1,
   onVersionChange,
   versions = [1],
+  isLoadingVersion = false,
 }: EditorPanelProps) {
   const [showEdits, setShowEdits] = useState(false);
 
@@ -79,9 +81,20 @@ export function EditorPanel({
           {/* Version dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 gap-1">
-                Version {version}
-                <ChevronDown className="h-3 w-3" />
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1"
+                disabled={isLoadingVersion || isStreaming}
+              >
+                {isLoadingVersion ? (
+                  <>Loading...</>
+                ) : (
+                  <>
+                    Version {version}
+                    <ChevronDown className="h-3 w-3" />
+                  </>
+                )}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -92,6 +105,11 @@ export function EditorPanel({
                   className={v === version ? "bg-muted" : ""}
                 >
                   Version {v}
+                  {v === versions[0] && (
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      (latest)
+                    </span>
+                  )}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>

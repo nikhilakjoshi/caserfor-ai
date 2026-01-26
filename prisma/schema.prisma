@@ -270,17 +270,33 @@ model StarredItem {
 }
 
 model EditorDocument {
-  id        String   @id @default(cuid())
-  title     String
-  content   Json
-  queryId   String   @unique
-  version   Int      @default(1)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(cuid())
+  title          String
+  content        Json
+  queryId        String   @unique
+  currentVersion Int      @default(1)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   // Relations
-  query AssistantQuery @relation(fields: [queryId], references: [id], onDelete: Cascade)
+  query    AssistantQuery    @relation(fields: [queryId], references: [id], onDelete: Cascade)
+  versions DocumentVersion[]
 
   @@index([queryId])
   @@map("editor_documents")
+}
+
+model DocumentVersion {
+  id         String   @id @default(cuid())
+  documentId String
+  version    Int
+  content    Json
+  createdAt  DateTime @default(now())
+
+  // Relations
+  document EditorDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, version])
+  @@index([documentId])
+  @@map("document_versions")
 }

@@ -21,6 +21,13 @@ export async function GET(
             createdAt: true,
           },
         },
+        versions: {
+          select: {
+            version: true,
+            createdAt: true,
+          },
+          orderBy: { version: "desc" },
+        },
       },
     })
 
@@ -31,7 +38,17 @@ export async function GET(
       )
     }
 
-    return NextResponse.json(document)
+    // Build versions array including current version
+    const versionNumbers = document.versions.map((v) => v.version)
+    if (!versionNumbers.includes(document.currentVersion)) {
+      versionNumbers.unshift(document.currentVersion)
+    }
+    versionNumbers.sort((a, b) => b - a) // Descending
+
+    return NextResponse.json({
+      ...document,
+      availableVersions: versionNumbers,
+    })
   } catch (error) {
     console.error("Error fetching document:", error)
     return NextResponse.json(
@@ -54,6 +71,12 @@ export async function PUT(
     // Check document exists
     const existing = await prisma.editorDocument.findUnique({
       where: { id },
+      include: {
+        versions: {
+          where: { version: 1 },
+          select: { id: true },
+        },
+      },
     })
 
     if (!existing) {
@@ -66,6 +89,18 @@ export async function PUT(
     const updateData: { title?: string; content?: object } = {}
     if (title !== undefined) updateData.title = title
     if (content !== undefined) updateData.content = content
+
+    // If this is the first update and we're updating content, save version 1
+    // This ensures we have a snapshot of version 1 before any AI regenerations
+    if (content !== undefined && existing.versions.length === 0 && existing.currentVersion === 1) {
+      await prisma.documentVersion.create({
+        data: {
+          documentId: id,
+          version: 1,
+          content: existing.content as object, // Save the original content as v1
+        },
+      })
+    }
 
     const document = await prisma.editorDocument.update({
       where: { id },

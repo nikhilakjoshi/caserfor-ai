@@ -1036,3 +1036,38 @@
 
 ### Files modified
 - components/assistant/chat-panel.tsx - added save prompt dialog, API call, states
+
+## 2026-01-26: Document Versioning
+
+### Completed
+- Added DocumentVersion model to Prisma schema for version history
+- Model has: id, documentId, version, content (Json), createdAt
+- Unique constraint on [documentId, version] for deduplication
+- Renamed EditorDocument.version to currentVersion for clarity
+- Created GET /api/documents/[id]/versions - list all versions
+- Created POST /api/documents/[id]/versions - create new version (AI regeneration)
+- Created GET /api/documents/[id]/versions/[version] - get specific version content
+- Updated PUT /api/documents/[id] to save v1 snapshot on first update
+- Updated GET /api/documents/[id] to include availableVersions array
+- Added version state to assistant page (currentVersion, availableVersions)
+- Implemented handleVersionChange to load previous versions
+- EditorPanel version dropdown now functional with loading state
+- Updated 1 PRD item to passes:true
+
+### Notes for next dev
+- Version 1 is created on first PUT to capture initial AI output
+- New versions created via POST /versions when AI regenerates (not implemented in UI yet)
+- Version switching loads content from DocumentVersion table
+- Current version content lives in EditorDocument.content (not duplicated in versions until superseded)
+- Remaining false PRD items: Test endpoints (3) - require actual API key
+
+### Files created
+- app/api/documents/[id]/versions/route.ts - GET/POST versions
+- app/api/documents/[id]/versions/[version]/route.ts - GET specific version
+
+### Files modified
+- prisma/schema.prisma - added DocumentVersion model, renamed version to currentVersion
+- app/api/documents/[id]/route.ts - include versions in GET, save v1 on first PUT
+- app/api/documents/route.ts - use currentVersion field
+- components/assistant/editor-panel.tsx - added isLoadingVersion prop, improved dropdown
+- app/(dashboard)/assistant/page.tsx - version state, handleVersionChange

@@ -314,6 +314,11 @@ export default function AssistantPage() {
   const [isSaving, setIsSaving] = useState(false);
   const queryIdRef = useRef<string | null>(null);
 
+  // Version state
+  const [currentVersion, setCurrentVersion] = useState(1);
+  const [availableVersions, setAvailableVersions] = useState<number[]>([1]);
+  const [isLoadingVersion, setIsLoadingVersion] = useState(false);
+
   // Create New Vault modal state
   const [showCreateVaultModal, setShowCreateVaultModal] = useState(false);
   const [newVaultName, setNewVaultName] = useState("");
@@ -598,6 +603,8 @@ export default function AssistantPage() {
           if (response.ok) {
             const doc = await response.json();
             setDocumentId(doc.id);
+            setCurrentVersion(doc.currentVersion || 1);
+            setAvailableVersions(doc.availableVersions || [1]);
           } else if (response.status === 409) {
             // Document already exists for this query, fetch and use it
             console.log("Document already exists for query, skipping create");
@@ -793,7 +800,33 @@ export default function AssistantPage() {
     setCurrentQueryId(null);
     setDocumentId(null);
     queryIdRef.current = null;
+    // Reset version state
+    setCurrentVersion(1);
+    setAvailableVersions([1]);
   };
+
+  // Handle version switching
+  const handleVersionChange = useCallback(async (version: number) => {
+    if (!documentId || version === currentVersion || isLoadingVersion) return;
+
+    setIsLoadingVersion(true);
+    try {
+      const response = await fetch(`/api/documents/${documentId}/versions/${version}`);
+      if (!response.ok) {
+        throw new Error("Failed to load version");
+      }
+
+      const data = await response.json();
+      // Extract HTML content from the JSON structure
+      const htmlContent = data.content?.html || "";
+      setEditorContent(htmlContent);
+      setCurrentVersion(version);
+    } catch (error) {
+      console.error("Error loading version:", error);
+    } finally {
+      setIsLoadingVersion(false);
+    }
+  }, [documentId, currentVersion, isLoadingVersion]);
 
   // Calculate total size of files being uploaded to new vault
   const newVaultTotalSize = newVaultFiles.reduce((sum, f) => sum + f.size, 0);
@@ -960,6 +993,10 @@ export default function AssistantPage() {
               onChange={handleEditorChange}
               isStreaming={isLoading}
               isSaving={isSaving}
+              version={currentVersion}
+              versions={availableVersions}
+              onVersionChange={handleVersionChange}
+              isLoadingVersion={isLoadingVersion}
             />
           </div>
         </div>
