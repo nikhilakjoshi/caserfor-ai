@@ -659,3 +659,33 @@
 ### Files modified
 - components/ui/button.tsx - added inline variant
 - app/(dashboard)/assistant/page.tsx - changed buttons from ghost to inline variant
+
+## 2026-01-26: Vault Selection Modal Redesign
+
+### Completed
+- Redesigned vault selection modal with 50% viewport dimensions (w-[50vw] h-[50vh])
+- Applied bg-gray-50 to modal background, white headers/footers
+- Square-edge design (uses global 0-4px radius system)
+- 1px neutral border on modal
+- "Choose a Vault" header with back navigation when in file view
+- "Create New Vault" as prominent first option with dashed border styling
+- Search bar in top-right header filters vaults by name
+- Vault cards in 2-column grid showing: name, type badge, created date, file count, storage used
+- File table view using shadcn Table component
+- Table columns: checkbox (select all), File Name (sortable), File Type (badge), File Size (sortable), Uploaded On (sortable), Tags
+- Multi-file selection with row click or checkbox
+- Back navigation from file table to vault list
+- Footer shows selection count and Add/Cancel buttons
+- Updated 18 PRD items to passes:true
+
+### Notes for next dev
+- "Create New Vault" button logs to console only - actual modal not yet implemented
+- Uses mock vault data with files - wire to /api/vaults/[id]/documents when DB connected
+- VaultFile interface extended: fileType, documentType, uploadedAt, tags fields
+- Vault interface extended: storageUsed, createdAt fields
+- File metadata panel (PRD item) not implemented - would need side panel
+- Filtering by file type/tags not implemented - only sorting currently
+- Removed unused drag handlers (isDragging, handleDragOver, handleDragLeave, handleDrop) since upload is via dropdown
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - complete vault modal redesign

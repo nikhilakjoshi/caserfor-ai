@@ -15,7 +15,6 @@ import {
   Paperclip,
   BookOpen,
   Sparkles,
-  ArrowRight,
   Check,
   Loader2,
   Star,
@@ -24,6 +23,12 @@ import {
   File,
   Database,
   Wand2,
+  Search,
+  Plus,
+  ChevronLeft,
+  HardDrive,
+  Calendar,
+  ArrowUpDown,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -37,10 +42,19 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Checkbox as TableCheckbox } from "@/components/ui/checkbox";
 
 interface AttachedFile {
   id: string;
@@ -54,8 +68,11 @@ interface AttachedFile {
 interface VaultFile {
   id: string;
   name: string;
-  type: string;
+  fileType: string;
+  documentType: string;
   size: number;
+  uploadedAt: string;
+  tags: string[];
 }
 
 interface Vault {
@@ -63,6 +80,8 @@ interface Vault {
   name: string;
   type: "knowledge_base" | "sandbox";
   fileCount: number;
+  storageUsed: number;
+  createdAt: string;
   files: VaultFile[];
 }
 
@@ -97,12 +116,14 @@ const mockVaultsWithFiles: Vault[] = [
     name: "Client Documents",
     type: "knowledge_base",
     fileCount: 5,
+    storageUsed: 558000,
+    createdAt: "2024-12-15",
     files: [
-      { id: "f1", name: "Agreement_2024.pdf", type: "pdf", size: 245000 },
-      { id: "f2", name: "NDA_Template.docx", type: "docx", size: 45000 },
-      { id: "f3", name: "Client_Notes.txt", type: "txt", size: 12000 },
-      { id: "f4", name: "Contract_Draft.pdf", type: "pdf", size: 189000 },
-      { id: "f5", name: "Appendix_A.pdf", type: "pdf", size: 67000 },
+      { id: "f1", name: "Agreement_2024.pdf", fileType: "pdf", documentType: "Contract", size: 245000, uploadedAt: "2024-12-20", tags: ["contract", "2024"] },
+      { id: "f2", name: "NDA_Template.docx", fileType: "docx", documentType: "Template", size: 45000, uploadedAt: "2024-12-18", tags: ["nda", "template"] },
+      { id: "f3", name: "Client_Notes.txt", fileType: "txt", documentType: "Notes", size: 12000, uploadedAt: "2024-12-22", tags: ["notes"] },
+      { id: "f4", name: "Contract_Draft.pdf", fileType: "pdf", documentType: "Contract", size: 189000, uploadedAt: "2024-12-21", tags: ["contract", "draft"] },
+      { id: "f5", name: "Appendix_A.pdf", fileType: "pdf", documentType: "Appendix", size: 67000, uploadedAt: "2024-12-19", tags: ["appendix"] },
     ],
   },
   {
@@ -110,10 +131,12 @@ const mockVaultsWithFiles: Vault[] = [
     name: "Legal Templates",
     type: "knowledge_base",
     fileCount: 3,
+    storageUsed: 288000,
+    createdAt: "2024-11-10",
     files: [
-      { id: "f6", name: "Master_Agreement.docx", type: "docx", size: 98000 },
-      { id: "f7", name: "SLA_Template.pdf", type: "pdf", size: 156000 },
-      { id: "f8", name: "Privacy_Policy.docx", type: "docx", size: 34000 },
+      { id: "f6", name: "Master_Agreement.docx", fileType: "docx", documentType: "Template", size: 98000, uploadedAt: "2024-11-12", tags: ["master", "template"] },
+      { id: "f7", name: "SLA_Template.pdf", fileType: "pdf", documentType: "Template", size: 156000, uploadedAt: "2024-11-15", tags: ["sla", "template"] },
+      { id: "f8", name: "Privacy_Policy.docx", fileType: "docx", documentType: "Policy", size: 34000, uploadedAt: "2024-11-20", tags: ["privacy", "policy"] },
     ],
   },
   {
@@ -121,11 +144,13 @@ const mockVaultsWithFiles: Vault[] = [
     name: "Research Papers",
     type: "sandbox",
     fileCount: 4,
+    storageUsed: 1388000,
+    createdAt: "2024-10-05",
     files: [
-      { id: "f9", name: "Case_Study_2023.pdf", type: "pdf", size: 420000 },
-      { id: "f10", name: "Legal_Analysis.pdf", type: "pdf", size: 312000 },
-      { id: "f11", name: "Market_Research.pdf", type: "pdf", size: 567000 },
-      { id: "f12", name: "Regulatory_Review.docx", type: "docx", size: 89000 },
+      { id: "f9", name: "Case_Study_2023.pdf", fileType: "pdf", documentType: "Research", size: 420000, uploadedAt: "2024-10-08", tags: ["case-study", "2023"] },
+      { id: "f10", name: "Legal_Analysis.pdf", fileType: "pdf", documentType: "Analysis", size: 312000, uploadedAt: "2024-10-10", tags: ["analysis"] },
+      { id: "f11", name: "Market_Research.pdf", fileType: "pdf", documentType: "Research", size: 567000, uploadedAt: "2024-10-12", tags: ["market", "research"] },
+      { id: "f12", name: "Regulatory_Review.docx", fileType: "docx", documentType: "Review", size: 89000, uploadedAt: "2024-10-15", tags: ["regulatory", "review"] },
     ],
   },
 ];
@@ -234,13 +259,15 @@ export default function AssistantPage() {
   const [deepAnalysis, setDeepAnalysis] = useState(false);
   const [showVaultSelector, setShowVaultSelector] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
   const [showVaultModal, setShowVaultModal] = useState(false);
   const [selectedVaultForFiles, setSelectedVaultForFiles] =
     useState<Vault | null>(null);
   const [selectedVaultFiles, setSelectedVaultFiles] = useState<string[]>([]);
   const [hoveredPrompt, setHoveredPrompt] = useState<Prompt | null>(null);
   const [isImproving, setIsImproving] = useState(false);
+  const [vaultSearchQuery, setVaultSearchQuery] = useState("");
+  const [fileSortColumn, setFileSortColumn] = useState<"name" | "documentType" | "size" | "uploadedAt">("name");
+  const [fileSortDirection, setFileSortDirection] = useState<"asc" | "desc">("asc");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { completion, isLoading, complete, error } = useCompletion({
@@ -261,30 +288,6 @@ export default function AssistantPage() {
   const removeFile = useCallback((id: string) => {
     setAttachedFiles((prev) => prev.filter((f) => f.id !== id));
   }, []);
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  }, []);
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDragging(false);
-      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        addFiles(e.dataTransfer.files);
-      }
-    },
-    [addFiles],
-  );
 
   const handleFileInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -308,6 +311,53 @@ export default function AssistantPage() {
     setSelectedVaultForFiles(vault);
     setSelectedVaultFiles([]);
   };
+
+  const handleBackToVaults = () => {
+    setSelectedVaultForFiles(null);
+    setSelectedVaultFiles([]);
+  };
+
+  const handleFileSort = (column: "name" | "documentType" | "size" | "uploadedAt") => {
+    if (fileSortColumn === column) {
+      setFileSortDirection(fileSortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setFileSortColumn(column);
+      setFileSortDirection("asc");
+    }
+  };
+
+  const toggleSelectAllFiles = () => {
+    if (!selectedVaultForFiles) return;
+    if (selectedVaultFiles.length === selectedVaultForFiles.files.length) {
+      setSelectedVaultFiles([]);
+    } else {
+      setSelectedVaultFiles(selectedVaultForFiles.files.map(f => f.id));
+    }
+  };
+
+  // Filter and sort vaults
+  const filteredVaults = mockVaultsWithFiles.filter(vault =>
+    vault.name.toLowerCase().includes(vaultSearchQuery.toLowerCase())
+  );
+
+  // Sort files
+  const sortedFiles = selectedVaultForFiles
+    ? [...selectedVaultForFiles.files].sort((a, b) => {
+        const direction = fileSortDirection === "asc" ? 1 : -1;
+        switch (fileSortColumn) {
+          case "name":
+            return direction * a.name.localeCompare(b.name);
+          case "documentType":
+            return direction * a.documentType.localeCompare(b.documentType);
+          case "size":
+            return direction * (a.size - b.size);
+          case "uploadedAt":
+            return direction * a.uploadedAt.localeCompare(b.uploadedAt);
+          default:
+            return 0;
+        }
+      })
+    : [];
 
   const toggleVaultFileSelection = (fileId: string) => {
     setSelectedVaultFiles((prev) =>
@@ -797,92 +847,235 @@ export default function AssistantPage() {
       </div>
 
       {/* Vault Selection Modal */}
-      <Dialog open={showVaultModal} onOpenChange={setShowVaultModal}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Add From Vault</DialogTitle>
-            <DialogDescription>
-              Select a vault and choose files to attach to your query.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex-1 overflow-hidden flex gap-4 min-h-0">
-            {/* Vault List */}
-            <div className="w-48 shrink-0 border-r pr-4 overflow-y-auto">
-              <div className="space-y-1">
-                {mockVaultsWithFiles.map((vault) => (
-                  <button
-                    key={vault.id}
-                    onClick={() => handleVaultSelect(vault)}
-                    className={`w-full text-left p-2 rounded text-sm transition-colors flex items-center gap-2 ${
-                      selectedVaultForFiles?.id === vault.id
-                        ? "bg-primary text-primary-foreground"
-                        : "hover:bg-muted"
-                    }`}
+      <Dialog open={showVaultModal} onOpenChange={(open) => {
+        setShowVaultModal(open);
+        if (!open) {
+          setSelectedVaultForFiles(null);
+          setSelectedVaultFiles([]);
+          setVaultSearchQuery("");
+        }
+      }}>
+        <DialogContent
+          className="w-[50vw] max-w-[50vw] h-[50vh] max-h-[50vh] bg-gray-50 dark:bg-muted/50 border border-neutral-200 dark:border-neutral-700 p-0 flex flex-col overflow-hidden"
+          showCloseButton={false}
+        >
+          {/* Header */}
+          <DialogHeader className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-background">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {selectedVaultForFiles && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={handleBackToVaults}
                   >
-                    {vault.type === "knowledge_base" ? (
-                      <Database className="h-4 w-4 shrink-0" />
-                    ) : (
-                      <Folder className="h-4 w-4 shrink-0" />
-                    )}
-                    <span className="truncate">{vault.name}</span>
-                    <Badge variant="secondary" className="ml-auto text-xs">
-                      {vault.fileCount}
-                    </Badge>
-                  </button>
-                ))}
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                )}
+                <DialogTitle>
+                  {selectedVaultForFiles ? selectedVaultForFiles.name : "Choose a Vault"}
+                </DialogTitle>
               </div>
-            </div>
-
-            {/* File List */}
-            <div className="flex-1 overflow-y-auto">
-              {selectedVaultForFiles ? (
-                <div className="space-y-1">
-                  {selectedVaultForFiles.files.map((file) => {
-                    const isSelected = selectedVaultFiles.includes(file.id);
-                    return (
-                      <button
-                        key={file.id}
-                        onClick={() => toggleVaultFileSelection(file.id)}
-                        className={`w-full text-left p-2 rounded text-sm transition-colors flex items-center gap-2 ${
-                          isSelected
-                            ? "bg-primary/10 border border-primary"
-                            : "hover:bg-muted border border-transparent"
-                        }`}
-                      >
-                        <div
-                          className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
-                            isSelected
-                              ? "bg-primary border-primary"
-                              : "border-muted-foreground/30"
-                          }`}
-                        >
-                          {isSelected && (
-                            <Check className="h-3 w-3 text-primary-foreground" />
-                          )}
-                        </div>
-                        <File className="h-4 w-4 text-muted-foreground shrink-0" />
-                        <span className="truncate flex-1">{file.name}</span>
-                        <span className="text-xs text-muted-foreground shrink-0">
-                          {formatFileSize(file.size)}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
-                  Select a vault to view files
+              {/* Search bar - top right */}
+              {!selectedVaultForFiles && (
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search vaults..."
+                    value={vaultSearchQuery}
+                    onChange={(e) => setVaultSearchQuery(e.target.value)}
+                    className="pl-9 h-9 bg-white dark:bg-background"
+                  />
                 </div>
               )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setShowVaultModal(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
+          </DialogHeader>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-6">
+            {selectedVaultForFiles ? (
+              /* File Table View */
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-10">
+                      <TableCheckbox
+                        checked={selectedVaultFiles.length === selectedVaultForFiles.files.length && selectedVaultForFiles.files.length > 0}
+                        onCheckedChange={toggleSelectAllFiles}
+                      />
+                    </TableHead>
+                    <TableHead>
+                      <button
+                        className="flex items-center gap-1 hover:text-foreground"
+                        onClick={() => handleFileSort("name")}
+                      >
+                        File Name
+                        <ArrowUpDown className="h-3 w-3" />
+                      </button>
+                    </TableHead>
+                    <TableHead>
+                      <button
+                        className="flex items-center gap-1 hover:text-foreground"
+                        onClick={() => handleFileSort("documentType")}
+                      >
+                        File Type
+                        <ArrowUpDown className="h-3 w-3" />
+                      </button>
+                    </TableHead>
+                    <TableHead>
+                      <button
+                        className="flex items-center gap-1 hover:text-foreground"
+                        onClick={() => handleFileSort("size")}
+                      >
+                        File Size
+                        <ArrowUpDown className="h-3 w-3" />
+                      </button>
+                    </TableHead>
+                    <TableHead>
+                      <button
+                        className="flex items-center gap-1 hover:text-foreground"
+                        onClick={() => handleFileSort("uploadedAt")}
+                      >
+                        Uploaded On
+                        <ArrowUpDown className="h-3 w-3" />
+                      </button>
+                    </TableHead>
+                    <TableHead>Tags</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedFiles.map((file) => {
+                    const isSelected = selectedVaultFiles.includes(file.id);
+                    return (
+                      <TableRow
+                        key={file.id}
+                        className="cursor-pointer"
+                        onClick={() => toggleVaultFileSelection(file.id)}
+                        data-state={isSelected ? "selected" : undefined}
+                      >
+                        <TableCell>
+                          <TableCheckbox
+                            checked={isSelected}
+                            onCheckedChange={() => toggleVaultFileSelection(file.id)}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            <File className="h-4 w-4 text-muted-foreground" />
+                            {file.name}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">{file.documentType}</Badge>
+                        </TableCell>
+                        <TableCell>{formatFileSize(file.size)}</TableCell>
+                        <TableCell>{file.uploadedAt}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-1 flex-wrap">
+                            {file.tags.slice(0, 2).map((tag) => (
+                              <Badge key={tag} variant="outline" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                            {file.tags.length > 2 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{file.tags.length - 2}
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            ) : (
+              /* Vault Cards View */
+              <div className="space-y-4">
+                {/* Create New Vault option */}
+                <button
+                  className="w-full p-4 border-2 border-dashed border-neutral-300 dark:border-neutral-600 bg-white dark:bg-background hover:border-primary hover:bg-primary/5 transition-colors flex items-center gap-3"
+                  onClick={() => {
+                    // TODO: Open create vault modal
+                    console.log("Create new vault clicked");
+                  }}
+                >
+                  <div className="h-10 w-10 bg-primary/10 flex items-center justify-center">
+                    <Plus className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium">Create New Vault</p>
+                    <p className="text-sm text-muted-foreground">
+                      Start a new knowledge base or sandbox
+                    </p>
+                  </div>
+                </button>
+
+                {/* Vault Cards Grid */}
+                <div className="grid grid-cols-2 gap-4">
+                  {filteredVaults.map((vault) => (
+                    <button
+                      key={vault.id}
+                      onClick={() => handleVaultSelect(vault)}
+                      className="p-4 bg-white dark:bg-background border border-neutral-200 dark:border-neutral-700 hover:border-primary transition-colors text-left"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          {vault.type === "knowledge_base" ? (
+                            <Database className="h-5 w-5 text-primary" />
+                          ) : (
+                            <Folder className="h-5 w-5 text-amber-500" />
+                          )}
+                          <span className="font-medium">{vault.name}</span>
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                          {vault.type === "knowledge_base" ? "KB" : "Sandbox"}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5" />
+                          <span>{vault.createdAt}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <File className="h-3.5 w-3.5" />
+                          <span>{vault.fileCount} files</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 col-span-2">
+                          <HardDrive className="h-3.5 w-3.5" />
+                          <span>{formatFileSize(vault.storageUsed)}</span>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Empty state */}
+                {filteredVaults.length === 0 && vaultSearchQuery && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No vaults found matching &quot;{vaultSearchQuery}&quot;
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Footer with actions */}
-          <div className="flex items-center justify-between pt-4 border-t">
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-neutral-200 dark:border-neutral-700 bg-white dark:bg-background flex items-center justify-between">
             <span className="text-sm text-muted-foreground">
-              {selectedVaultFiles.length} file
-              {selectedVaultFiles.length !== 1 ? "s" : ""} selected
+              {selectedVaultForFiles
+                ? `${selectedVaultFiles.length} file${selectedVaultFiles.length !== 1 ? "s" : ""} selected`
+                : `${filteredVaults.length} vault${filteredVaults.length !== 1 ? "s" : ""}`}
             </span>
             <div className="flex gap-2">
               <Button
@@ -891,20 +1084,20 @@ export default function AssistantPage() {
                   setShowVaultModal(false);
                   setSelectedVaultForFiles(null);
                   setSelectedVaultFiles([]);
+                  setVaultSearchQuery("");
                 }}
               >
                 Cancel
               </Button>
-              <Button
-                onClick={confirmVaultFileSelection}
-                disabled={selectedVaultFiles.length === 0}
-              >
-                Add{" "}
-                {selectedVaultFiles.length > 0
-                  ? `${selectedVaultFiles.length} `
-                  : ""}
-                File{selectedVaultFiles.length !== 1 ? "s" : ""}
-              </Button>
+              {selectedVaultForFiles && (
+                <Button
+                  onClick={confirmVaultFileSelection}
+                  disabled={selectedVaultFiles.length === 0}
+                >
+                  Add {selectedVaultFiles.length > 0 ? `${selectedVaultFiles.length} ` : ""}
+                  File{selectedVaultFiles.length !== 1 ? "s" : ""}
+                </Button>
+              )}
             </div>
           </div>
         </DialogContent>

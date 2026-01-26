@@ -372,7 +372,7 @@
       "Set modal max-height to 50% of screen",
       "Center modal on screen"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -383,7 +383,7 @@
       "Add 1px neutral border",
       "Set background to gray-50"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -392,7 +392,7 @@
       "Add header section to modal",
       "Set title text to 'Choose a Vault'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -402,7 +402,7 @@
       "Style as prominent actionable option",
       "Clicking opens Create New Vault modal"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -412,7 +412,7 @@
       "Search filters vault list by name",
       "Style consistently with square-edge design system"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -422,7 +422,7 @@
       "Arrange cards in grid or list format",
       "Ensure cards are clickable"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -433,7 +433,7 @@
       "Display number of files on card",
       "Display storage used on card"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -443,7 +443,7 @@
       "File table replaces or overlays vault list",
       "Back navigation available to return to vault list"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -453,7 +453,7 @@
       "Style table with square-edge design system",
       "Remove any shadows from table"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -463,7 +463,7 @@
       "Checkboxes enable multi-select",
       "Header checkbox toggles select all"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -473,7 +473,7 @@
       "Display original upload filename",
       "Allow sorting by file name"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -483,7 +483,7 @@
       "Display custom category assigned at upload",
       "Allow filtering by file type"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -493,7 +493,7 @@
       "Display size in KB/MB format",
       "Allow sorting by file size"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -503,7 +503,7 @@
       "Display upload timestamp",
       "Allow sorting by upload date"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -513,7 +513,7 @@
       "Display free-form or auto-populated tags",
       "Allow filtering by tags"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -750,7 +750,7 @@
       "Ensure contrast with surrounding UI",
       "Test in light and dark modes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -760,7 +760,7 @@
       "Set background to bg-gray-50 on file selection modals",
       "Maintain white for main content areas if needed"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -790,6 +790,6 @@
       "Add 1px border for table structure",
       "Style headers and rows with flat design"
     ],
-    "passes": false
+    "passes": true
   }
 ]
