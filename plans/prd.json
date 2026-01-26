@@ -1105,7 +1105,7 @@
       "Call debounced save function on editor onChange",
       "Show subtle saving indicator during save"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -1116,7 +1116,7 @@
       "If documentId exists, PUT to /api/documents/[id] to update",
       "Store returned documentId in state for subsequent saves"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -1126,7 +1126,7 @@
       "Include queryId in POST /api/documents body",
       "Verify relation is established in database"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

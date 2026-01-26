@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useCompletion } from "@ai-sdk/react";
 import { useSearchParams } from "next/navigation";
+import { useDebouncedCallback } from "use-debounce";
 import { useDropzone } from "react-dropzone";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -307,14 +308,32 @@ export default function AssistantPage() {
   const [editorContent, setEditorContent] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
 
+  // Document auto-save state
+  const [currentQueryId, setCurrentQueryId] = useState<string | null>(null);
+  const [documentId, setDocumentId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const queryIdRef = useRef<string | null>(null);
+
   // Create New Vault modal state
   const [showCreateVaultModal, setShowCreateVaultModal] = useState(false);
   const [newVaultName, setNewVaultName] = useState("");
   const [newVaultFiles, setNewVaultFiles] = useState<NewVaultFile[]>([]);
   const [isCreatingVault, setIsCreatingVault] = useState(false);
 
+  // Custom fetch to capture X-Query-Id header from response
+  const customFetch = useCallback(async (url: RequestInfo | URL, init?: RequestInit) => {
+    const response = await fetch(url, init);
+    const queryId = response.headers.get("X-Query-Id");
+    if (queryId) {
+      queryIdRef.current = queryId;
+      setCurrentQueryId(queryId);
+    }
+    return response;
+  }, []);
+
   const { completion, isLoading, complete, error } = useCompletion({
     api: "/api/assistant/query",
+    fetch: customFetch,
   });
 
   // Parse mode and content from AI response
@@ -540,6 +559,70 @@ export default function AssistantPage() {
     }
   }, [parsedResponse.mode, parsedResponse.content]);
 
+  // Debounced auto-save function (2 second delay)
+  const debouncedSaveDocument = useDebouncedCallback(
+    async (content: string, queryId: string | null, docId: string | null) => {
+      // Only save if we have content and are in document mode
+      if (!content.trim() || !queryId) return;
+
+      setIsSaving(true);
+      try {
+        if (docId) {
+          // Update existing document
+          const response = await fetch(`/api/documents/${docId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              content: { html: content },
+            }),
+          });
+          if (!response.ok) {
+            console.error("Failed to update document");
+          }
+        } else {
+          // Create new document
+          const title = submittedQuery.length > 50
+            ? submittedQuery.substring(0, 50) + "..."
+            : submittedQuery || "Untitled Draft";
+
+          const response = await fetch("/api/documents", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title,
+              content: { html: content },
+              queryId,
+            }),
+          });
+
+          if (response.ok) {
+            const doc = await response.json();
+            setDocumentId(doc.id);
+          } else if (response.status === 409) {
+            // Document already exists for this query, fetch and use it
+            console.log("Document already exists for query, skipping create");
+          } else {
+            console.error("Failed to create document");
+          }
+        }
+      } catch (error) {
+        console.error("Error saving document:", error);
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    2000 // 2 second delay
+  );
+
+  // Handle editor content changes with auto-save
+  const handleEditorChange = useCallback((content: string) => {
+    setEditorContent(content);
+    // Only trigger save if not currently streaming (user editing)
+    if (!isLoading && mode === "document") {
+      debouncedSaveDocument(content, currentQueryId, documentId);
+    }
+  }, [isLoading, mode, currentQueryId, documentId, debouncedSaveDocument]);
+
   const hasResponse = completion.length > 0;
   const displayContent = parsedResponse.content;
 
@@ -706,6 +789,10 @@ export default function AssistantPage() {
     setSubmittedQuery("");
     setEditorContent("");
     setMode("chat");
+    // Reset document state
+    setCurrentQueryId(null);
+    setDocumentId(null);
+    queryIdRef.current = null;
   };
 
   // Calculate total size of files being uploaded to new vault
@@ -870,8 +957,9 @@ export default function AssistantPage() {
           <div className="flex-1 transition-all duration-300">
             <EditorPanel
               content={editorContent}
-              onChange={setEditorContent}
+              onChange={handleEditorChange}
               isStreaming={isLoading}
+              isSaving={isSaving}
             />
           </div>
         </div>

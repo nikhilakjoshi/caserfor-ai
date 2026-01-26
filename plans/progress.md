@@ -989,3 +989,30 @@
 ### Files modified
 - components/editor/document-editor.tsx - streaming support with incremental updates
 - components/assistant/editor-panel.tsx - pass isStreaming to DocumentEditor
+
+## 2026-01-26: Debounced Auto-Save for Editor Documents
+
+### Completed
+- Installed use-debounce package for debounced callbacks
+- Added document state management: currentQueryId, documentId, isSaving
+- Created custom fetch wrapper to capture X-Query-Id header from API response
+- Implemented debounced save function with 2 second delay
+- Creates new EditorDocument via POST /api/documents when first saving
+- Updates existing document via PUT /api/documents/[id] on subsequent edits
+- Links document to AssistantQuery via queryId captured from response headers
+- Added saving indicator in EditorPanel header ("Saving...", "Saved")
+- handleNewThread resets document state for fresh sessions
+- Updated 3 PRD items to passes:true
+
+### Notes for next dev
+- queryIdRef used to avoid stale closure issues with async callbacks
+- Save only triggers after streaming completes (not during AI generation)
+- Document content stored as { html: content } JSON structure
+- If document already exists for query (409 response), skips create gracefully
+- Requires DATABASE_URL to actually persist documents
+- Next priorities: ChatPanel UI features, versioning, export functionality
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - auto-save state, custom fetch, debounced save
+- components/assistant/editor-panel.tsx - isSaving prop, saving indicator UI
+- package.json - added use-debounce dependency

@@ -6,6 +6,7 @@ import {
   FileText,
   Download,
   Eye,
+  Cloud,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DocumentEditor } from "@/components/editor/document-editor";
@@ -22,6 +23,7 @@ interface EditorPanelProps {
   content: string;
   onChange: (content: string) => void;
   isStreaming?: boolean;
+  isSaving?: boolean;
   version?: number;
   onVersionChange?: (version: number) => void;
   versions?: number[];
@@ -31,6 +33,7 @@ export function EditorPanel({
   content,
   onChange,
   isStreaming = false,
+  isSaving = false,
   version = 1,
   onVersionChange,
   versions = [1],
@@ -56,6 +59,18 @@ export function EditorPanel({
           {isStreaming && (
             <span className="text-xs text-muted-foreground animate-pulse">
               Generating...
+            </span>
+          )}
+          {!isStreaming && isSaving && (
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Cloud className="h-3 w-3 animate-pulse" />
+              Saving...
+            </span>
+          )}
+          {!isStreaming && !isSaving && content && (
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Cloud className="h-3 w-3" />
+              Saved
             </span>
           )}
         </div>
