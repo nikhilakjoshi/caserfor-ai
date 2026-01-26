@@ -7,7 +7,7 @@
       "Position button appropriately within the input area layout",
       "Style button consistently with existing UI patterns"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -17,7 +17,7 @@
       "Dropdown has two sections: File Actions and Sources",
       "Add visual divider between the two sections"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -27,7 +27,7 @@
       "Clicking triggers file picker dialog",
       "Selected files upload to current chat session"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -37,7 +37,7 @@
       "Clicking opens a modal window",
       "Modal displays all available user-created vaults"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -47,7 +47,7 @@
       "Modal displays files stored in that vault",
       "Files displayed in a list/grid format"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -57,7 +57,7 @@
       "Selection state visually indicated",
       "Confirm button attaches selected files to chat"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

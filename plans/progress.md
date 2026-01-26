@@ -454,3 +454,26 @@
 ### Files modified
 - app/(dashboard)/vault/page.tsx - edit/delete UI and handlers
 - components/ui/alert-dialog.tsx - new shadcn component
+
+## 2026-01-26: Files & Sources Dropdown and Vault Selection Modal
+
+### Completed
+- Replaced Files and Sources button with proper dropdown menu
+- Dropdown has two sections: "File Actions" and "Sources" with separator
+- Upload Files action triggers native file picker
+- Add From Vault action opens vault selection modal
+- Vault selection modal shows list of vaults with file counts
+- Clicking vault displays files in that vault
+- Multi-file selection with visual checkmark indicators
+- Confirm button adds selected files to attached files list
+- AttachedFile interface updated to support both uploaded files and vault references
+- Updated 6 PRD items to passes:true
+
+### Notes for next dev
+- Vault files are references (file: null, source: "vault") - real impl needs to fetch actual file content
+- Mock vaults with files used - wire to /api/vaults/[id]/documents when DB connected
+- Vault file references include vaultId for future lookup
+- Removed old drag-and-drop panel - upload via dropdown only now
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - dropdown menu, vault modal, updated AttachedFile type

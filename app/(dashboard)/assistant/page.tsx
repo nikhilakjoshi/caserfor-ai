@@ -25,13 +25,47 @@ import {
   X,
   Upload,
   File,
+  Database,
 } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface AttachedFile {
   id: string
-  file: File
+  file: File | null  // null for vault file references
   name: string
   size: number
+  source: "upload" | "vault"
+  vaultId?: string
+}
+
+interface VaultFile {
+  id: string
+  name: string
+  type: string
+  size: number
+}
+
+interface Vault {
+  id: string
+  name: string
+  type: "knowledge_base" | "sandbox"
+  fileCount: number
+  files: VaultFile[]
 }
 
 type OutputType = "draft" | "review_table"
@@ -56,6 +90,46 @@ const mockVaults: VaultSource[] = [
   { id: "1", name: "Client Documents" },
   { id: "2", name: "Legal Templates" },
   { id: "3", name: "Research Papers" },
+]
+
+// Mock vaults with files for vault selection modal
+const mockVaultsWithFiles: Vault[] = [
+  {
+    id: "1",
+    name: "Client Documents",
+    type: "knowledge_base",
+    fileCount: 5,
+    files: [
+      { id: "f1", name: "Agreement_2024.pdf", type: "pdf", size: 245000 },
+      { id: "f2", name: "NDA_Template.docx", type: "docx", size: 45000 },
+      { id: "f3", name: "Client_Notes.txt", type: "txt", size: 12000 },
+      { id: "f4", name: "Contract_Draft.pdf", type: "pdf", size: 189000 },
+      { id: "f5", name: "Appendix_A.pdf", type: "pdf", size: 67000 },
+    ],
+  },
+  {
+    id: "2",
+    name: "Legal Templates",
+    type: "knowledge_base",
+    fileCount: 3,
+    files: [
+      { id: "f6", name: "Master_Agreement.docx", type: "docx", size: 98000 },
+      { id: "f7", name: "SLA_Template.pdf", type: "pdf", size: 156000 },
+      { id: "f8", name: "Privacy_Policy.docx", type: "docx", size: 34000 },
+    ],
+  },
+  {
+    id: "3",
+    name: "Research Papers",
+    type: "sandbox",
+    fileCount: 4,
+    files: [
+      { id: "f9", name: "Case_Study_2023.pdf", type: "pdf", size: 420000 },
+      { id: "f10", name: "Legal_Analysis.pdf", type: "pdf", size: 312000 },
+      { id: "f11", name: "Market_Research.pdf", type: "pdf", size: 567000 },
+      { id: "f12", name: "Regulatory_Review.docx", type: "docx", size: 89000 },
+    ],
+  },
 ]
 
 const recommendedWorkflows = [
@@ -158,6 +232,9 @@ export default function AssistantPage() {
   const [showFilesPanel, setShowFilesPanel] = useState(false)
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
   const [isDragging, setIsDragging] = useState(false)
+  const [showVaultModal, setShowVaultModal] = useState(false)
+  const [selectedVaultForFiles, setSelectedVaultForFiles] = useState<Vault | null>(null)
+  const [selectedVaultFiles, setSelectedVaultFiles] = useState<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { completion, isLoading, complete, error } = useCompletion({
@@ -170,6 +247,7 @@ export default function AssistantPage() {
       file,
       name: file.name,
       size: file.size,
+      source: "upload" as const,
     }))
     setAttachedFiles((prev) => [...prev, ...newFiles])
   }, [])
@@ -212,6 +290,39 @@ export default function AssistantPage() {
         ? prev.filter((id) => id !== vaultId)
         : [...prev, vaultId]
     )
+  }
+
+  const handleVaultSelect = (vault: Vault) => {
+    setSelectedVaultForFiles(vault)
+    setSelectedVaultFiles([])
+  }
+
+  const toggleVaultFileSelection = (fileId: string) => {
+    setSelectedVaultFiles((prev) =>
+      prev.includes(fileId)
+        ? prev.filter((id) => id !== fileId)
+        : [...prev, fileId]
+    )
+  }
+
+  const confirmVaultFileSelection = () => {
+    if (!selectedVaultForFiles) return
+
+    const filesToAdd: AttachedFile[] = selectedVaultForFiles.files
+      .filter((f) => selectedVaultFiles.includes(f.id))
+      .map((f) => ({
+        id: `vault-${f.id}`,
+        file: null, // Vault files are references, not actual File objects
+        name: f.name,
+        size: f.size,
+        source: "vault" as const,
+        vaultId: selectedVaultForFiles.id,
+      }))
+
+    setAttachedFiles((prev) => [...prev, ...filesToAdd])
+    setShowVaultModal(false)
+    setSelectedVaultForFiles(null)
+    setSelectedVaultFiles([])
   }
 
   const handleSubmit = async () => {
@@ -373,21 +484,41 @@ export default function AssistantPage() {
                 <Folder className="h-4 w-4" />
                 Choose vault
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowFilesPanel(!showFilesPanel)}
-                className="gap-1.5"
-                disabled={isLoading}
-              >
-                <Paperclip className="h-4 w-4" />
-                Files and sources
-                {attachedFiles.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 justify-center">
-                    {attachedFiles.length}
-                  </Badge>
-                )}
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    disabled={isLoading}
+                  >
+                    <Paperclip className="h-4 w-4" />
+                    Files & Sources
+                    {attachedFiles.length > 0 && (
+                      <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 justify-center">
+                        {attachedFiles.length}
+                      </Badge>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <DropdownMenuLabel>File Actions</DropdownMenuLabel>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+                      <Upload className="h-4 w-4" />
+                      Upload Files
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Sources</DropdownMenuLabel>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onClick={() => setShowVaultModal(true)}>
+                      <Database className="h-4 w-4" />
+                      Add From Vault
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button
                 variant="outline"
                 size="sm"
@@ -422,90 +553,45 @@ export default function AssistantPage() {
               </div>
             )}
 
-            {/* Files and Sources Panel */}
-            {showFilesPanel && (
-              <div className="p-3 bg-muted/50 rounded-md space-y-3">
+            {/* Hidden file input for Upload Files action */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={handleFileInputChange}
+            />
+
+            {/* Attached files display */}
+            {attachedFiles.length > 0 && (
+              <div className="p-3 bg-muted/50 rounded-md space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Attach files</span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setShowFilesPanel(false)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                  <span className="text-sm font-medium">
+                    {attachedFiles.length} file{attachedFiles.length !== 1 ? "s" : ""} attached
+                  </span>
                 </div>
-
-                {/* Hidden file input */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  className="hidden"
-                  onChange={handleFileInputChange}
-                />
-
-                {/* Drop zone */}
-                <div
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`
-                    border-2 border-dashed rounded-lg p-6 text-center cursor-pointer
-                    transition-colors
-                    ${isDragging
-                      ? "border-primary bg-primary/5"
-                      : "border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/30"
-                    }
-                  `}
-                >
-                  <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    {isDragging
-                      ? "Drop files here"
-                      : "Drag and drop files here, or click to browse"
-                    }
-                  </p>
-                  <p className="text-xs text-muted-foreground/70 mt-1">
-                    PDF, DOCX, TXT, and more
-                  </p>
-                </div>
-
-                {/* Attached files list */}
-                {attachedFiles.length > 0 && (
-                  <div className="space-y-2">
-                    <span className="text-xs text-muted-foreground">
-                      {attachedFiles.length} file{attachedFiles.length !== 1 ? "s" : ""} attached
-                    </span>
-                    <div className="space-y-1 max-h-40 overflow-y-auto">
-                      {attachedFiles.map((af) => (
-                        <div
-                          key={af.id}
-                          className="flex items-center gap-2 p-2 bg-background rounded text-sm"
-                        >
-                          <File className="h-4 w-4 text-muted-foreground shrink-0" />
-                          <span className="truncate flex-1">{af.name}</span>
-                          <span className="text-xs text-muted-foreground shrink-0">
-                            {formatFileSize(af.size)}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 shrink-0"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              removeFile(af.id)
-                            }}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
+                <div className="space-y-1 max-h-40 overflow-y-auto">
+                  {attachedFiles.map((af) => (
+                    <div
+                      key={af.id}
+                      className="flex items-center gap-2 p-2 bg-background rounded text-sm"
+                    >
+                      <File className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span className="truncate flex-1">{af.name}</span>
+                      <span className="text-xs text-muted-foreground shrink-0">
+                        {formatFileSize(af.size)}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 shrink-0"
+                        onClick={() => removeFile(af.id)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
                     </div>
-                  </div>
-                )}
+                  ))}
+                </div>
               </div>
             )}
 
@@ -640,6 +726,107 @@ export default function AssistantPage() {
           </div>
         )}
       </div>
+
+      {/* Vault Selection Modal */}
+      <Dialog open={showVaultModal} onOpenChange={setShowVaultModal}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Add From Vault</DialogTitle>
+            <DialogDescription>
+              Select a vault and choose files to attach to your query.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-hidden flex gap-4 min-h-0">
+            {/* Vault List */}
+            <div className="w-48 shrink-0 border-r pr-4 overflow-y-auto">
+              <div className="space-y-1">
+                {mockVaultsWithFiles.map((vault) => (
+                  <button
+                    key={vault.id}
+                    onClick={() => handleVaultSelect(vault)}
+                    className={`w-full text-left p-2 rounded text-sm transition-colors flex items-center gap-2 ${
+                      selectedVaultForFiles?.id === vault.id
+                        ? "bg-primary text-primary-foreground"
+                        : "hover:bg-muted"
+                    }`}
+                  >
+                    {vault.type === "knowledge_base" ? (
+                      <Database className="h-4 w-4 shrink-0" />
+                    ) : (
+                      <Folder className="h-4 w-4 shrink-0" />
+                    )}
+                    <span className="truncate">{vault.name}</span>
+                    <Badge variant="secondary" className="ml-auto text-xs">
+                      {vault.fileCount}
+                    </Badge>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* File List */}
+            <div className="flex-1 overflow-y-auto">
+              {selectedVaultForFiles ? (
+                <div className="space-y-1">
+                  {selectedVaultForFiles.files.map((file) => {
+                    const isSelected = selectedVaultFiles.includes(file.id)
+                    return (
+                      <button
+                        key={file.id}
+                        onClick={() => toggleVaultFileSelection(file.id)}
+                        className={`w-full text-left p-2 rounded text-sm transition-colors flex items-center gap-2 ${
+                          isSelected ? "bg-primary/10 border border-primary" : "hover:bg-muted border border-transparent"
+                        }`}
+                      >
+                        <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
+                          isSelected ? "bg-primary border-primary" : "border-muted-foreground/30"
+                        }`}>
+                          {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
+                        </div>
+                        <File className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <span className="truncate flex-1">{file.name}</span>
+                        <span className="text-xs text-muted-foreground shrink-0">
+                          {formatFileSize(file.size)}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+                  Select a vault to view files
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Footer with actions */}
+          <div className="flex items-center justify-between pt-4 border-t">
+            <span className="text-sm text-muted-foreground">
+              {selectedVaultFiles.length} file{selectedVaultFiles.length !== 1 ? "s" : ""} selected
+            </span>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowVaultModal(false)
+                  setSelectedVaultForFiles(null)
+                  setSelectedVaultFiles([])
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmVaultFileSelection}
+                disabled={selectedVaultFiles.length === 0}
+              >
+                Add {selectedVaultFiles.length > 0 ? `${selectedVaultFiles.length} ` : ""}File{selectedVaultFiles.length !== 1 ? "s" : ""}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
