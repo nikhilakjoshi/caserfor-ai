@@ -5,6 +5,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   BookOpen,
+  ChevronRight,
+  Database,
   FolderOpen,
   HelpCircle,
   History,
@@ -15,6 +17,11 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,12 +38,24 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
 
-const navItems = [
+interface Vault {
+  id: string
+  name: string
+  type: "knowledge_base" | "sandbox"
+  fileCount: number
+}
+
+const navItemsTop = [
   { title: "Assistant", url: "/assistant", icon: MessageSquare },
-  { title: "Vault", url: "/vault", icon: FolderOpen },
+]
+
+const navItemsBottom = [
   { title: "Workflows", url: "/workflows", icon: Workflow },
   { title: "History", url: "/history", icon: History },
   { title: "Library", url: "/library", icon: BookOpen },
@@ -47,8 +66,29 @@ const footerItems = [
   { title: "Help", url: "/help", icon: HelpCircle },
 ]
 
+const MAX_SIDEBAR_VAULTS = 10
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
+  const [vaults, setVaults] = React.useState<Vault[]>([])
+  const [vaultsOpen, setVaultsOpen] = React.useState(false)
+
+  React.useEffect(() => {
+    async function fetchVaults() {
+      try {
+        const res = await fetch("/api/vaults?sortBy=recent")
+        if (res.ok) {
+          const data = await res.json()
+          setVaults(data.slice(0, MAX_SIDEBAR_VAULTS))
+        }
+      } catch {
+        // Silently fail - vaults section will just be empty
+      }
+    }
+    fetchVaults()
+  }, [])
+
+  const isVaultActive = pathname === "/vault" || pathname.startsWith("/vault/")
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -74,7 +114,68 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => {
+              {navItemsTop.map((item) => {
+                const isActive = pathname === item.url || pathname.startsWith(item.url + "/")
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
+
+              {/* Vault section with collapsible sub-items */}
+              <Collapsible
+                open={vaultsOpen}
+                onOpenChange={setVaultsOpen}
+                className="group/collapsible"
+              >
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton isActive={isVaultActive} tooltip="Vault">
+                      <FolderOpen />
+                      <span>Vault</span>
+                      <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={pathname === "/vault"}
+                        >
+                          <Link href="/vault">All Vaults</Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      {vaults.map((vault) => {
+                        const vaultPath = `/vault/${vault.id}`
+                        const isActive = pathname === vaultPath
+                        return (
+                          <SidebarMenuSubItem key={vault.id}>
+                            <SidebarMenuSubButton asChild isActive={isActive}>
+                              <Link href={vaultPath} className="flex items-center gap-2">
+                                {vault.type === "knowledge_base" ? (
+                                  <Database className="h-3 w-3 shrink-0" />
+                                ) : (
+                                  <FolderOpen className="h-3 w-3 shrink-0" />
+                                )}
+                                <span className="truncate">{vault.name}</span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        )
+                      })}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+
+              {navItemsBottom.map((item) => {
                 const isActive = pathname === item.url || pathname.startsWith(item.url + "/")
                 return (
                   <SidebarMenuItem key={item.title}>

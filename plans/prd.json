@@ -637,7 +637,7 @@
       "Show most recent or most used vaults",
       "Style list with square, flat, shadowless design"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -647,7 +647,7 @@
       "No separate 'View All' control needed",
       "Expanded view shows all user vaults"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -780,7 +780,7 @@
       "Set border-radius to 0-4px on vault list items",
       "Apply flat surface styling to sidebar"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

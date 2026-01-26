@@ -717,3 +717,25 @@
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - added Create New Vault modal, react-dropzone integration
 - package.json - added react-dropzone dependency
+
+## 2026-01-26: Sidebar Vault List
+
+### Completed
+- Added collapsible vault list to sidebar under Vault nav item
+- Vault section expands on click to show "All Vaults" link + individual vaults
+- Limited to max 10 vaults (sorted by most recent via /api/vaults?sortBy=recent)
+- Each vault shows icon (Database for knowledge_base, FolderOpen for sandbox) + name
+- Clicking vault navigates to /vault/[id] detail page
+- Uses Collapsible, SidebarMenuSub, SidebarMenuSubButton components
+- Styling uses existing flat/shadowless design (no shadows, 0-4px radius via global CSS)
+- Updated 3 PRD items to passes:true
+
+### Notes for next dev
+- Vaults fetched from /api/vaults on sidebar mount - requires DB to show actual vaults
+- Without DB, vault list will be empty (silently fails fetch)
+- "All Vaults" link always visible when expanded - provides access to full vault page
+- Collapsible state not persisted across page navigations
+- ChevronRight icon rotates 90deg when expanded
+
+### Files modified
+- components/app-sidebar.tsx - added collapsible vault list with fetch logic
