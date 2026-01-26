@@ -140,6 +140,7 @@ export function EditorPanel({
           onChange={onChange}
           placeholder="Your document will appear here..."
           className="min-h-full"
+          isStreaming={isStreaming}
         />
       </div>
     </div>

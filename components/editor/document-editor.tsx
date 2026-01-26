@@ -6,7 +6,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import Link from "@tiptap/extension-link";
-import { useEffect } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import {
   Bold,
   Italic,
@@ -30,6 +30,7 @@ interface DocumentEditorProps {
   placeholder?: string;
   editable?: boolean;
   className?: string;
+  isStreaming?: boolean;
 }
 
 export function DocumentEditor({
@@ -38,7 +39,13 @@ export function DocumentEditor({
   placeholder = "Start typing...",
   editable = true,
   className,
+  isStreaming = false,
 }: DocumentEditorProps) {
+  // Track previous content length to detect new streamed content
+  const prevContentLengthRef = useRef(0);
+  const isStreamingRef = useRef(isStreaming);
+  const wasStreamingRef = useRef(false);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -60,7 +67,10 @@ export function DocumentEditor({
     content,
     editable,
     onUpdate: ({ editor }) => {
-      onChange?.(editor.getHTML());
+      // Only emit changes when not streaming (user edits)
+      if (!isStreamingRef.current) {
+        onChange?.(editor.getHTML());
+      }
     },
     editorProps: {
       attributes: {
@@ -70,12 +80,71 @@ export function DocumentEditor({
     },
   });
 
-  // Update content when prop changes externally
+  // Keep refs in sync
   useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content);
+    isStreamingRef.current = isStreaming;
+  }, [isStreaming]);
+
+  // Convert plain text to simple HTML paragraphs
+  const textToHtml = useCallback((text: string): string => {
+    if (!text) return "";
+    // Split by double newlines for paragraphs, preserve single newlines as <br>
+    return text
+      .split(/\n\n+/)
+      .map((para) => `<p>${para.replace(/\n/g, "<br>")}</p>`)
+      .join("");
+  }, []);
+
+  // Handle streaming content updates
+  useEffect(() => {
+    if (!editor) return;
+
+    if (isStreaming) {
+      wasStreamingRef.current = true;
+
+      // During streaming, append only new content to avoid cursor jumps
+      const currentLength = content.length;
+      const prevLength = prevContentLengthRef.current;
+
+      if (currentLength > prevLength) {
+        // Get the new content that was added
+        const newContent = content.slice(prevLength);
+
+        // Move cursor to end and insert new text
+        editor
+          .chain()
+          .focus("end")
+          .insertContent(newContent)
+          .run();
+      } else if (currentLength === 0 && prevLength > 0) {
+        // Content was cleared, reset editor
+        editor.commands.clearContent();
+      }
+
+      prevContentLengthRef.current = currentLength;
+    } else {
+      // Streaming ended
+      if (wasStreamingRef.current) {
+        // Streaming just finished - convert to proper HTML format
+        wasStreamingRef.current = false;
+        prevContentLengthRef.current = 0;
+
+        // Final content sync with HTML conversion
+        const htmlContent = textToHtml(content);
+        editor.commands.setContent(htmlContent);
+      } else if (content !== editor.getText()) {
+        // Regular content update (not from streaming)
+        // Check if content looks like HTML or plain text
+        const isHtml = content.startsWith("<") || content.includes("</");
+        if (isHtml) {
+          editor.commands.setContent(content);
+        } else {
+          editor.commands.setContent(textToHtml(content));
+        }
+        prevContentLengthRef.current = content.length;
+      }
     }
-  }, [content, editor]);
+  }, [content, editor, isStreaming, textToHtml]);
 
   if (!editor) {
     return null;

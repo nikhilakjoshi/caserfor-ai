@@ -1095,7 +1095,7 @@
       "Maintain cursor position during updates",
       "Ensure editor remains fully editable after stream completes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

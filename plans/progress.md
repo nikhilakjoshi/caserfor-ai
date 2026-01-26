@@ -966,3 +966,26 @@
 ### Files modified
 - app/api/assistant/query/route.ts - updated system prompt with mode classification
 - app/(dashboard)/assistant/page.tsx - parsedResponse, displayContent, mode auto-switch
+
+## 2026-01-26: TipTap Streaming Content Support
+
+### Completed
+- Updated DocumentEditor to handle streaming content incrementally
+- Added isStreaming prop to control streaming vs normal update behavior
+- During streaming: appends new content to end without cursor jumps
+- After streaming: converts plain text to HTML paragraphs for proper formatting
+- Uses refs to track previous content length and streaming state
+- Prevents onChange emissions during streaming (only emit user edits)
+- EditorPanel now passes isStreaming prop to DocumentEditor
+- Updated 1 PRD item to passes:true
+
+### Notes for next dev
+- Streaming appends text character-by-character using insertContent
+- After streaming ends, content is reformatted with textToHtml() for proper paragraphs
+- isStreamingRef avoids stale closure issues in onUpdate callback
+- wasStreamingRef tracks stream end for final HTML conversion
+- Next priorities: debounced auto-save, document persistence, versioning
+
+### Files modified
+- components/editor/document-editor.tsx - streaming support with incremental updates
+- components/assistant/editor-panel.tsx - pass isStreaming to DocumentEditor
