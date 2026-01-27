@@ -1,14 +1,98 @@
 "use client"
 
+import React from "react"
 import ReactMarkdown from "react-markdown"
+import { FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
+
+// Regex to match [docName, chunk N] citation format
+const CITATION_REGEX = /\[([^\]]+?),\s*chunk\s+(\d+)\]/g
+
+interface CitationBadgeProps {
+  documentName: string
+  chunkIndex: number
+  onClick?: (documentName: string, chunkIndex: number) => void
+}
+
+function CitationBadge({ documentName, chunkIndex, onClick }: CitationBadgeProps) {
+  return (
+    <button
+      type="button"
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 mx-0.5 text-xs font-medium bg-primary/10 text-primary border border-primary/20 rounded hover:bg-primary/20 transition-colors cursor-pointer align-baseline"
+      onClick={() => onClick?.(documentName, chunkIndex)}
+      title={`${documentName}, chunk ${chunkIndex}`}
+    >
+      <FileText className="h-3 w-3 shrink-0" />
+      <span className="truncate max-w-[150px]">{documentName}</span>
+      <span className="text-primary/60">#{chunkIndex}</span>
+    </button>
+  )
+}
+
+/**
+ * Parses text and replaces [docName, chunk N] patterns with CitationBadge components.
+ */
+function parseCitations(
+  text: string,
+  onCitationClick?: (documentName: string, chunkIndex: number) => void
+): React.ReactNode[] {
+  const parts: React.ReactNode[] = []
+  let lastIndex = 0
+  let match: RegExpExecArray | null
+
+  const regex = new RegExp(CITATION_REGEX.source, "g")
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index))
+    }
+    parts.push(
+      <CitationBadge
+        key={`citation-${match.index}`}
+        documentName={match[1].trim()}
+        chunkIndex={parseInt(match[2], 10)}
+        onClick={onCitationClick}
+      />
+    )
+    lastIndex = regex.lastIndex
+  }
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex))
+  }
+  return parts
+}
+
+/**
+ * Recursively processes React children, replacing citation patterns in text nodes.
+ */
+function processChildren(
+  children: React.ReactNode,
+  onCitationClick?: (documentName: string, chunkIndex: number) => void
+): React.ReactNode {
+  return React.Children.map(children, (child) => {
+    if (typeof child === "string") {
+      if (CITATION_REGEX.test(child)) {
+        return <>{parseCitations(child, onCitationClick)}</>
+      }
+      return child
+    }
+    if (React.isValidElement<{ children?: React.ReactNode }>(child) && child.props.children) {
+      return React.cloneElement(
+        child,
+        {},
+        processChildren(child.props.children, onCitationClick)
+      )
+    }
+    return child
+  })
+}
 
 interface MarkdownRendererProps {
   content: string
   className?: string
+  onCitationClick?: (documentName: string, chunkIndex: number) => void
 }
 
-export function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
+export function MarkdownRenderer({ content, className, onCitationClick }: MarkdownRendererProps) {
   return (
     <div className={cn("prose prose-sm dark:prose-invert max-w-none", className)}>
       <ReactMarkdown
@@ -80,8 +164,10 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
           h3: ({ children }) => (
             <h3 className="text-lg font-semibold mt-3 mb-1">{children}</h3>
           ),
-          // Paragraphs
-          p: ({ children }) => <p className="my-2">{children}</p>,
+          // Paragraphs - with citation parsing
+          p: ({ children }) => <p className="my-2">{processChildren(children, onCitationClick)}</p>,
+          // List items - with citation parsing
+          li: ({ children }) => <li>{processChildren(children, onCitationClick)}</li>,
           // Blockquotes
           blockquote: ({ children }) => (
             <blockquote className="border-l-4 border-muted-foreground/30 pl-4 italic my-3">

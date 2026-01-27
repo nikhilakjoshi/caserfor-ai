@@ -385,7 +385,7 @@
       "On click, open document viewer at cited location",
       "Style citations distinctly from regular text"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

@@ -1401,3 +1401,24 @@
 - .env.example - added AWS env vars
 - app/api/vaults/[id]/documents/route.ts - S3 upload, server-side 25MB validation
 - app/api/vaults/[id]/documents/process/route.ts - S3 download instead of base64
+
+## 2026-01-27: Citation Parsing and Badge Rendering in Chat UI
+
+### Completed
+- Added citation parsing to MarkdownRenderer for [docName, chunk N] format
+- CitationBadge component renders inline with FileText icon, truncated doc name, chunk number
+- Badges styled with primary/10 bg, primary text, border, hover state
+- parseCitations() splits text on citation regex, returns React nodes
+- processChildren() recursively walks React children to find text nodes with citations
+- Applied to paragraph and list item renderers in MarkdownRenderer
+- MarkdownRenderer accepts optional onCitationClick callback for future document viewer integration
+- Updated 1 PRD item to passes:true
+
+### Notes for next dev
+- onCitationClick not wired to anything yet - needs DocumentViewer (not yet built)
+- Citation regex: \[([^\]]+?),\s*chunk\s+(\d+)\]
+- Badges show in both chat-panel compact view and full-width assistant page response
+- Remaining false PRD items: react-pdf (1), DocumentViewer (1), document preview in vault (1), citation click opens viewer (1)
+
+### Files modified
+- components/ui/markdown-renderer.tsx - citation parsing, CitationBadge, processChildren
