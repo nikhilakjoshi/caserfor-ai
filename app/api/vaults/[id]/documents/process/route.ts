@@ -6,6 +6,7 @@ import { embedChunks } from "@/lib/embeddings"
 import { upsertVectors, vaultNamespace } from "@/lib/pinecone"
 import type { VectorMetadata } from "@/lib/pinecone"
 import { categorizeDocument } from "@/lib/categorize-document"
+import { downloadFile } from "@/lib/s3"
 
 // POST /api/vaults/[id]/documents/process - Process document for embedding
 export async function POST(
@@ -42,15 +43,12 @@ export async function POST(
     })
 
     try {
-      // Extract base64 content from metadata
-      const metadata = document.metadata as Record<string, unknown>
-      const base64Content = metadata.content as string | undefined
-
-      if (!base64Content) {
-        throw new Error("No file content found in document metadata")
+      // Download file from S3
+      if (!document.storageKey) {
+        throw new Error("No storageKey found on document")
       }
 
-      const buffer = Buffer.from(base64Content, "base64")
+      const buffer = await downloadFile(document.storageKey)
 
       // Extract text
       const text = await extractText(buffer, document.fileType)

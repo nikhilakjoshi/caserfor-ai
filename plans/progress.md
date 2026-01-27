@@ -1371,3 +1371,33 @@
 
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - file size validation in addFiles and onDropNewVaultFiles
+
+## 2026-01-27: S3 Storage Integration
+
+### Completed
+- Installed @aws-sdk/client-s3 and @aws-sdk/s3-request-presigner
+- Created lib/s3.ts with S3Client singleton, uploadFile, downloadFile, getPresignedUrl, deleteFile helpers
+- Updated .env.example with AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AWS_S3_BUCKET
+- Updated POST /api/vaults/[id]/documents to upload files to S3 instead of storing base64 in metadata
+- Added server-side 25MB file size validation (returns 413 for oversized files)
+- Updated process endpoint to download files from S3 instead of reading base64 from metadata
+- Created GET /api/vaults/[id]/documents/[docId]/presign endpoint for presigned download URLs
+- Updated 6 PRD items to passes:true
+
+### Notes for next dev
+- S3 client uses lazy singleton init (created on first call)
+- getEnv() throws if env var missing (fail-fast)
+- downloadFile streams response body into Buffer
+- Upload endpoint no longer stores file content in metadata - only originalName, mimeType, tags
+- Process endpoint uses storageKey to download from S3 for text extraction
+- Presigned URLs default to 1 hour expiry
+- Remaining false PRD items: citations UI (1), react-pdf + DocumentViewer (4)
+
+### Files created
+- lib/s3.ts - S3 client singleton and helpers
+- app/api/vaults/[id]/documents/[docId]/presign/route.ts - presigned URL endpoint
+
+### Files modified
+- .env.example - added AWS env vars
+- app/api/vaults/[id]/documents/route.ts - S3 upload, server-side 25MB validation
+- app/api/vaults/[id]/documents/process/route.ts - S3 download instead of base64

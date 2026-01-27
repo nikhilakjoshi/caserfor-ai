@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import { randomUUID } from "crypto"
+import { uploadFile } from "@/lib/s3"
+
+const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB
 
 // POST /api/vaults/[id]/documents - Upload documents to vault
 export async function POST(
@@ -28,9 +31,6 @@ export async function POST(
     const categoriesRaw = formData.get("categories") as string | null
     const tagsRaw = formData.get("tags") as string | null
 
-    // Parse categories and tags JSON arrays
-    // categories: { [filename]: category }
-    // tags: { [filename]: string[] }
     const categories: Record<string, string> = categoriesRaw ? JSON.parse(categoriesRaw) : {}
     const tags: Record<string, string[]> = tagsRaw ? JSON.parse(tagsRaw) : {}
 
@@ -41,17 +41,28 @@ export async function POST(
       )
     }
 
+    // Server-side file size validation
+    const oversized = files.filter((f) => f.size > MAX_FILE_SIZE)
+    if (oversized.length > 0) {
+      return NextResponse.json(
+        {
+          error: `Files exceed 25MB limit: ${oversized.map((f) => f.name).join(", ")}`,
+        },
+        { status: 413 }
+      )
+    }
+
     const createdDocuments = []
 
     for (const file of files) {
       const arrayBuffer = await file.arrayBuffer()
-      const base64Content = Buffer.from(arrayBuffer).toString("base64")
+      const buffer = Buffer.from(arrayBuffer)
 
-      // Extract file extension
       const fileExtension = file.name.split(".").pop()?.toLowerCase() || "unknown"
-
-      // Generate storage key (would be S3 key in production)
       const storageKey = `vaults/${vaultId}/${randomUUID()}.${fileExtension}`
+
+      // Upload to S3
+      await uploadFile(storageKey, buffer, file.type || "application/octet-stream")
 
       const document = await prisma.document.create({
         data: {
@@ -65,9 +76,6 @@ export async function POST(
             originalName: file.name,
             mimeType: file.type,
             tags: tags[file.name] || [],
-            // Store base64 content in metadata for now (no S3)
-            // In production, this would be uploaded to S3 and removed from metadata
-            content: base64Content,
           },
           embeddingStatus: "pending",
         },

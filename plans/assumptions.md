@@ -42,3 +42,9 @@
 - Pinecone VectorMetadata needs index signature `[key: string]: string | number` for RecordMetadata compatibility
 - text-embedding-004 produces 768-dimensional vectors
 - Pinecone index must be configured for 768 dimensions
+
+## S3 Storage
+- AWS credentials provided via env vars (not IAM role/instance profile)
+- S3 bucket already exists and is configured for the account
+- downloadFile uses async iteration on response Body stream (Node.js compatible)
+- Presigned URLs default to 1 hour expiry
