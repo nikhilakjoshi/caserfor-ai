@@ -273,7 +273,7 @@
       "On error: set embeddingStatus=FAILED",
       "Trigger non-blocking from upload endpoint"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",

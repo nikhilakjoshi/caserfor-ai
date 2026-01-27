@@ -83,6 +83,18 @@ export async function POST(
       })
     }
 
+    // Trigger embedding pipeline non-blocking for each document
+    const baseUrl = request.nextUrl.origin
+    for (const doc of createdDocuments) {
+      fetch(`${baseUrl}/api/vaults/${vaultId}/documents/process`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documentId: doc.id }),
+      }).catch((err) =>
+        console.error(`Failed to trigger processing for ${doc.id}:`, err)
+      )
+    }
+
     return NextResponse.json({
       message: `Successfully uploaded ${createdDocuments.length} file(s)`,
       documents: createdDocuments,

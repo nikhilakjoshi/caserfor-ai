@@ -1,0 +1,1442 @@
+[
+  {
+    "category": "ui",
+    "description": "Add Files & Sources button to assistant chat input area",
+    "steps": [
+      "Add a Files & Sources button inside the chat input section",
+      "Position button appropriately within the input area layout",
+      "Style button consistently with existing UI patterns"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Files & Sources button opens dropdown menu on click",
+    "steps": [
+      "Implement dropdown menu that opens on button click",
+      "Dropdown has two sections: File Actions and Sources",
+      "Add visual divider between the two sections"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Upload Files action in Files & Sources dropdown",
+    "steps": [
+      "Add Upload Files option in File Actions section",
+      "Clicking triggers file picker dialog",
+      "Selected files upload to current chat session"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Add From Vault action opens vault selection modal",
+    "steps": [
+      "Add 'Add From Vault' option in Sources section",
+      "Clicking opens a modal window",
+      "Modal displays all available user-created vaults"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Vault selection modal shows files within selected vault",
+    "steps": [
+      "User selects a vault from the list",
+      "Modal displays files stored in that vault",
+      "Files displayed in a list/grid format"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Multi-file selection from vault modal",
+    "steps": [
+      "User can select one or more files from vault",
+      "Selection state visually indicated",
+      "Confirm button attaches selected files to chat"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add Prompts button to assistant input area",
+    "steps": [
+      "Add Prompts button next to Files & Sources button",
+      "Style consistently with Files & Sources button",
+      "Position appropriately in input area layout"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Prompts button displays dropdown of saved prompts",
+    "steps": [
+      "Clicking Prompts button opens dropdown",
+      "Dropdown lists all saved prompts",
+      "Prompts fetched from user's saved prompts data"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Prompt hover preview updates input placeholder",
+    "steps": [
+      "Hovering over a prompt in dropdown triggers preview",
+      "Assistant text input placeholder updates temporarily",
+      "Placeholder reverts when hover ends",
+      "Preview shows what selected prompt would do"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add Improve button to assistant input area",
+    "steps": [
+      "Add Improve button next to Prompts button",
+      "Style consistently with other input area buttons",
+      "Position appropriately in input area layout"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Improve button refines user's typed prompt",
+    "steps": [
+      "Clicking reads text currently in input field",
+      "Generates detailed, optimized version of the prompt",
+      "Replaces or updates input with improved prompt",
+      "Functions as integrated prompt refiner/generator"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Ask button works with new input area controls",
+    "steps": [
+      "Ask button remains on far right of input area",
+      "Maintains existing submit functionality",
+      "Works seamlessly with attached files from vault",
+      "Works seamlessly with selected/improved prompts"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Remove shadows from Card components globally",
+    "steps": [
+      "Identify all Card components using box-shadow or shadow-* classes",
+      "Remove shadow styles from Card components",
+      "Replace with 1px solid border (light neutral like #E5E7EB)",
+      "Ensure styling works in both light and dark modes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Remove shadows from Modal components globally",
+    "steps": [
+      "Identify all Modal components using shadows",
+      "Remove shadow styles from Modals",
+      "Replace with solid borders and full opacity surfaces",
+      "Ensure proper z-index stacking context",
+      "Verify works in light and dark modes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Remove shadows from Dropdown components globally",
+    "steps": [
+      "Identify all Dropdown components using shadows",
+      "Remove shadow styles from Dropdowns",
+      "Replace with clear borders and solid surfaces",
+      "Ensure proper z-index stacking context",
+      "Verify works in light and dark modes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Remove shadows from Button components globally",
+    "steps": [
+      "Identify all Button components using shadows",
+      "Remove shadow styles from Buttons",
+      "Replace with border or background contrast styling",
+      "Verify works in light and dark modes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Remove shadows from Input field components globally",
+    "steps": [
+      "Identify all Input components using shadows",
+      "Remove shadow and ring styles from Inputs",
+      "Replace with 1px solid borders",
+      "Verify works in light and dark modes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Remove shadows from Popover and Overlay components globally",
+    "steps": [
+      "Identify all Popover/Overlay components using shadows",
+      "Remove shadow styles",
+      "Replace with clear borders and full opacity",
+      "Ensure proper z-index stacking",
+      "Verify works in light and dark modes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Remove shadows from Panel and Sheet components globally",
+    "steps": [
+      "Identify all Panel/Sheet components using shadows",
+      "Remove shadow styles",
+      "Replace with borders or background contrast",
+      "Verify works in light and dark modes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Remove shadows from file tiles and vault file lists",
+    "steps": [
+      "Identify file tile components using shadows",
+      "Identify vault file list components using shadows",
+      "Remove shadow styles from both",
+      "Replace with borders and spacing-based elevation",
+      "Verify works in light and dark modes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Update global CSS to enforce zero-shadow design",
+    "steps": [
+      "Review global CSS/Tailwind config for shadow defaults",
+      "Remove or override default shadow utilities",
+      "Establish border-based elevation pattern as default",
+      "Document shadow-free design system approach"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Chat input container with embedded button row",
+    "steps": [
+      "Ensure Files & Sources, Prompts, Improve buttons are inside chat input box",
+      "Ask button positioned right-aligned within same container",
+      "All controls appear as single unified input surface",
+      "Buttons visually integrate as toolbar controls inside input"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Reduce border radius to 0-4px on Card components",
+    "steps": [
+      "Identify all Card components with large border radius (16-20px)",
+      "Reduce border-radius to 0-4px max",
+      "Verify square/minimal edges render correctly",
+      "Test in light and dark modes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Reduce border radius to 0-4px on Dropdown components",
+    "steps": [
+      "Identify all Dropdown components with rounded corners",
+      "Reduce border-radius to 0-4px max",
+      "Verify square edges render correctly",
+      "Test in light and dark modes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Reduce border radius to 0-4px on Button components",
+    "steps": [
+      "Identify all Button components with pill-shaped or large radius",
+      "Reduce border-radius to 0-4px max",
+      "Verify square edges render correctly",
+      "Test in light and dark modes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Reduce border radius to 0-4px on Modal components",
+    "steps": [
+      "Identify all Modal/Dialog components with rounded corners",
+      "Reduce border-radius to 0-4px max",
+      "Verify square edges render correctly",
+      "Test in light and dark modes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Reduce border radius to 0-4px on Input/Search components",
+    "steps": [
+      "Identify all Input and Search bar components with rounded corners",
+      "Reduce border-radius to 0-4px max",
+      "Verify square edges render correctly",
+      "Test in light and dark modes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Reduce border radius to 0-4px on vault/file selection tiles",
+    "steps": [
+      "Identify vault selection tiles with rounded corners",
+      "Identify file selection tiles with rounded corners",
+      "Reduce border-radius to 0-4px max on both",
+      "Test in light and dark modes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Redesign recommended workflow cards - remove borders and shadows",
+    "steps": [
+      "Remove all borders from recommended workflow cards",
+      "Remove all shadows from recommended workflow cards",
+      "Verify cards have no elevation styling"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Redesign recommended workflow cards - square edges and bg-gray-50",
+    "steps": [
+      "Set border-radius to 0-4px on workflow cards",
+      "Change background to bg-gray-50",
+      "Add subtle internal padding for spacing",
+      "Optionally add thin bottom border divider if needed for structure"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Chat input box styling - flat and square-edged",
+    "steps": [
+      "Remove shadows from chat input container",
+      "Set border-radius to 0-4px on input container",
+      "Apply flat surface styling",
+      "Ensure input box has clear 1px border"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Update global Tailwind config for 0-4px border radius default",
+    "steps": [
+      "Review Tailwind config for default border-radius values",
+      "Update rounded-* utilities to use 0-4px max",
+      "Document square-edge design system approach"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Input bar buttons styled as floating inline icons",
+    "steps": [
+      "Style Files & Sources, Prompts, Improve as floating inline icons",
+      "Remove background behind buttons so they appear part of input surface",
+      "Match Harvey/Lex visual style"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Input bar button hover states",
+    "steps": [
+      "Add hover state that alters icon color",
+      "Optionally add minimal background tint on hover",
+      "Ensure hover feedback is subtle but visible"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Vault selection modal - dimensions and positioning",
+    "steps": [
+      "Set modal max-width to 50% of screen",
+      "Set modal max-height to 50% of screen",
+      "Center modal on screen"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Vault selection modal - styling",
+    "steps": [
+      "Remove all shadows from modal",
+      "Set border-radius to 0-4px (square edges)",
+      "Add 1px neutral border",
+      "Set background to gray-50"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Vault selection modal - header",
+    "steps": [
+      "Add header section to modal",
+      "Set title text to 'Choose a Vault'"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Vault selection modal - Create New Vault option",
+    "steps": [
+      "Add 'Create New Vault' as first element in modal",
+      "Style as prominent actionable option",
+      "Clicking opens Create New Vault modal"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Vault selection modal - search bar",
+    "steps": [
+      "Add search bar positioned top-right above vault cards",
+      "Search filters vault list by name",
+      "Style consistently with square-edge design system"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Vault selection modal - vault cards layout",
+    "steps": [
+      "Display vaults as large square-edged cards",
+      "Arrange cards in grid or list format",
+      "Ensure cards are clickable"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Vault selection modal - vault card metadata display",
+    "steps": [
+      "Display vault name on card",
+      "Display created date on card",
+      "Display number of files on card",
+      "Display storage used on card"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Vault selection modal - vault click reveals file table",
+    "steps": [
+      "Clicking vault card transitions to file table view",
+      "File table replaces or overlays vault list",
+      "Back navigation available to return to vault list"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "File table - use shadcn table component",
+    "steps": [
+      "Implement file table using shadcn table",
+      "Style table with square-edge design system",
+      "Remove any shadows from table"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "File table - checkbox column",
+    "steps": [
+      "Add checkbox column as first column",
+      "Checkboxes enable multi-select",
+      "Header checkbox toggles select all"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "File table - File Name column",
+    "steps": [
+      "Add File Name column to table",
+      "Display original upload filename",
+      "Allow sorting by file name"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "File table - File Type column",
+    "steps": [
+      "Add File Type column to table",
+      "Display custom category assigned at upload",
+      "Allow filtering by file type"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "File table - File Size column",
+    "steps": [
+      "Add File Size column to table",
+      "Display size in KB/MB format",
+      "Allow sorting by file size"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "File table - Uploaded On column",
+    "steps": [
+      "Add Uploaded On column to table",
+      "Display upload timestamp",
+      "Allow sorting by upload date"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "File table - Tags column",
+    "steps": [
+      "Add Tags column to table",
+      "Display free-form or auto-populated tags",
+      "Allow filtering by tags"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "File table - metadata panel",
+    "steps": [
+      "Add metadata panel on right side of file table",
+      "Display file type in panel",
+      "Display category in panel",
+      "Display size in panel",
+      "Display any other stored metadata"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create New Vault modal - dimensions and positioning",
+    "steps": [
+      "Set modal width to 50% of screen",
+      "Set modal height to 50% of screen",
+      "Center modal on screen"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create New Vault modal - styling",
+    "steps": [
+      "Remove all shadows from modal",
+      "Set border-radius to 0-4px",
+      "Set background to gray-50",
+      "Add 1px neutral border"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create New Vault modal - header",
+    "steps": [
+      "Add header section to modal",
+      "Set title text to 'Create a Vault'"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create New Vault modal - vault name input",
+    "steps": [
+      "Add single-line text input for vault name",
+      "Label input appropriately",
+      "Style with square-edge design system"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create New Vault modal - drag-and-drop upload zone",
+    "steps": [
+      "Add drag-and-drop upload zone using React Dropzone",
+      "Zone accepts multiple file uploads",
+      "Visual feedback on drag enter/leave"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create New Vault modal - uploaded files list",
+    "steps": [
+      "Display list of selected/uploaded files",
+      "Each file row shows file name and size",
+      "Add remove button for each file"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create New Vault modal - custom category per file",
+    "steps": [
+      "Add category input/dropdown per file",
+      "User can assign custom category during upload",
+      "Category stored as file metadata"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create New Vault modal - footer usage stats",
+    "steps": [
+      "Add footer section to modal",
+      "Display usage: '0 KB of 100 GB' format",
+      "Display file count: '0 of 100,000 files' format",
+      "Position stats on left side of footer"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create New Vault modal - footer action buttons",
+    "steps": [
+      "Add Cancel button on right side of footer",
+      "Add Create button on right side of footer",
+      "Style buttons with square-edge design system"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create New Vault modal - create action",
+    "steps": [
+      "Cancel button closes modal without saving",
+      "Create button validates vault name is not empty",
+      "Create button saves vault with uploaded files",
+      "Modal closes on successful creation"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Sidebar vault list - max 10 vaults displayed",
+    "steps": [
+      "Limit sidebar vault list to max 10 vaults",
+      "Show most recent or most used vaults",
+      "Style list with square, flat, shadowless design"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Sidebar vault list - expand to full list",
+    "steps": [
+      "Clicking vault parent item expands to full vault list",
+      "No separate 'View All' control needed",
+      "Expanded view shows all user vaults"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Vault detail page - query banner visibility",
+    "steps": [
+      "Show banner only when vault has 1 or more files",
+      "Hide banner when vault is empty",
+      "Position banner prominently on vault detail page"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Vault detail page - query banner content",
+    "steps": [
+      "Set banner text to 'Start querying your knowledge base'",
+      "Add 'Start a Query' button to banner",
+      "Style banner with square-edge design system"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Start a Query - opens file selection modal",
+    "steps": [
+      "Clicking 'Start a Query' opens file selection modal",
+      "Modal displays files from current vault",
+      "Modal uses same styling as other modals (50%, centered, square)"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Start a Query - file selection in modal",
+    "steps": [
+      "User can select one or more files using checkboxes",
+      "Selection state visually indicated",
+      "Add 'Go' button to confirm selection"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Start a Query - creates new Assistant session",
+    "steps": [
+      "Clicking 'Go' opens new Assistant chat session",
+      "Vault is preloaded as context in new session",
+      "Selected files attached as sources"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "New Assistant session - vault context in UI",
+    "steps": [
+      "Display vault name in Sources section",
+      "Display selected files as chips/resources",
+      "Update input placeholder to reflect file context"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "New Assistant session - placeholder text",
+    "steps": [
+      "Set placeholder to 'Ask a question about your selected vault files...'",
+      "Placeholder reflects file-driven context",
+      "Placeholder updates based on selected sources"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "File metadata - custom category assignment at upload",
+    "steps": [
+      "Allow users to assign custom category during file upload",
+      "Category field available in upload UI",
+      "Category persisted with file metadata"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "File metadata - persistent storage fields",
+    "steps": [
+      "Store file name in metadata",
+      "Store file type (custom category) in metadata",
+      "Store upload timestamp in metadata",
+      "Store file size in metadata",
+      "Store tags in metadata",
+      "Store vault association in metadata"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Apply bg-gray-50 to vault cards",
+    "steps": [
+      "Set background color to bg-gray-50 on vault cards",
+      "Ensure contrast with surrounding UI",
+      "Test in light and dark modes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Apply bg-gray-50 to modal surfaces",
+    "steps": [
+      "Set background to bg-gray-50 on vault modals",
+      "Set background to bg-gray-50 on file selection modals",
+      "Maintain white for main content areas if needed"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Remove elevation styling from all components",
+    "steps": [
+      "Audit all components for elevation tokens",
+      "Remove Material/AntD elevation if present",
+      "Replace with flat surface styling"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Sidebar vault list - square flat shadowless styling",
+    "steps": [
+      "Remove shadows from sidebar vault items",
+      "Set border-radius to 0-4px on vault list items",
+      "Apply flat surface styling to sidebar"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Table component - shadowless styling",
+    "steps": [
+      "Remove shadows from table components",
+      "Add 1px border for table structure",
+      "Style headers and rows with flat design"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Install Google AI SDK package",
+    "steps": [
+      "Run npm install @ai-sdk/google",
+      "Verify package added to package.json dependencies"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Uninstall Anthropic AI SDK package",
+    "steps": [
+      "Run npm uninstall @ai-sdk/anthropic",
+      "Verify package removed from package.json"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Update lib/ai.ts - import Google provider",
+    "steps": [
+      "Remove import { createAnthropic } from @ai-sdk/anthropic",
+      "Add import { createGoogleGenerativeAI } from @ai-sdk/google"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Update lib/ai.ts - configure Gemini provider",
+    "steps": [
+      "Create google provider with createGoogleGenerativeAI()",
+      "Pass apiKey from process.env.GOOGLE_GENERATIVE_AI_API_KEY",
+      "Remove anthropic provider configuration"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Update lib/ai.ts - export Gemini models",
+    "steps": [
+      "Export defaultModel as google('gemini-2.5-flash')",
+      "Export analysisModel as google('gemini-2.5-pro')"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Update .env.example with Google API key",
+    "steps": [
+      "Add GOOGLE_GENERATIVE_AI_API_KEY='' to .env.example",
+      "Remove ANTHROPIC_API_KEY from .env.example"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Test /api/assistant/query endpoint with Gemini",
+    "steps": [
+      "Start dev server with npm run dev",
+      "Send test query to /api/assistant/query",
+      "Verify streaming response works correctly"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Test /api/assistant/improve endpoint with Gemini",
+    "steps": [
+      "Send test prompt to /api/assistant/improve",
+      "Verify improved prompt is returned",
+      "Check streaming response works"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Test /api/test-ai endpoint with Gemini",
+    "steps": [
+      "Send GET request to /api/test-ai",
+      "Verify Gemini response is returned"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Install TipTap simple-editor template",
+    "steps": [
+      "Run npx @tiptap/cli@latest add simple-editor",
+      "Verify files created in components/tiptap-templates/simple/"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Style TipTap editor to match design system",
+    "steps": [
+      "Set border-radius to 4px on editor container",
+      "Remove any shadows from editor",
+      "Match border color with existing components",
+      "Ensure dark mode compatibility"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create DocumentEditor wrapper component",
+    "steps": [
+      "Create components/editor/document-editor.tsx",
+      "Import SimpleEditor from tiptap-templates",
+      "Add controlled value prop for content",
+      "Add onChange prop for content updates",
+      "Export component for use in assistant page"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Add Document model to Prisma schema",
+    "steps": [
+      "Open prisma/schema.prisma",
+      "Add Document model with id, title, content (Json), queryId, createdAt, updatedAt",
+      "Add @unique constraint on queryId",
+      "Add relation to AssistantQuery model"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Add document relation to AssistantQuery model",
+    "steps": [
+      "Open prisma/schema.prisma",
+      "Add document Document? field to AssistantQuery model",
+      "Ensure bidirectional relation is configured"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Run Prisma migration for Document model",
+    "steps": [
+      "Run npx prisma db push or npx prisma migrate dev",
+      "Verify Document table created in database",
+      "Regenerate Prisma client"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create POST /api/documents endpoint",
+    "steps": [
+      "Create app/api/documents/route.ts",
+      "Add POST handler that accepts title, content, queryId in body",
+      "Create document in database using Prisma",
+      "Return created document as JSON response"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create GET /api/documents endpoint",
+    "steps": [
+      "Add GET handler to app/api/documents/route.ts",
+      "Query documents from database",
+      "Support optional pagination parameters",
+      "Return document list as JSON"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create GET /api/documents/[id] endpoint",
+    "steps": [
+      "Create app/api/documents/[id]/route.ts",
+      "Add GET handler that accepts id from params",
+      "Query single document by id from database",
+      "Return 404 if not found, otherwise return document JSON"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create PUT /api/documents/[id] endpoint",
+    "steps": [
+      "Add PUT handler to app/api/documents/[id]/route.ts",
+      "Accept title and content in request body",
+      "Update document in database using Prisma",
+      "Return updated document as JSON"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create DELETE /api/documents/[id] endpoint",
+    "steps": [
+      "Add DELETE handler to app/api/documents/[id]/route.ts",
+      "Delete document from database by id",
+      "Return success response or 404 if not found"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Add mode state to assistant page",
+    "steps": [
+      "Open app/(dashboard)/assistant/page.tsx",
+      "Add useState for mode: 'chat' | 'document'",
+      "Default mode to 'chat'",
+      "Add setter function to update mode"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Extract ChatPanel component from assistant page",
+    "steps": [
+      "Create components/assistant/chat-panel.tsx",
+      "Move chat UI elements from assistant page",
+      "Accept query, completion, isLoading, onSubmit as props",
+      "Include query display area at top showing user's original query",
+      "Add 'Copy', 'Save prompt', 'Edit query' action buttons below query",
+      "Show 'Answering' status with 'Generating new version...' progress text when loading",
+      "Position chat input at bottom of panel"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create EditorPanel component",
+    "steps": [
+      "Create components/assistant/editor-panel.tsx",
+      "Import DocumentEditor component",
+      "Accept content and onChange props",
+      "Add header row with 'Draft' label on left",
+      "Include formatting toolbar (Paragraph dropdown, Bold, Italic, Underline, Strikethrough, lists, alignment, clipboard, undo/redo)",
+      "Add top-right controls: 'Version 1' dropdown, 'Sources' button, 'Export' button",
+      "Add 'Show edits' toggle below header",
+      "Style panel with consistent design system"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Implement split-panel layout in assistant page",
+    "steps": [
+      "Add conditional rendering based on mode state",
+      "When mode='chat': render full-width ChatPanel",
+      "When mode='document': render flex container with 25% ChatPanel + 75% EditorPanel",
+      "Use Tailwind flex utilities for layout (w-1/4 and w-3/4)"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add CSS transitions for panel layout changes",
+    "steps": [
+      "Add transition-all duration-300 to panel containers",
+      "Animate width changes smoothly",
+      "Ensure content reflows gracefully during transition"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Update system prompt to classify chat vs document intent",
+    "steps": [
+      "Open app/api/assistant/query/route.ts",
+      "Update system prompt to include mode classification instruction",
+      "Instruct AI to prefix response with [MODE:chat] or [MODE:document]",
+      "Define criteria: document mode for drafts/generation, chat mode for Q&A"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Parse mode prefix from AI response",
+    "steps": [
+      "In assistant page, check first line of completion for [MODE:document] or [MODE:chat]",
+      "Extract mode value from prefix",
+      "Strip prefix from displayed content",
+      "Update mode state based on parsed value"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Route content to appropriate panel based on mode",
+    "steps": [
+      "If mode='chat', display content in ChatPanel completion area",
+      "If mode='document', pass content to EditorPanel",
+      "Handle mode switching during streaming if needed"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Handle streaming content into TipTap editor",
+    "steps": [
+      "Convert streamed markdown/text to TipTap-compatible format",
+      "Update editor content progressively as stream arrives",
+      "Maintain cursor position during updates",
+      "Ensure editor remains fully editable after stream completes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement debounced auto-save for editor",
+    "steps": [
+      "Add useDebouncedCallback hook with 2-3 second delay",
+      "Call debounced save function on editor onChange",
+      "Show subtle saving indicator during save"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Save document to database on editor change",
+    "steps": [
+      "Track documentId in component state",
+      "If no documentId exists, POST to /api/documents to create",
+      "If documentId exists, PUT to /api/documents/[id] to update",
+      "Store returned documentId in state for subsequent saves"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Link document to AssistantQuery",
+    "steps": [
+      "Pass conversationId/queryId when creating document",
+      "Include queryId in POST /api/documents body",
+      "Verify relation is established in database"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add New Thread button to ChatPanel header",
+    "steps": [
+      "Add 'New thread' button with edit/pencil icon at top of ChatPanel",
+      "Clicking resets chat state and clears editor",
+      "Style consistently with design system"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add query display area to ChatPanel",
+    "steps": [
+      "Display user's original query text prominently in ChatPanel",
+      "Position below New Thread button",
+      "Show query in readable format with proper text styling"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add query action buttons (Copy, Save prompt, Edit query)",
+    "steps": [
+      "Add 'Copy' button that copies query to clipboard",
+      "Add 'Save prompt' button to save query as reusable prompt",
+      "Add 'Edit query' button to allow editing the original query",
+      "Position buttons below query display area",
+      "Style as subtle inline actions"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add generation status indicator to ChatPanel",
+    "steps": [
+      "Show 'Answering' label when AI is generating",
+      "Display 'Generating new version...' progress text during streaming",
+      "Hide status when generation complete",
+      "Position between query area and chat input"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add Version dropdown to EditorPanel header",
+    "steps": [
+      "Add 'Version 1' dropdown button in top-right of editor header",
+      "Dropdown shows list of document versions",
+      "Clicking version loads that version into editor",
+      "Style consistently with design system"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add Sources button to EditorPanel header",
+    "steps": [
+      "Add 'Sources' button in top-right of editor header",
+      "Clicking opens panel showing source documents used",
+      "Display source file names and relevant excerpts",
+      "Position next to Version dropdown"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add Export button to EditorPanel header",
+    "steps": [
+      "Add 'Export' button in top-right of editor header",
+      "Clicking opens export options (PDF, DOCX, etc.)",
+      "Position as rightmost header button",
+      "Style as primary action button"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add Show edits toggle to EditorPanel",
+    "steps": [
+      "Add 'Show edits' toggle/checkbox below editor header toolbar",
+      "When enabled, highlight changes from previous version",
+      "Position on right side below toolbar",
+      "Default to off"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement document versioning",
+    "steps": [
+      "Add version field to Document model in Prisma",
+      "Create new version on each AI regeneration",
+      "Store version history linked to document",
+      "Allow loading previous versions into editor"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement Save prompt functionality",
+    "steps": [
+      "Create API endpoint to save prompts",
+      "Store prompt text with user association",
+      "Make saved prompt appear in Prompts dropdown",
+      "Allow naming the saved prompt"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Fix content comparison in document-editor useEffect",
+    "steps": [
+      "Open components/editor/document-editor.tsx",
+      "Line 122: Change editor.getText() to editor.getHTML()",
+      "This ensures HTML content comparison instead of plain text"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Add internal update tracking ref to document-editor",
+    "steps": [
+      "Add isInternalUpdateRef = useRef(false) near line 46",
+      "Set ref to true in onUpdate before calling onChange",
+      "Reset ref to false after microtask with queueMicrotask"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Guard content sync useEffect from internal updates",
+    "steps": [
+      "In useEffect (lines 103-133), add early return if isInternalUpdateRef.current",
+      "Prevents feedback loop from parent re-render"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Consolidate setContent calls for streaming mode",
+    "steps": [
+      "In streaming branch, compare content vs editor.getHTML() before calling setContent",
+      "Pass false as second arg to setContent to prevent emitting update event"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Consolidate setContent calls for post-streaming sync",
+    "steps": [
+      "In wasStreamingRef.current branch, compare before setContent",
+      "Reset wasStreamingRef to false after sync"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Add cursor position preservation for external content updates",
+    "steps": [
+      "Save cursor position before setContent: const { from, to } = editor.state.selection",
+      "After setContent, restore cursor with editor.commands.setTextSelection",
+      "Clamp position to valid range based on new doc length"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Remove unused isMarkdown from useEffect dependencies",
+    "steps": [
+      "Line 133: Remove isMarkdown from dependency array",
+      "isMarkdown function is defined but not used in effect"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Add formatting operation guard ref to document-editor",
+    "steps": [
+      "Add isFormattingRef = useRef(false) near other refs",
+      "This prevents content sync during formatting operations"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Wrap toolbar button handlers with formatting guard",
+    "steps": [
+      "Set isFormattingRef.current = true before chain().focus().toggle*().run()",
+      "Reset to false in queueMicrotask after each button click"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Skip content sync during formatting operations",
+    "steps": [
+      "In content sync useEffect, add early return if isFormattingRef.current",
+      "Prevents cursor jump when formatting is applied"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Verify all formatting extensions are loaded",
+    "steps": [
+      "Confirm StarterKit includes Bold, Italic, Strike",
+      "Confirm Underline extension is imported and added",
+      "Test each formatting button works after fixes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Install react-markdown package",
+    "steps": [
+      "Run npm install react-markdown",
+      "Verify package added to package.json"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create MarkdownRenderer component",
+    "steps": [
+      "Create components/ui/markdown-renderer.tsx",
+      "Import ReactMarkdown from react-markdown",
+      "Apply prose styling classes for consistent formatting",
+      "Export component for reuse"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Apply markdown rendering to ChatPanel query display",
+    "steps": [
+      "Open components/assistant/chat-panel.tsx",
+      "Replace plain text query display (line ~131) with MarkdownRenderer",
+      "Pass query prop to MarkdownRenderer"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Apply markdown rendering to AssistantPage full-width query display",
+    "steps": [
+      "Open app/(dashboard)/assistant/page.tsx",
+      "Replace query display (lines 1721-1726) with MarkdownRenderer",
+      "Maintain existing layout and styling"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Style markdown code blocks and tables",
+    "steps": [
+      "Add custom renderers for code blocks with syntax highlighting",
+      "Style tables with proper borders and alignment",
+      "Ensure dark mode compatibility"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add Copy as Markdown button to ChatPanel",
+    "steps": [
+      "Add button next to existing Copy button in chat-panel.tsx",
+      "Icon: clipboard or document icon",
+      "Label/tooltip: 'Copy Markdown'"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement Copy as Markdown handler",
+    "steps": [
+      "Create handler that copies raw query text to clipboard",
+      "Use navigator.clipboard.writeText(query)",
+      "Preserve markdown syntax in copied text"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add Copy as Plain Text button to ChatPanel",
+    "steps": [
+      "Add second copy button with distinct icon",
+      "Label/tooltip: 'Copy Text'"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement Copy as Plain Text handler",
+    "steps": [
+      "Strip markdown syntax from query before copying",
+      "Use regex or markdown-to-text library",
+      "Copy plain text to clipboard"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add copy confirmation tooltips",
+    "steps": [
+      "Show 'Copied!' tooltip on successful copy",
+      "Tooltip auto-dismisses after 2 seconds",
+      "Works for both Markdown and Plain Text buttons"
+    ],
+    "passes": true
+  }
+]

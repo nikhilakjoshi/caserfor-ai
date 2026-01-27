@@ -1227,3 +1227,32 @@
 - .env.example - added Pinecone env vars
 - prisma/schema.prisma - added chunkCount, embeddedAt to Document model
 - package.json - added pinecone, pdf-parse, mammoth, @types/pdf-parse
+
+## 2026-01-27: Embed API Endpoint (Document Processing Pipeline)
+
+### Completed
+- Created POST /api/vaults/[id]/documents/process endpoint
+- Accepts documentId, sets embeddingStatus to processing
+- Extracts base64 content from Document.metadata.content
+- Parses text via document-parser (PDF/DOCX/TXT)
+- Chunks text via chunker (~1000 token chunks, 200 overlap)
+- Embeds chunks via embeddings.ts (Google text-embedding-004)
+- Upserts vectors to Pinecone with metadata (documentId, chunkIndex, text, documentName, documentType)
+- Vector IDs: {documentId}-chunk-{chunkIndex}
+- Updates Document: embeddingStatus=completed, chunkCount, embeddedAt
+- On error: sets embeddingStatus=failed
+- Wired upload endpoint to trigger processing non-blocking via fire-and-forget fetch
+- Updated 1 PRD item to passes:true
+
+### Notes for next dev
+- Processing uses base64 from metadata (no S3) - when S3 added, change to S3 download
+- Non-blocking trigger uses fetch to self (request.nextUrl.origin) - works in dev and prod
+- No retry logic yet - failed documents stay failed until retry endpoint built
+- Pinecone namespace: vault-{vaultId}
+- Next priorities: status polling API, retry endpoint, RAG query helper
+
+### Files created
+- app/api/vaults/[id]/documents/process/route.ts - embedding pipeline endpoint
+
+### Files modified
+- app/api/vaults/[id]/documents/route.ts - added non-blocking processing trigger after upload
