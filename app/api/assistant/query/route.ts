@@ -1,6 +1,7 @@
 import { streamText } from "ai"
 import { defaultModel, analysisModel } from "@/lib/ai"
 import { prisma } from "@/lib/db"
+import { queryRelevantChunks, type RetrievedChunk } from "@/lib/rag"
 import type { AssistantQuery, QueryOutputType, SourceType } from "@prisma/client"
 
 // TODO: Replace with actual auth when implemented
@@ -92,6 +93,21 @@ export async function POST(req: Request) {
 
   const model = deepAnalysis ? analysisModel : defaultModel
 
+  // RAG: retrieve relevant chunks from vault files
+  let ragChunks: RetrievedChunk[] = []
+  const vaultFiles = files.filter((f: AttachedFileInput) => f.source === "vault")
+  if (vaultFiles.length > 0 && vaultFiles[0].vaultId) {
+    try {
+      ragChunks = await queryRelevantChunks(
+        inputText,
+        vaultFiles.map((f: AttachedFileInput) => f.id),
+        { topK: 10, vaultId: vaultFiles[0].vaultId }
+      )
+    } catch (error) {
+      console.error("RAG retrieval failed:", error)
+    }
+  }
+
   // Build system prompt based on output type
   let systemPrompt = `You are a legal document assistant.
 
@@ -126,9 +142,23 @@ Based on my analysis, the key considerations are...
       "Provide helpful, accurate responses to legal research questions. Determine the appropriate mode based on whether you are generating a document or answering a question."
   }
 
-  // Add source context if provided
+  // Add citation instructions when RAG context present
+  if (ragChunks.length > 0) {
+    systemPrompt += `\n\nYou have been provided with relevant excerpts from the user's documents. Use these to ground your response.
+When citing information from a document, use the format [docName, chunk N] where docName is the document name and N is the chunk index.
+Each citation must reference a specific document. Only cite information that appears in the provided excerpts.`
+  }
+
+  // Build user prompt with RAG context
   let userPrompt = inputText
   const contextParts: string[] = []
+
+  if (ragChunks.length > 0) {
+    const chunksText = ragChunks
+      .map((c) => `--- ${c.documentName} (chunk ${c.chunkIndex}) ---\n${c.text}`)
+      .join("\n\n")
+    contextParts.push(`Document excerpts:\n${chunksText}`)
+  }
 
   if (sources?.length > 0) {
     const sourceNames = sources.map((s: { name: string }) => s.name).join(", ")
@@ -141,7 +171,7 @@ Based on my analysis, the key considerations are...
   }
 
   if (contextParts.length > 0) {
-    userPrompt = `Context: ${contextParts.join("; ")}\n\nQuery: ${inputText}`
+    userPrompt = `${contextParts.join("\n\n")}\n\nQuery: ${inputText}`
   }
 
   const result = streamText({
@@ -164,6 +194,19 @@ Based on my analysis, the key considerations are...
             status: "completed",
           },
         })
+
+        // Store RAG source references
+        if (ragChunks.length > 0) {
+          await prisma.sourceReference.createMany({
+            data: ragChunks.map((c) => ({
+              queryId: query!.id,
+              sourceType: "document" as SourceType,
+              sourceId: c.documentId,
+              sourceName: c.documentName,
+              metadata: { chunkIndex: c.chunkIndex, score: c.score, textSnippet: c.text.substring(0, 200) },
+            })),
+          })
+        }
 
         // Create history entry
         const title =

@@ -1228,6 +1228,31 @@
 - prisma/schema.prisma - added chunkCount, embeddedAt to Document model
 - package.json - added pinecone, pdf-parse, mammoth, @types/pdf-parse
 
+## 2026-01-27: RAG Query Helper and Context Injection
+
+### Completed
+- Created lib/rag.ts with queryRelevantChunks function
+- Embeds user query, queries Pinecone filtered by documentIds, returns top-10 chunks with scores
+- Updated /api/assistant/query to retrieve RAG chunks for vault-sourced attached files
+- Injects document excerpts into user prompt with document name and chunk index labels
+- Adds citation instructions to system prompt when RAG context present ([docName, chunk N] format)
+- Stores RAG source references in SourceReference table with metadata (chunkIndex, score, textSnippet)
+- Updated 4 PRD items to passes:true
+
+### Notes for next dev
+- RAG only triggers for vault files (source: "vault") with a vaultId
+- Uploaded files (source: "upload") do not go through RAG - would need inline text extraction
+- Multiple vaults not supported yet - uses first file's vaultId for namespace
+- Citation format is [docName, chunk N] not [docName, p.X] since we have chunk indices not page numbers
+- Source references stored async in onFinish - not included in streaming response body
+- Next priorities: UI citation parsing, document viewer, status polling, document categories
+
+### Files created
+- lib/rag.ts - RAG query helper
+
+### Files modified
+- app/api/assistant/query/route.ts - RAG retrieval, context injection, citation instructions, source refs
+
 ## 2026-01-27: Embed API Endpoint (Document Processing Pipeline)
 
 ### Completed

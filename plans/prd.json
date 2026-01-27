@@ -343,7 +343,7 @@
       "Query Pinecone filtered by document IDs",
       "Return top-K chunks (K=10) with metadata"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -354,7 +354,7 @@
       "For uploaded files: extract text inline, chunk as ephemeral context",
       "Inject retrieved chunks into system prompt"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -364,7 +364,7 @@
       "Instruct AI to use [docName, p.X] citation format",
       "Each citation must reference document ID + chunk index"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -374,7 +374,7 @@
       "Each source: documentId, documentName, chunkIndex, text snippet",
       "Store references in SourceReference table"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
