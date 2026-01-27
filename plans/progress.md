@@ -1192,3 +1192,38 @@
 
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - added file search state, filter logic, search input in file table header
+
+## 2026-01-27: Embedding Pipeline Foundation
+
+### Completed
+- Installed @pinecone-database/pinecone, pdf-parse (v2), mammoth
+- Installed @types/pdf-parse dev dependency
+- Created lib/pinecone.ts with singleton client, upsertVectors (batch 100), queryVectors, deleteVectors, deleteNamespace, vaultNamespace helpers
+- Created lib/document-parser.ts with extractText function (PDF via PDFParse class, DOCX via mammoth, TXT direct)
+- Created lib/chunker.ts with chunkText function (~1000 token chunks, 200 token overlap, sentence boundary splitting)
+- Created lib/embeddings.ts with embedChunks (embedMany) and embedQuery (embed) using AI SDK
+- Added embeddingModel export to lib/ai.ts using google.textEmbeddingModel('text-embedding-004')
+- Added PINECONE_API_KEY and PINECONE_INDEX to .env.example
+- Added chunkCount (Int?) and embeddedAt (DateTime?) fields to Document model in schema.prisma
+- Regenerated Prisma client
+- Updated 7 PRD items to passes:true
+
+### Notes for next dev
+- pdf-parse v2 uses class-based API: `new PDFParse({ data })` then `.getText()` then `.destroy()`
+- VectorMetadata interface includes index signature for Pinecone RecordMetadata compatibility
+- chunker uses ~4 chars/token approximation, tries to break at sentence boundaries
+- embeddings.ts exports both embedChunks (batch) and embedQuery (single) functions
+- Next priority: Create embed API endpoint (process/route.ts) that orchestrates parse -> chunk -> embed -> upsert pipeline
+- Requires db:push after setting DATABASE_URL for new schema fields
+
+### Files created
+- lib/pinecone.ts - Pinecone client singleton and vector helpers
+- lib/document-parser.ts - text extraction from PDF/DOCX/TXT
+- lib/chunker.ts - text chunking with overlap
+- lib/embeddings.ts - AI SDK embedding wrappers
+
+### Files modified
+- lib/ai.ts - added embeddingModel export
+- .env.example - added Pinecone env vars
+- prisma/schema.prisma - added chunkCount, embeddedAt to Document model
+- package.json - added pinecone, pdf-parse, mammoth, @types/pdf-parse

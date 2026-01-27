@@ -35,3 +35,10 @@
 - PRD says "Document" but that name was taken - EditorDocument used instead
 - One-to-one with AssistantQuery via unique queryId
 - Content field stores TipTap editor JSON format
+
+## Embedding Pipeline
+- pdf-parse v2 uses class-based API (not the v1 default-export function)
+- Chunking uses ~4 chars/token heuristic (not tiktoken) for simplicity
+- Pinecone VectorMetadata needs index signature `[key: string]: string | number` for RecordMetadata compatibility
+- text-embedding-004 produces 768-dimensional vectors
+- Pinecone index must be configured for 768 dimensions

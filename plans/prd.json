@@ -189,7 +189,7 @@
       "Run npm install @pinecone-database/pinecone pdf-parse mammoth",
       "Verify packages in package.json"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -202,7 +202,7 @@
       "Export deleteVectors helper",
       "Use namespace format: vault-{vaultId}"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -210,7 +210,7 @@
     "steps": [
       "Add PINECONE_API_KEY and PINECONE_INDEX to .env.example"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -223,7 +223,7 @@
       "Handle TXT via direct read",
       "Return extracted text string"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -234,7 +234,7 @@
       "Split text into ~1000 token chunks with 200 token overlap",
       "Return array of { text, chunkIndex } objects"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -245,7 +245,7 @@
       "Export embedChunks function using AI SDK embedMany()",
       "Return array of vectors (768 dims)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -256,7 +256,7 @@
       "Run prisma migrate to apply changes",
       "Verify migration succeeds"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",

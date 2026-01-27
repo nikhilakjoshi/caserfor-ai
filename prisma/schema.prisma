@@ -117,6 +117,8 @@ model Document {
   pageCount       Int?
   metadata        Json            @default("{}")
   embeddingStatus EmbeddingStatus @default(pending)
+  chunkCount      Int?
+  embeddedAt      DateTime?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 

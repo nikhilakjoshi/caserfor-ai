@@ -26,4 +26,7 @@ export const defaultModel = google("gemini-2.5-flash")
 // Model for complex analysis tasks
 export const analysisModel = google("gemini-2.5-pro")
 
+// Embedding model (768 dimensions)
+export const embeddingModel = google.textEmbeddingModel("text-embedding-004")
+
 export default google
