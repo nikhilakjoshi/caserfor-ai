@@ -1127,3 +1127,22 @@
 - components/assistant/chat-panel.tsx - added MarkdownRenderer, copy buttons, tooltips
 - app/(dashboard)/assistant/page.tsx - added MarkdownRenderer import, applied to query/response display
 - package.json - added react-markdown dependency
+
+## 2026-01-27: Vault Detail Page API Integration
+
+### Completed
+- Replaced mock vault and document data with real API calls
+- Fetches vault from GET /api/vaults/[id] and documents from GET /api/vaults/[id]/documents in parallel
+- Removed mockVault and mockDocuments constants
+- Added error state with "Back to Vaults" and "Retry" buttons
+- Loading/empty/error states now complete for both /vault and /vault/[id] pages
+- Updated 2 PRD items to passes:true
+
+### Notes for next dev
+- Requires DATABASE_URL to show actual data
+- Without DB, error state shows with retry option
+- File upload button on vault detail page is still UI-only (no upload handler wired)
+- Next priority: replace mock data in assistant page vault modal (PRD items 1-2)
+
+### Files modified
+- app/(dashboard)/vault/[id]/page.tsx - removed mock data, added API fetch, error state

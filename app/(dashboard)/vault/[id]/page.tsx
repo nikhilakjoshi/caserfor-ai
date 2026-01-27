@@ -74,72 +74,6 @@ interface Vault {
 type SortField = "name" | "documentType" | "updatedAt" | "fileType" | "sizeBytes"
 type SortDirection = "asc" | "desc"
 
-// Mock vault data - replace with API
-const mockVault: Vault = {
-  id: "1",
-  name: "M&A Deal Documents",
-  description: "Due diligence materials for Project Apollo",
-  type: "knowledge_base",
-  isShared: true,
-  fileCount: 234,
-  createdAt: "2026-01-15",
-  updatedAt: "2026-01-24",
-}
-
-// Mock documents - replace with API
-const mockDocuments: Document[] = [
-  {
-    id: "d1",
-    name: "Purchase Agreement - Final.pdf",
-    documentType: "Agreement",
-    fileType: "pdf",
-    sizeBytes: 2456789,
-    embeddingStatus: "completed",
-    createdAt: "2026-01-20T10:30:00Z",
-    updatedAt: "2026-01-24T14:20:00Z",
-  },
-  {
-    id: "d2",
-    name: "Due Diligence Checklist.docx",
-    documentType: "Checklist",
-    fileType: "docx",
-    sizeBytes: 145230,
-    embeddingStatus: "completed",
-    createdAt: "2026-01-18T09:00:00Z",
-    updatedAt: "2026-01-22T11:45:00Z",
-  },
-  {
-    id: "d3",
-    name: "Financial Statements Q4 2025.xlsx",
-    documentType: "Financial",
-    fileType: "xlsx",
-    sizeBytes: 3890125,
-    embeddingStatus: "processing",
-    createdAt: "2026-01-22T16:00:00Z",
-    updatedAt: "2026-01-25T08:30:00Z",
-  },
-  {
-    id: "d4",
-    name: "Corporate Structure Chart.pdf",
-    documentType: "Corporate",
-    fileType: "pdf",
-    sizeBytes: 567890,
-    embeddingStatus: "completed",
-    createdAt: "2026-01-19T14:15:00Z",
-    updatedAt: "2026-01-21T10:00:00Z",
-  },
-  {
-    id: "d5",
-    name: "IP Portfolio Summary.pdf",
-    documentType: null,
-    fileType: "pdf",
-    sizeBytes: 1234567,
-    embeddingStatus: "pending",
-    createdAt: "2026-01-25T09:00:00Z",
-    updatedAt: "2026-01-25T09:00:00Z",
-  },
-]
-
 const documentTypeColors: Record<string, string> = {
   Agreement: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
   Checklist: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
@@ -172,6 +106,7 @@ export default function VaultDetailPage() {
   const [vault, setVault] = useState<Vault | null>(null)
   const [documents, setDocuments] = useState<Document[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [quickQuery, setQuickQuery] = useState("")
   const [sortField, setSortField] = useState<SortField>("updatedAt")
@@ -181,17 +116,33 @@ export default function VaultDetailPage() {
   const [queryModalSortField, setQueryModalSortField] = useState<SortField>("name")
   const [queryModalSortDirection, setQueryModalSortDirection] = useState<SortDirection>("asc")
 
-  useEffect(() => {
-    // TODO: Replace with API call to GET /api/vaults/[id]
-    const loadVault = async () => {
-      setIsLoading(true)
-      // Simulate API delay
-      await new Promise((r) => setTimeout(r, 200))
-      setVault({ ...mockVault, id: vaultId })
-      setDocuments(mockDocuments)
+  const fetchData = async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const [vaultRes, docsRes] = await Promise.all([
+        fetch(`/api/vaults/${vaultId}`),
+        fetch(`/api/vaults/${vaultId}/documents`),
+      ])
+      if (!vaultRes.ok) {
+        if (vaultRes.status === 404) throw new Error("Vault not found")
+        throw new Error("Failed to load vault")
+      }
+      if (!docsRes.ok) throw new Error("Failed to load documents")
+      const vaultData = await vaultRes.json()
+      const docsData = await docsRes.json()
+      setVault(vaultData)
+      setDocuments(docsData)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load vault")
+    } finally {
       setIsLoading(false)
     }
-    loadVault()
+  }
+
+  useEffect(() => {
+    fetchData()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vaultId])
 
   const handleSort = (field: SortField) => {
@@ -295,12 +246,32 @@ export default function VaultDetailPage() {
     return sortDirection === "asc" ? comparison : -comparison
   })
 
-  if (isLoading || !vault) {
+  if (isLoading) {
     return (
       <>
         <PageHeader title="Loading..." />
         <div className="flex items-center justify-center py-12">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      </>
+    )
+  }
+
+  if (error || !vault) {
+    return (
+      <>
+        <PageHeader title="Error" />
+        <div className="flex flex-col items-center justify-center py-12 gap-4">
+          <p className="text-muted-foreground">{error || "Vault not found"}</p>
+          <div className="flex gap-2">
+            <Link href="/vault">
+              <Button variant="outline">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Vaults
+              </Button>
+            </Link>
+            <Button onClick={fetchData}>Retry</Button>
+          </div>
         </div>
       </>
     )
