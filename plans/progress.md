@@ -1354,3 +1354,20 @@
 
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - modal dimensions, grid cols, card description
+
+## 2026-01-27: Client-Side 25MB File Size Validation
+
+### Completed
+- Added MAX_FILE_SIZE constant (25MB) at module level in assistant page
+- addFiles() now filters oversized files and shows alert with rejected filenames
+- onDropNewVaultFiles() same validation for create vault modal drag-drop
+- Valid files still added; only oversized ones rejected
+- Updated 2 PRD items to passes:true
+
+### Notes for next dev
+- Vault detail page has no file upload handler yet - validation not needed there
+- Uses alert() for error display - replace with toast when toast system added
+- Remaining false PRD items: S3 storage (6), server-side file validation (1), presigned URLs (1), citations UI (1), react-pdf + DocumentViewer (4)
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - file size validation in addFiles and onDropNewVaultFiles

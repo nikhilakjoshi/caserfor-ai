@@ -158,7 +158,7 @@
       "Show error toast/message if file exceeds 25MB",
       "Prevent upload from proceeding"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -168,7 +168,7 @@
       "Show error toast/message if file exceeds 25MB",
       "Prevent upload from proceeding"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",

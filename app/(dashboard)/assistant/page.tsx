@@ -71,6 +71,8 @@ import {
 } from "@/components/ui/select";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
+
 interface AttachedFile {
   id: string;
   file: File | null; // null for vault file references
@@ -375,7 +377,20 @@ export default function AssistantPage() {
   }, [searchParams]);
 
   const addFiles = useCallback((files: FileList | File[]) => {
-    const newFiles: AttachedFile[] = Array.from(files).map((file) => ({
+    const validFiles: File[] = [];
+    const oversized: string[] = [];
+    for (const file of Array.from(files)) {
+      if (file.size > MAX_FILE_SIZE) {
+        oversized.push(file.name);
+      } else {
+        validFiles.push(file);
+      }
+    }
+    if (oversized.length > 0) {
+      alert(`Files exceed 25MB limit and were not added:\n${oversized.join("\n")}`);
+    }
+    if (validFiles.length === 0) return;
+    const newFiles: AttachedFile[] = validFiles.map((file) => ({
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       file,
       name: file.name,
@@ -731,7 +746,20 @@ export default function AssistantPage() {
 
   // Create New Vault dropzone
   const onDropNewVaultFiles = useCallback((acceptedFiles: File[]) => {
-    const newFiles: NewVaultFile[] = acceptedFiles.map((file) => ({
+    const validFiles: File[] = [];
+    const oversized: string[] = [];
+    for (const file of acceptedFiles) {
+      if (file.size > MAX_FILE_SIZE) {
+        oversized.push(file.name);
+      } else {
+        validFiles.push(file);
+      }
+    }
+    if (oversized.length > 0) {
+      alert(`Files exceed 25MB limit and were not added:\n${oversized.join("\n")}`);
+    }
+    if (validFiles.length === 0) return;
+    const newFiles: NewVaultFile[] = validFiles.map((file) => ({
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       file,
       name: file.name,
