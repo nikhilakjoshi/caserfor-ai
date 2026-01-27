@@ -1078,7 +1078,7 @@ export default function AssistantPage() {
         }}
       >
         <DialogContent
-          className="w-[50vw] max-w-[50vw] h-[50vh] max-h-[50vh] bg-gray-50 dark:bg-muted/50 border border-neutral-200 dark:border-neutral-700 p-0 flex flex-col overflow-hidden"
+          className="w-[90vw] max-w-[90vw] h-[90vh] max-h-[90vh] bg-gray-50 dark:bg-muted/50 border border-neutral-200 dark:border-neutral-700 p-0 flex flex-col overflow-hidden"
           showCloseButton={false}
         >
           {/* Header */}
@@ -1371,14 +1371,14 @@ export default function AssistantPage() {
                 </button>
 
                 {/* Vault Cards Grid */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   {filteredVaults.map((vault) => (
                     <button
                       key={vault.id}
                       onClick={() => handleVaultSelect(vault)}
                       className="p-4 bg-white dark:bg-background border border-neutral-200 dark:border-neutral-700 hover:border-primary transition-colors text-left"
                     >
-                      <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
                           {vault.type === "knowledge_base" ? (
                             <Database className="h-5 w-5 text-primary" />
@@ -1391,14 +1391,17 @@ export default function AssistantPage() {
                           {vault.type === "knowledge_base" ? "KB" : "Sandbox"}
                         </Badge>
                       </div>
-                      <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1.5">
-                          <Calendar className="h-3.5 w-3.5" />
-                          <span>{new Date(vault.createdAt).toLocaleDateString()}</span>
-                        </div>
+                      {vault.description && (
+                        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{vault.description}</p>
+                      )}
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1.5">
                           <File className="h-3.5 w-3.5" />
                           <span>{vault.fileCount} files</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5" />
+                          <span>{new Date(vault.createdAt).toLocaleDateString()}</span>
                         </div>
                       </div>
                     </button>

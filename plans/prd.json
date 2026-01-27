@@ -40,7 +40,7 @@
       "Center modal on screen",
       "Verify modal is responsive"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -53,7 +53,7 @@
       "Add selected files summary bar with Add to Chat CTA",
       "Add smooth transitions between states"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

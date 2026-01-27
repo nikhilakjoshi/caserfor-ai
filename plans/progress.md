@@ -1336,3 +1336,21 @@
 
 ### Files modified
 - app/(dashboard)/vault/[id]/page.tsx - polling, status badges, retry button
+
+## 2026-01-27: Vault Selection Modal Resize and 3-Column Grid
+
+### Completed
+- Resized vault selection modal from 50vw x 50vh to 90vw x 90vh
+- Updated vault cards grid from 2-column to 3-column layout
+- Added vault description to cards (line-clamp-2 for overflow)
+- Rearranged card metadata: file count and date shown inline instead of 2-col grid
+- Updated 2 PRD items to passes:true
+
+### Notes for next dev
+- Only the vault selection modal was resized; create vault modal remains 50vw x 50vh
+- Two-state view (vault list vs file table) already existed from earlier work
+- Back navigation, file checkboxes, summary bar already implemented
+- Remaining false PRD items: S3 storage (6), client-side file validation (2), presigned URLs (1), citations UI (1), react-pdf + DocumentViewer (4)
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - modal dimensions, grid cols, card description
