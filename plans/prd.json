@@ -64,7 +64,7 @@
       "Add search input to vault detail file table",
       "Filter files by name on input"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -75,7 +75,7 @@
       "Fetch from GET /api/vaults",
       "Render vault list from API response"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",

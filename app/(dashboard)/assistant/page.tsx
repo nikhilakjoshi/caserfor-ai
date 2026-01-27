@@ -243,6 +243,7 @@ export default function AssistantPage() {
   const [hoveredPrompt, setHoveredPrompt] = useState<Prompt | null>(null);
   const [isImproving, setIsImproving] = useState(false);
   const [vaultSearchQuery, setVaultSearchQuery] = useState("");
+  const [fileSearchQuery, setFileSearchQuery] = useState("");
   const [fileSortColumn, setFileSortColumn] = useState<
     "name" | "documentType" | "size" | "createdAt"
   >("name");
@@ -475,6 +476,7 @@ export default function AssistantPage() {
     setFocusedFile(null);
     setVaultFiles([]);
     setVaultFilesError(null);
+    setFileSearchQuery("");
   };
 
   const handleFileSort = (
@@ -489,10 +491,10 @@ export default function AssistantPage() {
   };
 
   const toggleSelectAllFiles = () => {
-    if (selectedVaultFiles.length === vaultFiles.length) {
+    if (selectedVaultFiles.length === filteredFiles.length) {
       setSelectedVaultFiles([]);
     } else {
-      setSelectedVaultFiles(vaultFiles.map((f) => f.id));
+      setSelectedVaultFiles(filteredFiles.map((f) => f.id));
     }
   };
 
@@ -501,9 +503,14 @@ export default function AssistantPage() {
     vault.name.toLowerCase().includes(vaultSearchQuery.toLowerCase()),
   );
 
+  // Filter files by search
+  const filteredFiles = vaultFiles.filter((file) =>
+    file.name.toLowerCase().includes(fileSearchQuery.toLowerCase()),
+  );
+
   // Sort files
   const sortedFiles = selectedVaultForFiles
-    ? [...vaultFiles].sort((a, b) => {
+    ? [...filteredFiles].sort((a, b) => {
         const direction = fileSortDirection === "asc" ? 1 : -1;
         switch (fileSortColumn) {
           case "name":
@@ -1095,17 +1102,24 @@ export default function AssistantPage() {
                 </DialogTitle>
               </div>
               {/* Search bar - top right */}
-              {!selectedVaultForFiles && (
-                <div className="relative w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                {!selectedVaultForFiles ? (
                   <Input
                     placeholder="Search vaults..."
                     value={vaultSearchQuery}
                     onChange={(e) => setVaultSearchQuery(e.target.value)}
                     className="pl-9 h-9 bg-white dark:bg-background"
                   />
-                </div>
-              )}
+                ) : (
+                  <Input
+                    placeholder="Search files..."
+                    value={fileSearchQuery}
+                    onChange={(e) => setFileSearchQuery(e.target.value)}
+                    className="pl-9 h-9 bg-white dark:bg-background"
+                  />
+                )}
+              </div>
               <Button
                 variant="ghost"
                 size="icon"
@@ -1152,8 +1166,8 @@ export default function AssistantPage() {
                           <TableCheckbox
                             checked={
                               selectedVaultFiles.length ===
-                                vaultFiles.length &&
-                              vaultFiles.length > 0
+                                filteredFiles.length &&
+                              filteredFiles.length > 0
                             }
                             onCheckedChange={toggleSelectAllFiles}
                           />

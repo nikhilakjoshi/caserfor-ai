@@ -1173,3 +1173,22 @@
 
 ### Files modified
 - app/(dashboard)/vault/[id]/page.tsx - removed mock data, added API fetch, error state
+
+## 2026-01-27: Vault Modal File Search/Filter
+
+### Completed
+- Added fileSearchQuery state for file table search
+- Search input shown in modal header for both vault list and file table views
+- Files filtered by name (case-insensitive) before sorting
+- Select-all checkbox operates on filtered results only
+- fileSearchQuery resets when navigating back to vault list
+- Updated 1 PRD item to passes:true (search/filter in vault selection modal)
+- Also marked vault page API integration PRD item as passes:true (was already done)
+
+### Notes for next dev
+- Vault list search filters by name only (not description) - matches existing behavior
+- File search filters by filename only
+- Search persists while in file view, resets on back navigation
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - added file search state, filter logic, search input in file table header
