@@ -69,6 +69,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 
 interface AttachedFile {
   id: string;
@@ -1720,16 +1721,14 @@ export default function AssistantPage() {
           <div className="w-full max-w-3xl">
             <div className="mb-4 p-4 bg-muted/30 rounded-lg">
               <p className="text-sm text-muted-foreground mb-2">Query:</p>
-              <p>{submittedQuery}</p>
+              <MarkdownRenderer content={submittedQuery} />
             </div>
-            <div className="prose prose-sm max-w-none dark:prose-invert">
-              <div className="whitespace-pre-wrap">{displayContent}</div>
-              {isLoading && (
-                <span className="inline-flex items-center gap-1 text-muted-foreground">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                </span>
-              )}
-            </div>
+            <MarkdownRenderer content={displayContent} />
+            {isLoading && (
+              <span className="inline-flex items-center gap-1 text-muted-foreground">
+                <Loader2 className="h-3 w-3 animate-spin" />
+              </span>
+            )}
           </div>
         )}
 

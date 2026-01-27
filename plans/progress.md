@@ -1097,3 +1097,33 @@
 
 ### Files modified
 - components/editor/document-editor.tsx - all bug fixes applied
+
+## 2026-01-26: Markdown Rendering Feature
+
+### Completed
+- Installed react-markdown package
+- Created MarkdownRenderer component at components/ui/markdown-renderer.tsx
+- Custom renderers for: code blocks (inline + block), tables, lists, headings, blockquotes, links
+- Dark mode compatible via prose classes
+- Applied MarkdownRenderer to ChatPanel query display (line ~131)
+- Applied MarkdownRenderer to ChatPanel completion display
+- Applied MarkdownRenderer to AssistantPage full-width query/response display
+- Replaced single Copy button with "Copy Markdown" and "Copy Text" buttons
+- Copy Markdown preserves raw markdown syntax
+- Copy Text uses stripMarkdown() helper to remove markdown formatting
+- Added controlled tooltips that show "Copied!" for 2 seconds after copy
+- Updated 10 PRD items to passes:true
+
+### Notes for next dev
+- MarkdownRenderer exports both component and stripMarkdown() helper
+- stripMarkdown uses regex to strip headers, bold/italic, code, links, images, blockquotes, lists
+- Tooltips use controlled open state with setTimeout for auto-dismiss
+- Remaining false PRD items: Test endpoints (3) - require actual API key
+
+### Files created
+- components/ui/markdown-renderer.tsx - MarkdownRenderer component + stripMarkdown helper
+
+### Files modified
+- components/assistant/chat-panel.tsx - added MarkdownRenderer, copy buttons, tooltips
+- app/(dashboard)/assistant/page.tsx - added MarkdownRenderer import, applied to query/response display
+- package.json - added react-markdown dependency

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import {
   Copy,
+  FileText,
   Bookmark,
   Pencil,
   Loader2,
@@ -20,6 +21,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { MarkdownRenderer, stripMarkdown } from "@/components/ui/markdown-renderer";
 
 interface ChatPanelProps {
   query: string;
@@ -48,10 +55,20 @@ export function ChatPanel({
   const [promptName, setPromptName] = useState("");
   const [isSavingPrompt, setIsSavingPrompt] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [copyTooltip, setCopyTooltip] = useState<"markdown" | "plain" | null>(null);
   const hasResponse = completion.length > 0;
 
-  const handleCopy = () => {
+  const handleCopyMarkdown = () => {
     navigator.clipboard.writeText(query);
+    setCopyTooltip("markdown");
+    setTimeout(() => setCopyTooltip(null), 2000);
+  };
+
+  const handleCopyPlainText = () => {
+    const plainText = stripMarkdown(query);
+    navigator.clipboard.writeText(plainText);
+    setCopyTooltip("plain");
+    setTimeout(() => setCopyTooltip(null), 2000);
   };
 
   const handleSavePrompt = () => {
@@ -128,19 +145,38 @@ export function ChatPanel({
       {hasResponse && !isEditing && (
         <div className="p-4 border-b space-y-3">
           <div className="p-3 bg-muted/30 rounded">
-            <p className="text-sm">{query}</p>
+            <MarkdownRenderer content={query} className="text-sm" />
           </div>
           {/* Action buttons */}
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs gap-1"
-              onClick={handleCopy}
-            >
-              <Copy className="h-3 w-3" />
-              Copy
-            </Button>
+            <Tooltip open={copyTooltip === "markdown"}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs gap-1"
+                  onClick={handleCopyMarkdown}
+                >
+                  <Copy className="h-3 w-3" />
+                  Copy Markdown
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Copied!</TooltipContent>
+            </Tooltip>
+            <Tooltip open={copyTooltip === "plain"}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs gap-1"
+                  onClick={handleCopyPlainText}
+                >
+                  <FileText className="h-3 w-3" />
+                  Copy Text
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Copied!</TooltipContent>
+            </Tooltip>
             <Button
               variant="ghost"
               size="sm"
@@ -200,9 +236,7 @@ export function ChatPanel({
       {/* Completion display (only in chat mode / full width) */}
       {hasResponse && !compact && (
         <div className="flex-1 overflow-y-auto p-4">
-          <div className="prose prose-sm max-w-none dark:prose-invert">
-            <div className="whitespace-pre-wrap">{completion}</div>
-          </div>
+          <MarkdownRenderer content={completion} />
         </div>
       )}
 

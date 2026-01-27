@@ -1347,7 +1347,7 @@
       "Run npm install react-markdown",
       "Verify package added to package.json"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -1358,7 +1358,7 @@
       "Apply prose styling classes for consistent formatting",
       "Export component for reuse"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1368,7 +1368,7 @@
       "Replace plain text query display (line ~131) with MarkdownRenderer",
       "Pass query prop to MarkdownRenderer"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1378,7 +1378,7 @@
       "Replace query display (lines 1721-1726) with MarkdownRenderer",
       "Maintain existing layout and styling"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1388,7 +1388,7 @@
       "Style tables with proper borders and alignment",
       "Ensure dark mode compatibility"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1398,7 +1398,7 @@
       "Icon: clipboard or document icon",
       "Label/tooltip: 'Copy Markdown'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -1408,7 +1408,7 @@
       "Use navigator.clipboard.writeText(query)",
       "Preserve markdown syntax in copied text"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1417,7 +1417,7 @@
       "Add second copy button with distinct icon",
       "Label/tooltip: 'Copy Text'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -1427,7 +1427,7 @@
       "Use regex or markdown-to-text library",
       "Copy plain text to clipboard"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1437,6 +1437,6 @@
       "Tooltip auto-dismisses after 2 seconds",
       "Works for both Markdown and Plain Text buttons"
     ],
-    "passes": false
+    "passes": true
   }
 ]
