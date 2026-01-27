@@ -1128,6 +1128,33 @@
 - app/(dashboard)/assistant/page.tsx - added MarkdownRenderer import, applied to query/response display
 - package.json - added react-markdown dependency
 
+## 2026-01-27: Assistant Page Vault Modal API Integration
+
+### Completed
+- Removed mockVaults and mockVaultsWithFiles from assistant page
+- Vault list fetched from GET /api/vaults when modal opens or vault selector toggled
+- Vault documents fetched from GET /api/vaults/[id]/documents on vault click
+- Added loading spinners for vault list and file table
+- Added error states with retry buttons for both views
+- Added empty states for no vaults and no files
+- Updated preloaded context (URL params) to fetch files from API
+- Updated vault selector dropdown to use fetched vaults with loading/error states
+- Removed VaultSource interface (using Vault directly)
+- Removed HardDrive icon import and storageUsed display (not in API response)
+- Removed tags column from file table (not in API response)
+- Changed uploadedAt to createdAt to match API response
+- Updated 3 PRD items to passes:true
+
+### Notes for next dev
+- Vault modal uses separate state for vault list vs vault files (fetched independently)
+- VaultFile.documentType is nullable (API may return null)
+- API returns sizeBytes, mapped to size in VaultFile interface
+- mockPrompts still in use - wire to /api/prompts when ready
+- Vault selector dropdown fetches on first open, uses cached state after
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - removed mock data, added API fetch, loading/error states
+
 ## 2026-01-27: Vault Detail Page API Integration
 
 ### Completed

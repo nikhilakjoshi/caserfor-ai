@@ -8,7 +8,7 @@
       "Fetch vaults from GET /api/vaults on modal open",
       "Map API response to vault list UI"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -19,7 +19,7 @@
       "Fetch documents from GET /api/vaults/[id]/documents on vault click",
       "Map API response to file list UI"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -30,7 +30,7 @@
       "Display error message on fetch failure",
       "Allow retry on error"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

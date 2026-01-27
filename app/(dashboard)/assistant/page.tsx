@@ -32,7 +32,7 @@ import {
   Search,
   Plus,
   ChevronLeft,
-  HardDrive,
+
   Calendar,
   ArrowUpDown,
   Trash2,
@@ -92,30 +92,24 @@ interface VaultFile {
   id: string;
   name: string;
   fileType: string;
-  documentType: string;
+  documentType: string | null;
   size: number;
-  uploadedAt: string;
-  tags: string[];
+  createdAt: string;
 }
 
 interface Vault {
   id: string;
   name: string;
   type: "knowledge_base" | "sandbox";
+  description: string | null;
   fileCount: number;
-  storageUsed: number;
   createdAt: string;
-  files: VaultFile[];
 }
 
 type OutputType = "draft" | "review_table";
 type OwnerType = "system" | "personal";
 type AssistantMode = "chat" | "document";
 
-interface VaultSource {
-  id: string;
-  name: string;
-}
 
 interface Prompt {
   id: string;
@@ -126,154 +120,6 @@ interface Prompt {
   isStarred: boolean;
 }
 
-// Mock data - will be replaced with API calls
-const mockVaults: VaultSource[] = [
-  { id: "1", name: "Client Documents" },
-  { id: "2", name: "Legal Templates" },
-  { id: "3", name: "Research Papers" },
-];
-
-// Mock vaults with files for vault selection modal
-const mockVaultsWithFiles: Vault[] = [
-  {
-    id: "1",
-    name: "Client Documents",
-    type: "knowledge_base",
-    fileCount: 5,
-    storageUsed: 558000,
-    createdAt: "2024-12-15",
-    files: [
-      {
-        id: "f1",
-        name: "Agreement_2024.pdf",
-        fileType: "pdf",
-        documentType: "Contract",
-        size: 245000,
-        uploadedAt: "2024-12-20",
-        tags: ["contract", "2024"],
-      },
-      {
-        id: "f2",
-        name: "NDA_Template.docx",
-        fileType: "docx",
-        documentType: "Template",
-        size: 45000,
-        uploadedAt: "2024-12-18",
-        tags: ["nda", "template"],
-      },
-      {
-        id: "f3",
-        name: "Client_Notes.txt",
-        fileType: "txt",
-        documentType: "Notes",
-        size: 12000,
-        uploadedAt: "2024-12-22",
-        tags: ["notes"],
-      },
-      {
-        id: "f4",
-        name: "Contract_Draft.pdf",
-        fileType: "pdf",
-        documentType: "Contract",
-        size: 189000,
-        uploadedAt: "2024-12-21",
-        tags: ["contract", "draft"],
-      },
-      {
-        id: "f5",
-        name: "Appendix_A.pdf",
-        fileType: "pdf",
-        documentType: "Appendix",
-        size: 67000,
-        uploadedAt: "2024-12-19",
-        tags: ["appendix"],
-      },
-    ],
-  },
-  {
-    id: "2",
-    name: "Legal Templates",
-    type: "knowledge_base",
-    fileCount: 3,
-    storageUsed: 288000,
-    createdAt: "2024-11-10",
-    files: [
-      {
-        id: "f6",
-        name: "Master_Agreement.docx",
-        fileType: "docx",
-        documentType: "Template",
-        size: 98000,
-        uploadedAt: "2024-11-12",
-        tags: ["master", "template"],
-      },
-      {
-        id: "f7",
-        name: "SLA_Template.pdf",
-        fileType: "pdf",
-        documentType: "Template",
-        size: 156000,
-        uploadedAt: "2024-11-15",
-        tags: ["sla", "template"],
-      },
-      {
-        id: "f8",
-        name: "Privacy_Policy.docx",
-        fileType: "docx",
-        documentType: "Policy",
-        size: 34000,
-        uploadedAt: "2024-11-20",
-        tags: ["privacy", "policy"],
-      },
-    ],
-  },
-  {
-    id: "3",
-    name: "Research Papers",
-    type: "sandbox",
-    fileCount: 4,
-    storageUsed: 1388000,
-    createdAt: "2024-10-05",
-    files: [
-      {
-        id: "f9",
-        name: "Case_Study_2023.pdf",
-        fileType: "pdf",
-        documentType: "Research",
-        size: 420000,
-        uploadedAt: "2024-10-08",
-        tags: ["case-study", "2023"],
-      },
-      {
-        id: "f10",
-        name: "Legal_Analysis.pdf",
-        fileType: "pdf",
-        documentType: "Analysis",
-        size: 312000,
-        uploadedAt: "2024-10-10",
-        tags: ["analysis"],
-      },
-      {
-        id: "f11",
-        name: "Market_Research.pdf",
-        fileType: "pdf",
-        documentType: "Research",
-        size: 567000,
-        uploadedAt: "2024-10-12",
-        tags: ["market", "research"],
-      },
-      {
-        id: "f12",
-        name: "Regulatory_Review.docx",
-        fileType: "docx",
-        documentType: "Review",
-        size: 89000,
-        uploadedAt: "2024-10-15",
-        tags: ["regulatory", "review"],
-      },
-    ],
-  },
-];
 
 const recommendedWorkflows = [
   {
@@ -398,7 +244,7 @@ export default function AssistantPage() {
   const [isImproving, setIsImproving] = useState(false);
   const [vaultSearchQuery, setVaultSearchQuery] = useState("");
   const [fileSortColumn, setFileSortColumn] = useState<
-    "name" | "documentType" | "size" | "uploadedAt"
+    "name" | "documentType" | "size" | "createdAt"
   >("name");
   const [fileSortDirection, setFileSortDirection] = useState<"asc" | "desc">(
     "asc",
@@ -421,6 +267,14 @@ export default function AssistantPage() {
   const [currentVersion, setCurrentVersion] = useState(1);
   const [availableVersions, setAvailableVersions] = useState<number[]>([1]);
   const [isLoadingVersion, setIsLoadingVersion] = useState(false);
+
+  // Vault data state (fetched from API)
+  const [vaults, setVaults] = useState<Vault[]>([]);
+  const [vaultsLoading, setVaultsLoading] = useState(false);
+  const [vaultsError, setVaultsError] = useState<string | null>(null);
+  const [vaultFiles, setVaultFiles] = useState<VaultFile[]>([]);
+  const [vaultFilesLoading, setVaultFilesLoading] = useState(false);
+  const [vaultFilesError, setVaultFilesError] = useState<string | null>(null);
 
   // Create New Vault modal state
   const [showCreateVaultModal, setShowCreateVaultModal] = useState(false);
@@ -483,26 +337,26 @@ export default function AssistantPage() {
         fileIds,
       });
 
-      // Add vault files to attached files as references
-      // Find files from mock data that match the IDs
-      const vault = mockVaultsWithFiles.find((v) => v.id === vaultId);
-      if (vault) {
-        const filesToAdd: AttachedFile[] = vault.files
-          .filter((f) => fileIds.includes(f.id))
-          .map((f) => ({
-            id: `vault-${f.id}`,
-            file: null,
-            name: f.name,
-            size: f.size,
-            source: "vault" as const,
-            vaultId: vaultId,
-          }));
-        setAttachedFiles(filesToAdd);
-        // Add vault to selected vaults for context
-        setSelectedVaults((prev) =>
-          prev.includes(vaultId) ? prev : [vaultId],
-        );
-      }
+      // Fetch vault documents from API to resolve file references
+      fetch(`/api/vaults/${vaultId}/documents`)
+        .then((res) => (res.ok ? res.json() : []))
+        .then((docs: { id: string; name: string; sizeBytes: number }[]) => {
+          const filesToAdd: AttachedFile[] = docs
+            .filter((d) => fileIds.includes(d.id))
+            .map((d) => ({
+              id: `vault-${d.id}`,
+              file: null,
+              name: d.name,
+              size: d.sizeBytes || 0,
+              source: "vault" as const,
+              vaultId: vaultId,
+            }));
+          if (filesToAdd.length > 0) setAttachedFiles(filesToAdd);
+        })
+        .catch(() => {});
+      setSelectedVaults((prev) =>
+        prev.includes(vaultId) ? prev : [vaultId],
+      );
     } else if (vaultId) {
       // Just vault selected, no specific files
       setPreloadedContext({
@@ -544,6 +398,63 @@ export default function AssistantPage() {
     [addFiles],
   );
 
+  // Fetch vaults from API
+  const fetchVaults = useCallback(async () => {
+    setVaultsLoading(true);
+    setVaultsError(null);
+    try {
+      const res = await fetch("/api/vaults");
+      if (!res.ok) throw new Error("Failed to fetch vaults");
+      const data = await res.json();
+      setVaults(
+        data.map((v: { id: string; name: string; type: string; description: string | null; fileCount: number; createdAt: string }) => ({
+          id: v.id,
+          name: v.name,
+          type: v.type as "knowledge_base" | "sandbox",
+          description: v.description,
+          fileCount: v.fileCount,
+          createdAt: v.createdAt,
+        })),
+      );
+    } catch (e) {
+      setVaultsError(e instanceof Error ? e.message : "Failed to fetch vaults");
+    } finally {
+      setVaultsLoading(false);
+    }
+  }, []);
+
+  // Fetch documents for a vault
+  const fetchVaultFiles = useCallback(async (vaultId: string) => {
+    setVaultFilesLoading(true);
+    setVaultFilesError(null);
+    try {
+      const res = await fetch(`/api/vaults/${vaultId}/documents`);
+      if (!res.ok) throw new Error("Failed to fetch documents");
+      const data = await res.json();
+      setVaultFiles(
+        data.map((d: { id: string; name: string; fileType: string; documentType: string | null; sizeBytes: number; createdAt: string }) => ({
+          id: d.id,
+          name: d.name,
+          fileType: d.fileType || "unknown",
+          documentType: d.documentType,
+          size: d.sizeBytes || 0,
+          createdAt: d.createdAt,
+        })),
+      );
+    } catch (e) {
+      setVaultFilesError(e instanceof Error ? e.message : "Failed to fetch documents");
+    } finally {
+      setVaultFilesLoading(false);
+    }
+  }, []);
+
+  // Fetch vaults when modal opens
+  useEffect(() => {
+    if (showVaultModal) {
+      fetchVaults();
+    }
+  }, [showVaultModal, fetchVaults]);
+
   const toggleVault = (vaultId: string) => {
     setSelectedVaults((prev) =>
       prev.includes(vaultId)
@@ -555,16 +466,19 @@ export default function AssistantPage() {
   const handleVaultSelect = (vault: Vault) => {
     setSelectedVaultForFiles(vault);
     setSelectedVaultFiles([]);
+    fetchVaultFiles(vault.id);
   };
 
   const handleBackToVaults = () => {
     setSelectedVaultForFiles(null);
     setSelectedVaultFiles([]);
     setFocusedFile(null);
+    setVaultFiles([]);
+    setVaultFilesError(null);
   };
 
   const handleFileSort = (
-    column: "name" | "documentType" | "size" | "uploadedAt",
+    column: "name" | "documentType" | "size" | "createdAt",
   ) => {
     if (fileSortColumn === column) {
       setFileSortDirection(fileSortDirection === "asc" ? "desc" : "asc");
@@ -575,32 +489,31 @@ export default function AssistantPage() {
   };
 
   const toggleSelectAllFiles = () => {
-    if (!selectedVaultForFiles) return;
-    if (selectedVaultFiles.length === selectedVaultForFiles.files.length) {
+    if (selectedVaultFiles.length === vaultFiles.length) {
       setSelectedVaultFiles([]);
     } else {
-      setSelectedVaultFiles(selectedVaultForFiles.files.map((f) => f.id));
+      setSelectedVaultFiles(vaultFiles.map((f) => f.id));
     }
   };
 
-  // Filter and sort vaults
-  const filteredVaults = mockVaultsWithFiles.filter((vault) =>
+  // Filter vaults by search
+  const filteredVaults = vaults.filter((vault) =>
     vault.name.toLowerCase().includes(vaultSearchQuery.toLowerCase()),
   );
 
   // Sort files
   const sortedFiles = selectedVaultForFiles
-    ? [...selectedVaultForFiles.files].sort((a, b) => {
+    ? [...vaultFiles].sort((a, b) => {
         const direction = fileSortDirection === "asc" ? 1 : -1;
         switch (fileSortColumn) {
           case "name":
             return direction * a.name.localeCompare(b.name);
           case "documentType":
-            return direction * a.documentType.localeCompare(b.documentType);
+            return direction * (a.documentType || "").localeCompare(b.documentType || "");
           case "size":
             return direction * (a.size - b.size);
-          case "uploadedAt":
-            return direction * a.uploadedAt.localeCompare(b.uploadedAt);
+          case "createdAt":
+            return direction * a.createdAt.localeCompare(b.createdAt);
           default:
             return 0;
         }
@@ -618,11 +531,11 @@ export default function AssistantPage() {
   const confirmVaultFileSelection = () => {
     if (!selectedVaultForFiles) return;
 
-    const filesToAdd: AttachedFile[] = selectedVaultForFiles.files
+    const filesToAdd: AttachedFile[] = vaultFiles
       .filter((f) => selectedVaultFiles.includes(f.id))
       .map((f) => ({
         id: `vault-${f.id}`,
-        file: null, // Vault files are references, not actual File objects
+        file: null,
         name: f.name,
         size: f.size,
         source: "vault" as const,
@@ -640,7 +553,7 @@ export default function AssistantPage() {
 
     const sources = selectedVaults
       .map((id) => {
-        const vault = mockVaults.find((v) => v.id === id);
+        const vault = vaults.find((v) => v.id === id);
         return vault ? { id, name: vault.name } : null;
       })
       .filter(Boolean);
@@ -1213,6 +1126,25 @@ export default function AssistantPage() {
                 <div
                   className={`${focusedFile ? "flex-1" : "w-full"} overflow-y-auto p-6`}
                 >
+                  {vaultFilesLoading && (
+                    <div className="flex items-center justify-center h-full">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    </div>
+                  )}
+                  {vaultFilesError && (
+                    <div className="flex flex-col items-center justify-center h-full gap-3">
+                      <p className="text-sm text-destructive">{vaultFilesError}</p>
+                      <Button variant="outline" size="sm" onClick={() => fetchVaultFiles(selectedVaultForFiles.id)}>
+                        Retry
+                      </Button>
+                    </div>
+                  )}
+                  {!vaultFilesLoading && !vaultFilesError && vaultFiles.length === 0 && (
+                    <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+                      No files in this vault
+                    </div>
+                  )}
+                  {!vaultFilesLoading && !vaultFilesError && vaultFiles.length > 0 && (
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -1220,8 +1152,8 @@ export default function AssistantPage() {
                           <TableCheckbox
                             checked={
                               selectedVaultFiles.length ===
-                                selectedVaultForFiles.files.length &&
-                              selectedVaultForFiles.files.length > 0
+                                vaultFiles.length &&
+                              vaultFiles.length > 0
                             }
                             onCheckedChange={toggleSelectAllFiles}
                           />
@@ -1256,13 +1188,12 @@ export default function AssistantPage() {
                         <TableHead>
                           <button
                             className="flex items-center gap-1 hover:text-foreground"
-                            onClick={() => handleFileSort("uploadedAt")}
+                            onClick={() => handleFileSort("createdAt")}
                           >
-                            Uploaded On
+                            Created
                             <ArrowUpDown className="h-3 w-3" />
                           </button>
                         </TableHead>
-                        <TableHead>Tags</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -1295,35 +1226,22 @@ export default function AssistantPage() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Badge variant="secondary">
-                                {file.documentType}
-                              </Badge>
+                              {file.documentType ? (
+                                <Badge variant="secondary">
+                                  {file.documentType}
+                                </Badge>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">-</span>
+                              )}
                             </TableCell>
                             <TableCell>{formatFileSize(file.size)}</TableCell>
-                            <TableCell>{file.uploadedAt}</TableCell>
-                            <TableCell>
-                              <div className="flex gap-1 flex-wrap">
-                                {file.tags.slice(0, 2).map((tag) => (
-                                  <Badge
-                                    key={tag}
-                                    variant="outline"
-                                    className="text-xs"
-                                  >
-                                    {tag}
-                                  </Badge>
-                                ))}
-                                {file.tags.length > 2 && (
-                                  <Badge variant="outline" className="text-xs">
-                                    +{file.tags.length - 2}
-                                  </Badge>
-                                )}
-                              </div>
-                            </TableCell>
+                            <TableCell>{new Date(file.createdAt).toLocaleDateString()}</TableCell>
                           </TableRow>
                         );
                       })}
                     </TableBody>
                   </Table>
+                  )}
                 </div>
 
                 {/* Metadata Panel - Right Side */}
@@ -1395,29 +1313,10 @@ export default function AssistantPage() {
 
                         <div>
                           <p className="text-xs text-muted-foreground mb-1">
-                            Uploaded On
+                            Created
                           </p>
-                          <p className="text-sm">{focusedFile.uploadedAt}</p>
+                          <p className="text-sm">{new Date(focusedFile.createdAt).toLocaleDateString()}</p>
                         </div>
-
-                        {focusedFile.tags.length > 0 && (
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">
-                              Tags
-                            </p>
-                            <div className="flex gap-1 flex-wrap">
-                              {focusedFile.tags.map((tag) => (
-                                <Badge
-                                  key={tag}
-                                  variant="outline"
-                                  className="text-xs"
-                                >
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -1426,6 +1325,19 @@ export default function AssistantPage() {
             ) : (
               /* Vault Cards View */
               <div className="space-y-4 p-6 overflow-y-auto h-full">
+                {vaultsLoading && (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+                {vaultsError && (
+                  <div className="flex flex-col items-center justify-center py-12 gap-3">
+                    <p className="text-sm text-destructive">{vaultsError}</p>
+                    <Button variant="outline" size="sm" onClick={fetchVaults}>Retry</Button>
+                  </div>
+                )}
+                {!vaultsLoading && !vaultsError && (
+                <>
                 {/* Create New Vault option */}
                 <button
                   className="w-full p-4 border-2 border-dashed border-neutral-300 dark:border-neutral-600 bg-white dark:bg-background hover:border-primary hover:bg-primary/5 transition-colors flex items-center gap-3"
@@ -1468,15 +1380,11 @@ export default function AssistantPage() {
                       <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1.5">
                           <Calendar className="h-3.5 w-3.5" />
-                          <span>{vault.createdAt}</span>
+                          <span>{new Date(vault.createdAt).toLocaleDateString()}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <File className="h-3.5 w-3.5" />
                           <span>{vault.fileCount} files</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 col-span-2">
-                          <HardDrive className="h-3.5 w-3.5" />
-                          <span>{formatFileSize(vault.storageUsed)}</span>
                         </div>
                       </div>
                     </button>
@@ -1488,6 +1396,8 @@ export default function AssistantPage() {
                   <div className="text-center py-8 text-muted-foreground">
                     No vaults found matching &quot;{vaultSearchQuery}&quot;
                   </div>
+                )}
+                </>
                 )}
               </div>
             )}
@@ -1798,7 +1708,11 @@ export default function AssistantPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setShowVaultSelector(!showVaultSelector)}
+                onClick={() => {
+                  const next = !showVaultSelector;
+                  setShowVaultSelector(next);
+                  if (next && vaults.length === 0) fetchVaults();
+                }}
                 className="gap-1.5"
                 disabled={isLoading}
               >
@@ -1810,7 +1724,13 @@ export default function AssistantPage() {
             {/* Vault Selection Dropdown */}
             {showVaultSelector && (
               <div className="flex flex-wrap gap-2 p-3 bg-muted/50 rounded-md">
-                {mockVaults.map((vault) => {
+                {vaultsLoading && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading vaults...
+                  </div>
+                )}
+                {!vaultsLoading && vaults.map((vault) => {
                   const isSelected = selectedVaults.includes(vault.id);
                   return (
                     <Button
@@ -1826,6 +1746,12 @@ export default function AssistantPage() {
                     </Button>
                   );
                 })}
+                {!vaultsLoading && vaults.length === 0 && !vaultsError && (
+                  <span className="text-sm text-muted-foreground">No vaults found</span>
+                )}
+                {vaultsError && (
+                  <span className="text-sm text-destructive">{vaultsError}</span>
+                )}
               </div>
             )}
 
@@ -1895,7 +1821,7 @@ export default function AssistantPage() {
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <span>Sources:</span>
                 {selectedVaults.map((id) => {
-                  const vault = mockVaults.find((v) => v.id === id);
+                  const vault = vaults.find((v) => v.id === id);
                   return vault ? (
                     <Badge key={id} variant="secondary">
                       {vault.name}
