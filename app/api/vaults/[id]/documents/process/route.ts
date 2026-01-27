@@ -5,6 +5,7 @@ import { chunkText } from "@/lib/chunker"
 import { embedChunks } from "@/lib/embeddings"
 import { upsertVectors, vaultNamespace } from "@/lib/pinecone"
 import type { VectorMetadata } from "@/lib/pinecone"
+import { categorizeDocument } from "@/lib/categorize-document"
 
 // POST /api/vaults/[id]/documents/process - Process document for embedding
 export async function POST(
@@ -58,12 +59,23 @@ export async function POST(
         throw new Error("No text could be extracted from document")
       }
 
+      // Run categorization and embedding in parallel
+      const categorizePromise = categorizeDocument(document.name, text).catch(
+        (err) => {
+          console.error("Categorization failed (non-fatal):", err)
+          return null
+        }
+      )
+
       // Chunk text
       const chunks = chunkText(text)
 
       // Embed chunks
       const chunkTexts = chunks.map((c) => c.text)
       const vectors = await embedChunks(chunkTexts)
+
+      // Await categorization (started earlier)
+      const categorization = await categorizePromise
 
       // Prepare pinecone records
       const namespace = vaultNamespace(vaultId)
@@ -82,14 +94,32 @@ export async function POST(
       // Upsert to Pinecone
       await upsertVectors(namespace, records)
 
+      // Build update data
+      const existingMeta = (document.metadata as Record<string, unknown>) || {}
+      const updateData: Record<string, unknown> = {
+        embeddingStatus: "completed",
+        chunkCount: chunks.length,
+        embeddedAt: new Date(),
+      }
+
+      if (categorization) {
+        // Only set documentType if not already user-assigned
+        if (!document.documentType) {
+          updateData.documentType = categorization.category
+        }
+        // Store AI categorization in metadata
+        updateData.metadata = {
+          ...existingMeta,
+          aiCategory: categorization.category,
+          aiCategoryConfidence: categorization.confidence,
+          aiCategoryReasoning: categorization.reasoning,
+        }
+      }
+
       // Update document status
       await prisma.document.update({
         where: { id: documentId },
-        data: {
-          embeddingStatus: "completed",
-          chunkCount: chunks.length,
-          embeddedAt: new Date(),
-        },
+        data: updateData,
       })
 
       return NextResponse.json({

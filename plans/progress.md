@@ -1281,3 +1281,32 @@
 
 ### Files modified
 - app/api/vaults/[id]/documents/route.ts - added non-blocking processing trigger after upload
+
+## 2026-01-27: Document Categories and AI Categorization
+
+### Completed
+- Created lib/document-categories.ts with 18 categories (10 EB1A + 8 general)
+- Created lib/categorize-document.ts using generateObject() with structured output
+- Wired categorization into process endpoint alongside embedding (parallel, non-fatal)
+- AI sets documentType if not already user-assigned, stores confidence/reasoning in metadata
+- Created PATCH /api/vaults/[id]/documents/[docId] endpoint for category override
+- Preserves aiCategory in metadata when user overrides
+- Added category Select dropdown to vault detail page document rows
+- Query modal shows category as Badge with getCategoryLabel()
+- Updated 5 PRD items to passes:true
+
+### Notes for next dev
+- Categorization uses first ~12000 chars (~3000 tokens) of extracted text
+- categorizeDocument() is non-fatal - if it fails, embedding still completes
+- PATCH endpoint also supports name updates
+- Category slugs used in DB, labels for display via getCategoryLabel()
+- Create vault modal already has per-file category dropdown (from earlier work)
+
+### Files created
+- lib/document-categories.ts - category constants and helpers
+- lib/categorize-document.ts - AI categorization via generateObject()
+- app/api/vaults/[id]/documents/[docId]/route.ts - PATCH endpoint
+
+### Files modified
+- app/api/vaults/[id]/documents/process/route.ts - added categorization alongside embedding
+- app/(dashboard)/vault/[id]/page.tsx - category Select dropdown, handleCategoryChange

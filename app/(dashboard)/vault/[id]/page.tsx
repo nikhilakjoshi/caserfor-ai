@@ -44,6 +44,14 @@ import {
   X,
   File,
 } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { DOCUMENT_CATEGORIES, getCategoryLabel } from "@/lib/document-categories"
 import Link from "next/link"
 
 type VaultType = "knowledge_base" | "sandbox"
@@ -74,12 +82,7 @@ interface Vault {
 type SortField = "name" | "documentType" | "updatedAt" | "fileType" | "sizeBytes"
 type SortDirection = "asc" | "desc"
 
-const documentTypeColors: Record<string, string> = {
-  Agreement: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  Checklist: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-  Financial: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-  Corporate: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
-}
+// Color map not needed - using Select dropdown for category display
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B"
@@ -185,6 +188,23 @@ export default function VaultDetailPage() {
       setSelectedFileIds([])
     } else {
       setSelectedFileIds(documents.map((d) => d.id))
+    }
+  }
+
+  const handleCategoryChange = async (docId: string, category: string) => {
+    try {
+      const res = await fetch(`/api/vaults/${vaultId}/documents/${docId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documentType: category }),
+      })
+      if (!res.ok) throw new Error("Failed to update")
+      const updated = await res.json()
+      setDocuments((prev) =>
+        prev.map((d) => (d.id === docId ? { ...d, documentType: updated.documentType, updatedAt: updated.updatedAt } : d))
+      )
+    } catch (err) {
+      console.error("Failed to update category:", err)
     }
   }
 
@@ -490,17 +510,24 @@ export default function VaultDetailPage() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      {doc.documentType ? (
-                        <Badge
-                          variant="secondary"
-                          className={documentTypeColors[doc.documentType] || ""}
-                        >
-                          {doc.documentType}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <Select
+                        value={doc.documentType || ""}
+                        onValueChange={(value) => handleCategoryChange(doc.id, value)}
+                      >
+                        <SelectTrigger className="h-7 w-[160px] text-xs">
+                          <SelectValue placeholder="Set category">
+                            {doc.documentType ? getCategoryLabel(doc.documentType) : "Set category"}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DOCUMENT_CATEGORIES.map((cat) => (
+                            <SelectItem key={cat.slug} value={cat.slug}>
+                              {cat.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {formatDate(doc.updatedAt)}
@@ -640,11 +667,8 @@ export default function VaultDetailPage() {
                         </TableCell>
                         <TableCell>
                           {doc.documentType ? (
-                            <Badge
-                              variant="secondary"
-                              className={documentTypeColors[doc.documentType] || ""}
-                            >
-                              {doc.documentType}
+                            <Badge variant="secondary">
+                              {getCategoryLabel(doc.documentType)}
                             </Badge>
                           ) : (
                             <span className="text-muted-foreground">-</span>

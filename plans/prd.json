@@ -284,7 +284,7 @@
       "Include slug, label, and description for each",
       "Export as const"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -296,7 +296,7 @@
       "Output schema: { category: enum, confidence: number, reasoning: string }",
       "Return categorization result"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -307,7 +307,7 @@
       "Store confidence + reasoning in Document.metadata",
       "Preserve original AI category in metadata.aiCategory on override"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -319,7 +319,7 @@
       "Update Document record",
       "Return updated document"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -331,7 +331,7 @@
       "Show current category badge on each document row",
       "Add category select option in create vault modal if applicable"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
