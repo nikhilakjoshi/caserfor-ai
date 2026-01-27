@@ -395,7 +395,7 @@
       "Verify package in package.json",
       "Configure Next.js for react-pdf if needed (webpack config for pdf.worker)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -408,7 +408,7 @@
       "Support jumping to specific page via props",
       "Support text highlight/scroll for citation navigation"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -419,7 +419,7 @@
       "Pass presigned URL to viewer",
       "Close viewer on dismiss"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -429,7 +429,7 @@
       "Open DocumentViewer with target page/passage",
       "Highlight cited text passage in viewer"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",

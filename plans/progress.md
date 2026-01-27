@@ -1422,3 +1422,33 @@
 
 ### Files modified
 - components/ui/markdown-renderer.tsx - citation parsing, CitationBadge, processChildren
+
+## 2026-01-27: Document Preview (react-pdf + DocumentViewer)
+
+### Completed
+- Installed react-pdf package
+- Configured Next.js webpack to exclude canvas for SSR compatibility
+- Created DocumentViewer component at components/vault/document-viewer.tsx
+- PDF rendering via react-pdf with page navigation, zoom controls, download button
+- Non-PDF files render as pre-formatted text
+- Added document preview to vault detail page: clicking a document row fetches presigned URL and opens viewer
+- Wired citation badges in assistant page to open DocumentViewer on click
+- Citation click matches attached file by name, fetches presigned URL, opens viewer
+- Updated 4 PRD items to passes:true - ALL PRD items now complete
+
+### Notes for next dev
+- pdf.js worker configured via import.meta.url for Next.js compatibility
+- DocumentViewer is a fixed overlay (z-50) - not a modal/dialog
+- Citation click uses fuzzy name matching (attached file name vs citation document name)
+- Text highlight/scroll for citation navigation not implemented - would need chunk-to-page mapping
+- Non-PDF preview shows textContent prop or fallback message
+- Pre-existing .next/types validator errors (Route type) unrelated to this work
+
+### Files created
+- components/vault/document-viewer.tsx - DocumentViewer with react-pdf
+
+### Files modified
+- next.config.ts - webpack canvas alias for react-pdf SSR
+- app/(dashboard)/vault/[id]/page.tsx - document row click handler, preview state, DocumentViewer render
+- app/(dashboard)/assistant/page.tsx - citation click handler, citationPreview state, DocumentViewer render
+- package.json - added react-pdf dependency

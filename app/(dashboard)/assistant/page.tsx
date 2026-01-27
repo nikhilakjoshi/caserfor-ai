@@ -70,6 +70,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
+import { DocumentViewer } from "@/components/vault/document-viewer";
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 
@@ -254,6 +255,9 @@ export default function AssistantPage() {
   );
   const [focusedFile, setFocusedFile] = useState<VaultFile | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Document preview state
+  const [citationPreview, setCitationPreview] = useState<{ url: string; fileName: string; fileType: string } | null>(null);
 
   // Mode state for split-panel layout
   const [mode, setMode] = useState<AssistantMode>("chat");
@@ -873,6 +877,25 @@ export default function AssistantPage() {
     setCurrentVersion(1);
     setAvailableVersions([1]);
   };
+
+  // Handle citation click - fetch presigned URL and open viewer
+  const handleCitationClick = useCallback(async (documentName: string) => {
+    // Find matching attached file by name
+    const match = attachedFiles.find((f) =>
+      f.name.toLowerCase().includes(documentName.toLowerCase()) ||
+      documentName.toLowerCase().includes(f.name.replace(/\.[^.]+$/, "").toLowerCase())
+    );
+    if (!match || !match.vaultId) return;
+    try {
+      const res = await fetch(`/api/vaults/${match.vaultId}/documents/${match.id}/presign`);
+      if (!res.ok) return;
+      const { url } = await res.json();
+      const ext = match.name.split(".").pop()?.toLowerCase() || "";
+      setCitationPreview({ url, fileName: match.name, fileType: ext });
+    } catch {
+      // silently fail
+    }
+  }, [attachedFiles]);
 
   // Handle version switching
   const handleVersionChange = useCallback(
@@ -1678,7 +1701,7 @@ export default function AssistantPage() {
               <p className="text-sm text-muted-foreground mb-2">Query:</p>
               <MarkdownRenderer content={submittedQuery} />
             </div>
-            <MarkdownRenderer content={displayContent} />
+            <MarkdownRenderer content={displayContent} onCitationClick={handleCitationClick} />
             {isLoading && (
               <span className="inline-flex items-center gap-1 text-muted-foreground">
                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -1933,6 +1956,16 @@ export default function AssistantPage() {
       {/* Modals */}
       {renderVaultModal()}
       {renderCreateVaultModal()}
+
+      {/* Citation Document Preview */}
+      {citationPreview && (
+        <DocumentViewer
+          url={citationPreview.url}
+          fileName={citationPreview.fileName}
+          fileType={citationPreview.fileType}
+          onClose={() => setCitationPreview(null)}
+        />
+      )}
     </>
   );
 }

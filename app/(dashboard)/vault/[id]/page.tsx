@@ -57,6 +57,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { DOCUMENT_CATEGORIES, getCategoryLabel } from "@/lib/document-categories"
+import { DocumentViewer } from "@/components/vault/document-viewer"
 import Link from "next/link"
 
 type VaultType = "knowledge_base" | "sandbox"
@@ -123,6 +124,8 @@ export default function VaultDetailPage() {
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([])
   const [queryModalSortField, setQueryModalSortField] = useState<SortField>("name")
   const [queryModalSortDirection, setQueryModalSortDirection] = useState<SortDirection>("asc")
+  const [previewDoc, setPreviewDoc] = useState<{ url: string; fileName: string; fileType: string; textContent?: string } | null>(null)
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false)
 
   const fetchData = async () => {
     setIsLoading(true)
@@ -259,6 +262,21 @@ export default function VaultDetailPage() {
       )
     } catch (err) {
       console.error("Failed to update category:", err)
+    }
+  }
+
+  const handlePreviewDocument = async (doc: Document) => {
+    if (isLoadingPreview) return
+    setIsLoadingPreview(true)
+    try {
+      const res = await fetch(`/api/vaults/${vaultId}/documents/${doc.id}/presign`)
+      if (!res.ok) throw new Error("Failed to get download URL")
+      const { url } = await res.json()
+      setPreviewDoc({ url, fileName: doc.name, fileType: doc.fileType })
+    } catch (err) {
+      console.error("Preview failed:", err)
+    } finally {
+      setIsLoadingPreview(false)
     }
   }
 
@@ -547,7 +565,7 @@ export default function VaultDetailPage() {
                 </TableRow>
               ) : (
                 sortedDocuments.map((doc) => (
-                  <TableRow key={doc.id} className="cursor-pointer hover:bg-muted/50">
+                  <TableRow key={doc.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handlePreviewDocument(doc)}>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4 text-muted-foreground" />
@@ -775,6 +793,17 @@ export default function VaultDetailPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Document Preview */}
+      {previewDoc && (
+        <DocumentViewer
+          url={previewDoc.url}
+          fileName={previewDoc.fileName}
+          fileType={previewDoc.fileType}
+          textContent={previewDoc.textContent}
+          onClose={() => setPreviewDoc(null)}
+        />
+      )}
     </>
   )
 }
