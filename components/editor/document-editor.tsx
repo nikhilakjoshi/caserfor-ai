@@ -6,6 +6,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import Link from "@tiptap/extension-link";
+import { Markdown } from "tiptap-markdown";
 import { useEffect, useRef, useCallback } from "react";
 import {
   Bold,
@@ -41,8 +42,7 @@ export function DocumentEditor({
   className,
   isStreaming = false,
 }: DocumentEditorProps) {
-  // Track previous content length to detect new streamed content
-  const prevContentLengthRef = useRef(0);
+  // Track streaming state
   const isStreamingRef = useRef(isStreaming);
   const wasStreamingRef = useRef(false);
 
@@ -63,9 +63,16 @@ export function DocumentEditor({
       Link.configure({
         openOnClick: false,
       }),
+      Markdown.configure({
+        html: true, // Allow HTML in markdown
+        breaks: true, // Convert single line breaks to <br>
+        transformPastedText: true, // Transform pasted markdown
+        transformCopiedText: true, // Transform copied text to markdown
+      }),
     ],
     content,
     editable,
+    immediatelyRender: false, // Prevent SSR hydration mismatch
     onUpdate: ({ editor }) => {
       // Only emit changes when not streaming (user edits)
       if (!isStreamingRef.current) {
@@ -85,14 +92,11 @@ export function DocumentEditor({
     isStreamingRef.current = isStreaming;
   }, [isStreaming]);
 
-  // Convert plain text to simple HTML paragraphs
-  const textToHtml = useCallback((text: string): string => {
-    if (!text) return "";
-    // Split by double newlines for paragraphs, preserve single newlines as <br>
-    return text
-      .split(/\n\n+/)
-      .map((para) => `<p>${para.replace(/\n/g, "<br>")}</p>`)
-      .join("");
+  // Check if content looks like markdown
+  const isMarkdown = useCallback((text: string): boolean => {
+    if (!text) return false;
+    // Check for common markdown patterns
+    return /^#{1,6}\s|^\*\*|^__|\*\*$|__$|^\-\s|^\d+\.\s|^>\s|```|^\|.*\|$/m.test(text);
   }, []);
 
   // Handle streaming content updates
@@ -101,50 +105,32 @@ export function DocumentEditor({
 
     if (isStreaming) {
       wasStreamingRef.current = true;
-
-      // During streaming, append only new content to avoid cursor jumps
-      const currentLength = content.length;
-      const prevLength = prevContentLengthRef.current;
-
-      if (currentLength > prevLength) {
-        // Get the new content that was added
-        const newContent = content.slice(prevLength);
-
-        // Move cursor to end and insert new text
-        editor
-          .chain()
-          .focus("end")
-          .insertContent(newContent)
-          .run();
-      } else if (currentLength === 0 && prevLength > 0) {
-        // Content was cleared, reset editor
-        editor.commands.clearContent();
+      // During streaming, update content directly
+      // The Markdown extension will parse markdown content automatically
+      if (content) {
+        // Use setContent with markdown - the Markdown extension handles parsing
+        editor.commands.setContent(content);
       }
-
-      prevContentLengthRef.current = currentLength;
     } else {
       // Streaming ended
       if (wasStreamingRef.current) {
-        // Streaming just finished - convert to proper HTML format
         wasStreamingRef.current = false;
-        prevContentLengthRef.current = 0;
-
-        // Final content sync with HTML conversion
-        const htmlContent = textToHtml(content);
-        editor.commands.setContent(htmlContent);
+        // Final content sync - the Markdown extension handles formatting
+        if (content) {
+          editor.commands.setContent(content);
+        }
       } else if (content !== editor.getText()) {
         // Regular content update (not from streaming)
-        // Check if content looks like HTML or plain text
         const isHtml = content.startsWith("<") || content.includes("</");
         if (isHtml) {
           editor.commands.setContent(content);
         } else {
-          editor.commands.setContent(textToHtml(content));
+          // Let the Markdown extension handle non-HTML content
+          editor.commands.setContent(content);
         }
-        prevContentLengthRef.current = content.length;
       }
     }
-  }, [content, editor, isStreaming, textToHtml]);
+  }, [content, editor, isStreaming, isMarkdown]);
 
   if (!editor) {
     return null;

@@ -333,6 +333,19 @@ Present in alphabetical order by term.`,
 ]
 
 async function main() {
+  // Create mock user for development
+  console.log("Creating mock user...")
+  await prisma.user.upsert({
+    where: { id: "mock-user-id" },
+    update: {},
+    create: {
+      id: "mock-user-id",
+      email: "dev@example.com",
+      name: "Dev User",
+    },
+  })
+  console.log("  Created mock user: mock-user-id")
+
   console.log("Seeding database with system workflows...")
 
   for (const workflow of systemWorkflows) {
