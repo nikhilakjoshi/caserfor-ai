@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
@@ -43,6 +43,11 @@ import {
   Sparkles,
   X,
   File,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  RefreshCw,
+  Clock,
 } from "lucide-react"
 import {
   Select,
@@ -147,6 +152,55 @@ export default function VaultDetailPage() {
     fetchData()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vaultId])
+
+  // Poll for document processing status updates
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const hasProcessingDocs = useCallback(() => {
+    return documents.some(
+      (d) => d.embeddingStatus === "pending" || d.embeddingStatus === "processing"
+    )
+  }, [documents])
+
+  useEffect(() => {
+    if (hasProcessingDocs()) {
+      pollIntervalRef.current = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/vaults/${vaultId}/documents`)
+          if (res.ok) {
+            const data = await res.json()
+            setDocuments(data)
+          }
+        } catch {
+          // silently ignore poll errors
+        }
+      }, 4000)
+    } else if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current)
+      pollIntervalRef.current = null
+    }
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current)
+        pollIntervalRef.current = null
+      }
+    }
+  }, [hasProcessingDocs, vaultId])
+
+  const handleRetry = async (docId: string) => {
+    try {
+      const res = await fetch(`/api/vaults/${vaultId}/documents/${docId}/retry`, {
+        method: "POST",
+      })
+      if (!res.ok) throw new Error("Retry failed")
+      const updated = await res.json()
+      setDocuments((prev) =>
+        prev.map((d) => (d.id === docId ? { ...d, embeddingStatus: updated.embeddingStatus } : d))
+      )
+    } catch (err) {
+      console.error("Failed to retry:", err)
+    }
+  }
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -498,14 +552,28 @@ export default function VaultDetailPage() {
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">{doc.name}</span>
+                        {doc.embeddingStatus === "pending" && (
+                          <Badge variant="outline" className="text-xs text-muted-foreground">
+                            <Clock className="mr-1 h-3 w-3" />
+                            Pending
+                          </Badge>
+                        )}
                         {doc.embeddingStatus === "processing" && (
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge variant="secondary" className="text-xs text-blue-600 dark:text-blue-400">
+                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                             Processing
                           </Badge>
                         )}
-                        {doc.embeddingStatus === "pending" && (
-                          <Badge variant="outline" className="text-xs">
-                            Pending
+                        {doc.embeddingStatus === "completed" && (
+                          <Badge variant="secondary" className="text-xs text-green-600 dark:text-green-400">
+                            <CheckCircle2 className="mr-1 h-3 w-3" />
+                            Embedded
+                          </Badge>
+                        )}
+                        {doc.embeddingStatus === "failed" && (
+                          <Badge variant="secondary" className="text-xs text-red-600 dark:text-red-400">
+                            <XCircle className="mr-1 h-3 w-3" />
+                            Failed
                           </Badge>
                         )}
                       </div>
@@ -551,6 +619,12 @@ export default function VaultDetailPage() {
                           <DropdownMenuItem>Download</DropdownMenuItem>
                           <DropdownMenuItem>Rename</DropdownMenuItem>
                           <DropdownMenuItem>Set document type</DropdownMenuItem>
+                          {doc.embeddingStatus === "failed" && (
+                            <DropdownMenuItem onClick={() => handleRetry(doc.id)}>
+                              <RefreshCw className="mr-2 h-4 w-4" />
+                              Retry processing
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem className="text-red-600">
                             Delete
                           </DropdownMenuItem>

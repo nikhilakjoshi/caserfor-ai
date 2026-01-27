@@ -1310,3 +1310,29 @@
 ### Files modified
 - app/api/vaults/[id]/documents/process/route.ts - added categorization alongside embedding
 - app/(dashboard)/vault/[id]/page.tsx - category Select dropdown, handleCategoryChange
+
+## 2026-01-27: Document Processing Status Polling, Badges, and Retry
+
+### Completed
+- Added polling to vault detail page: fetches documents every 4s while any are pending/processing
+- Polling auto-stops when all documents reach completed or failed state
+- Cleanup on unmount via useRef interval tracking
+- Styled all 4 embedding status badges: pending (gray, Clock icon), processing (blue, animated Loader2), completed (green, CheckCircle2), failed (red, XCircle)
+- Created POST /api/vaults/[id]/documents/[docId]/retry endpoint
+- Retry resets embeddingStatus to pending and re-triggers processing pipeline non-blocking
+- Only failed documents can be retried (400 error otherwise)
+- Added "Retry processing" option in document row dropdown menu for failed docs
+- Retry triggers polling to resume automatically
+- Updated 4 PRD items to passes:true
+
+### Notes for next dev
+- Polling interval is 4 seconds - adjust if too frequent for production
+- Retry uses same fire-and-forget fetch pattern as initial upload processing
+- hasProcessingDocs is memoized with useCallback to avoid unnecessary polling restarts
+- Status badges use lucide icons inline with text for compact display
+
+### Files created
+- app/api/vaults/[id]/documents/[docId]/retry/route.ts - retry endpoint
+
+### Files modified
+- app/(dashboard)/vault/[id]/page.tsx - polling, status badges, retry button

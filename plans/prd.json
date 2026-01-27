@@ -439,7 +439,7 @@
       "Include status field: PENDING, PROCESSING, COMPLETED, FAILED",
       "Optionally create per-document status endpoint"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -450,7 +450,7 @@
       "Stop polling when all documents COMPLETED or FAILED",
       "Update document list on each poll response"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -461,7 +461,7 @@
       "Show COMPLETED badge (green)",
       "Show FAILED badge (red)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -473,6 +473,6 @@
       "Add retry button on FAILED document rows in UI",
       "On click, call retry endpoint and resume polling"
     ],
-    "passes": false
+    "passes": true
   }
 ]
