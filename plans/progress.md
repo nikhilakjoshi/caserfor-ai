@@ -1071,3 +1071,29 @@
 - app/api/documents/route.ts - use currentVersion field
 - components/assistant/editor-panel.tsx - added isLoadingVersion prop, improved dropdown
 - app/(dashboard)/assistant/page.tsx - version state, handleVersionChange
+
+## 2026-01-26: Document Editor Bug Fixes
+
+### Completed
+- Fixed content comparison: changed editor.getText() to editor.getHTML() for proper comparison
+- Added isInternalUpdateRef to track internal updates and prevent feedback loops
+- Added isFormattingRef to track formatting operations and prevent cursor jumps
+- Guard content sync useEffect from internal updates (early return if isInternalUpdateRef.current)
+- Guard content sync useEffect from formatting operations (early return if isFormattingRef.current)
+- Consolidated setContent calls with { emitUpdate: false } option to prevent update loops
+- Added cursor position preservation: save selection before setContent, restore after (clamped to valid range)
+- Removed unused isMarkdown function and removed it from useEffect dependencies
+- Created runFormatting() helper that wraps formatting commands with guard ref
+- Wrapped all 13 toolbar button handlers with runFormatting() guard
+- Verified StarterKit includes Bold, Italic, Strike; Underline extension loaded separately
+- Updated 11 PRD bug fix items to passes:true
+
+### Notes for next dev
+- TipTap setContent uses { emitUpdate: false } option, not boolean second arg
+- Formatting guard uses queueMicrotask to reset after React reconciliation
+- Cursor preservation clamps to doc.content.size to avoid out-of-bounds
+- All formatting operations (bold, italic, underline, strike, lists, alignment, link, undo/redo) now guarded
+- Remaining false PRD items: Test endpoints (3), Markdown rendering (12)
+
+### Files modified
+- components/editor/document-editor.tsx - all bug fixes applied

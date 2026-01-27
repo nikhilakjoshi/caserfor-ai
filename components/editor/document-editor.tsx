@@ -45,6 +45,10 @@ export function DocumentEditor({
   // Track streaming state
   const isStreamingRef = useRef(isStreaming);
   const wasStreamingRef = useRef(false);
+  // Track internal updates to prevent feedback loops
+  const isInternalUpdateRef = useRef(false);
+  // Track formatting operations to prevent cursor jumps
+  const isFormattingRef = useRef(false);
 
   const editor = useEditor({
     extensions: [
@@ -76,7 +80,12 @@ export function DocumentEditor({
     onUpdate: ({ editor }) => {
       // Only emit changes when not streaming (user edits)
       if (!isStreamingRef.current) {
+        isInternalUpdateRef.current = true;
         onChange?.(editor.getHTML());
+        // Reset after microtask to allow parent re-render
+        queueMicrotask(() => {
+          isInternalUpdateRef.current = false;
+        });
       }
     },
     editorProps: {
@@ -92,45 +101,63 @@ export function DocumentEditor({
     isStreamingRef.current = isStreaming;
   }, [isStreaming]);
 
-  // Check if content looks like markdown
-  const isMarkdown = useCallback((text: string): boolean => {
-    if (!text) return false;
-    // Check for common markdown patterns
-    return /^#{1,6}\s|^\*\*|^__|\*\*$|__$|^\-\s|^\d+\.\s|^>\s|```|^\|.*\|$/m.test(text);
-  }, []);
-
   // Handle streaming content updates
   useEffect(() => {
     if (!editor) return;
+
+    // Skip if this is a re-render from our own onChange emission
+    if (isInternalUpdateRef.current) return;
+
+    // Skip if formatting operation in progress
+    if (isFormattingRef.current) return;
 
     if (isStreaming) {
       wasStreamingRef.current = true;
       // During streaming, update content directly
       // The Markdown extension will parse markdown content automatically
-      if (content) {
-        // Use setContent with markdown - the Markdown extension handles parsing
-        editor.commands.setContent(content);
+      if (content && content !== editor.getHTML()) {
+        // Save cursor position
+        const { from, to } = editor.state.selection;
+        editor.commands.setContent(content, { emitUpdate: false });
+        // Restore cursor (clamped to valid range)
+        const maxPos = editor.state.doc.content.size;
+        const safeFrom = Math.min(from, maxPos);
+        const safeTo = Math.min(to, maxPos);
+        editor.commands.setTextSelection({ from: safeFrom, to: safeTo });
       }
     } else {
       // Streaming ended
       if (wasStreamingRef.current) {
         wasStreamingRef.current = false;
         // Final content sync - the Markdown extension handles formatting
-        if (content) {
-          editor.commands.setContent(content);
+        if (content && content !== editor.getHTML()) {
+          editor.commands.setContent(content, { emitUpdate: false });
         }
-      } else if (content !== editor.getText()) {
+      } else if (content !== editor.getHTML()) {
         // Regular content update (not from streaming)
-        const isHtml = content.startsWith("<") || content.includes("</");
-        if (isHtml) {
-          editor.commands.setContent(content);
-        } else {
-          // Let the Markdown extension handle non-HTML content
-          editor.commands.setContent(content);
-        }
+        // Save cursor position
+        const { from, to } = editor.state.selection;
+        editor.commands.setContent(content, { emitUpdate: false });
+        // Restore cursor (clamped to valid range)
+        const maxPos = editor.state.doc.content.size;
+        const safeFrom = Math.min(from, maxPos);
+        const safeTo = Math.min(to, maxPos);
+        editor.commands.setTextSelection({ from: safeFrom, to: safeTo });
       }
     }
-  }, [content, editor, isStreaming, isMarkdown]);
+  }, [content, editor, isStreaming]);
+
+  // Wrap formatting commands to prevent content sync during operation
+  const runFormatting = useCallback(
+    (command: () => void) => {
+      isFormattingRef.current = true;
+      command();
+      queueMicrotask(() => {
+        isFormattingRef.current = false;
+      });
+    },
+    []
+  );
 
   if (!editor) {
     return null;
@@ -149,7 +176,7 @@ export function DocumentEditor({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleBold().run()}
+          onClick={() => runFormatting(() => editor.chain().focus().toggleBold().run())}
           className={cn(
             "h-8 w-8 p-0",
             editor.isActive("bold") && "bg-muted"
@@ -161,7 +188,7 @@ export function DocumentEditor({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
+          onClick={() => runFormatting(() => editor.chain().focus().toggleItalic().run())}
           className={cn(
             "h-8 w-8 p-0",
             editor.isActive("italic") && "bg-muted"
@@ -173,7 +200,7 @@ export function DocumentEditor({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          onClick={() => runFormatting(() => editor.chain().focus().toggleUnderline().run())}
           className={cn(
             "h-8 w-8 p-0",
             editor.isActive("underline") && "bg-muted"
@@ -185,7 +212,7 @@ export function DocumentEditor({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleStrike().run()}
+          onClick={() => runFormatting(() => editor.chain().focus().toggleStrike().run())}
           className={cn(
             "h-8 w-8 p-0",
             editor.isActive("strike") && "bg-muted"
@@ -201,7 +228,7 @@ export function DocumentEditor({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          onClick={() => runFormatting(() => editor.chain().focus().toggleBulletList().run())}
           className={cn(
             "h-8 w-8 p-0",
             editor.isActive("bulletList") && "bg-muted"
@@ -213,7 +240,7 @@ export function DocumentEditor({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          onClick={() => runFormatting(() => editor.chain().focus().toggleOrderedList().run())}
           className={cn(
             "h-8 w-8 p-0",
             editor.isActive("orderedList") && "bg-muted"
@@ -229,7 +256,7 @@ export function DocumentEditor({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().setTextAlign("left").run()}
+          onClick={() => runFormatting(() => editor.chain().focus().setTextAlign("left").run())}
           className={cn(
             "h-8 w-8 p-0",
             editor.isActive({ textAlign: "left" }) && "bg-muted"
@@ -241,7 +268,7 @@ export function DocumentEditor({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().setTextAlign("center").run()}
+          onClick={() => runFormatting(() => editor.chain().focus().setTextAlign("center").run())}
           className={cn(
             "h-8 w-8 p-0",
             editor.isActive({ textAlign: "center" }) && "bg-muted"
@@ -253,7 +280,7 @@ export function DocumentEditor({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().setTextAlign("right").run()}
+          onClick={() => runFormatting(() => editor.chain().focus().setTextAlign("right").run())}
           className={cn(
             "h-8 w-8 p-0",
             editor.isActive({ textAlign: "right" }) && "bg-muted"
@@ -272,7 +299,7 @@ export function DocumentEditor({
           onClick={() => {
             const url = window.prompt("Enter URL:");
             if (url) {
-              editor.chain().focus().setLink({ href: url }).run();
+              runFormatting(() => editor.chain().focus().setLink({ href: url }).run());
             }
           }}
           className={cn(
@@ -290,7 +317,7 @@ export function DocumentEditor({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().undo().run()}
+          onClick={() => runFormatting(() => editor.chain().focus().undo().run())}
           disabled={!editor.can().undo()}
           className="h-8 w-8 p-0"
           title="Undo"
@@ -300,7 +327,7 @@ export function DocumentEditor({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().redo().run()}
+          onClick={() => runFormatting(() => editor.chain().focus().redo().run())}
           disabled={!editor.can().redo()}
           className="h-8 w-8 p-0"
           title="Redo"

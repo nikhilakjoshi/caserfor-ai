@@ -1236,5 +1236,207 @@
       "Allow naming the saved prompt"
     ],
     "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Fix content comparison in document-editor useEffect",
+    "steps": [
+      "Open components/editor/document-editor.tsx",
+      "Line 122: Change editor.getText() to editor.getHTML()",
+      "This ensures HTML content comparison instead of plain text"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Add internal update tracking ref to document-editor",
+    "steps": [
+      "Add isInternalUpdateRef = useRef(false) near line 46",
+      "Set ref to true in onUpdate before calling onChange",
+      "Reset ref to false after microtask with queueMicrotask"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Guard content sync useEffect from internal updates",
+    "steps": [
+      "In useEffect (lines 103-133), add early return if isInternalUpdateRef.current",
+      "Prevents feedback loop from parent re-render"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Consolidate setContent calls for streaming mode",
+    "steps": [
+      "In streaming branch, compare content vs editor.getHTML() before calling setContent",
+      "Pass false as second arg to setContent to prevent emitting update event"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Consolidate setContent calls for post-streaming sync",
+    "steps": [
+      "In wasStreamingRef.current branch, compare before setContent",
+      "Reset wasStreamingRef to false after sync"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Add cursor position preservation for external content updates",
+    "steps": [
+      "Save cursor position before setContent: const { from, to } = editor.state.selection",
+      "After setContent, restore cursor with editor.commands.setTextSelection",
+      "Clamp position to valid range based on new doc length"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Remove unused isMarkdown from useEffect dependencies",
+    "steps": [
+      "Line 133: Remove isMarkdown from dependency array",
+      "isMarkdown function is defined but not used in effect"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Add formatting operation guard ref to document-editor",
+    "steps": [
+      "Add isFormattingRef = useRef(false) near other refs",
+      "This prevents content sync during formatting operations"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Wrap toolbar button handlers with formatting guard",
+    "steps": [
+      "Set isFormattingRef.current = true before chain().focus().toggle*().run()",
+      "Reset to false in queueMicrotask after each button click"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Skip content sync during formatting operations",
+    "steps": [
+      "In content sync useEffect, add early return if isFormattingRef.current",
+      "Prevents cursor jump when formatting is applied"
+    ],
+    "passes": true
+  },
+  {
+    "category": "bug",
+    "description": "Verify all formatting extensions are loaded",
+    "steps": [
+      "Confirm StarterKit includes Bold, Italic, Strike",
+      "Confirm Underline extension is imported and added",
+      "Test each formatting button works after fixes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Install react-markdown package",
+    "steps": [
+      "Run npm install react-markdown",
+      "Verify package added to package.json"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Create MarkdownRenderer component",
+    "steps": [
+      "Create components/ui/markdown-renderer.tsx",
+      "Import ReactMarkdown from react-markdown",
+      "Apply prose styling classes for consistent formatting",
+      "Export component for reuse"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Apply markdown rendering to ChatPanel query display",
+    "steps": [
+      "Open components/assistant/chat-panel.tsx",
+      "Replace plain text query display (line ~131) with MarkdownRenderer",
+      "Pass query prop to MarkdownRenderer"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Apply markdown rendering to AssistantPage full-width query display",
+    "steps": [
+      "Open app/(dashboard)/assistant/page.tsx",
+      "Replace query display (lines 1721-1726) with MarkdownRenderer",
+      "Maintain existing layout and styling"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Style markdown code blocks and tables",
+    "steps": [
+      "Add custom renderers for code blocks with syntax highlighting",
+      "Style tables with proper borders and alignment",
+      "Ensure dark mode compatibility"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add Copy as Markdown button to ChatPanel",
+    "steps": [
+      "Add button next to existing Copy button in chat-panel.tsx",
+      "Icon: clipboard or document icon",
+      "Label/tooltip: 'Copy Markdown'"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement Copy as Markdown handler",
+    "steps": [
+      "Create handler that copies raw query text to clipboard",
+      "Use navigator.clipboard.writeText(query)",
+      "Preserve markdown syntax in copied text"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add Copy as Plain Text button to ChatPanel",
+    "steps": [
+      "Add second copy button with distinct icon",
+      "Label/tooltip: 'Copy Text'"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement Copy as Plain Text handler",
+    "steps": [
+      "Strip markdown syntax from query before copying",
+      "Use regex or markdown-to-text library",
+      "Copy plain text to clipboard"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add copy confirmation tooltips",
+    "steps": [
+      "Show 'Copied!' tooltip on successful copy",
+      "Tooltip auto-dismisses after 2 seconds",
+      "Works for both Markdown and Plain Text buttons"
+    ],
+    "passes": false
   }
 ]
