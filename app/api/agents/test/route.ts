@@ -1,41 +1,45 @@
-import { NextRequest } from "next/server"
-import { streamText } from "ai"
-import { defaultModel } from "@/lib/ai"
+import { ToolLoopAgent, createAgentUIStreamResponse, UIMessage } from "ai";
+import { defaultModel } from "@/lib/ai";
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const { instruction, messages } = body
+    const {
+      instruction,
+      messages,
+    }: { instruction: string; messages: UIMessage[] } = await request.json();
 
     if (!instruction || typeof instruction !== "string") {
-      return new Response(JSON.stringify({ error: "Instruction is required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      })
+      return new Response(
+        JSON.stringify({ error: "Instruction is required" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return new Response(JSON.stringify({ error: "Messages array is required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      })
+      return new Response(
+        JSON.stringify({ error: "Messages array is required" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
-    const result = streamText({
+    const agent = new ToolLoopAgent({
       model: defaultModel,
-      system: instruction,
-      messages: messages.map((m: { role: string; content: string }) => ({
-        role: m.role as "user" | "assistant",
-        content: m.content,
-      })),
-    })
+      instructions: instruction,
+      tools: {},
+    });
 
-    return result.toTextStreamResponse()
+    return createAgentUIStreamResponse({ agent, uiMessages: messages });
   } catch (error) {
-    console.error("Agent test error:", error)
+    console.error("Agent test error:", error);
     return new Response(JSON.stringify({ error: "Failed to run agent test" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
-    })
+    });
   }
 }

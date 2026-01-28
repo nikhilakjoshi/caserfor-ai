@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
-import { useCompletion } from "@ai-sdk/react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
 import { useDropzone } from "react-dropzone";
@@ -15,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { ChatPanel } from "@/components/assistant/chat-panel";
 import { EditorPanel } from "@/components/assistant/editor-panel";
+import { ToolCallDisplay } from "@/components/assistant/tool-call-display";
 import {
   FileText,
   Table2,
@@ -294,9 +296,12 @@ export default function AssistantPage() {
   // Mention system state
   const [mentions, setMentions] = useState<Mention[]>([]);
 
+  // Request body ref - updated before each send
+  const requestBodyRef = useRef<Record<string, unknown>>({});
+
   // Custom fetch to capture X-Query-Id header from response
   const customFetch = useCallback(
-    async (url: RequestInfo | URL, init?: RequestInit) => {
+    async (url: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
       const response = await fetch(url, init);
       const queryId = response.headers.get("X-Query-Id");
       if (queryId) {
@@ -308,11 +313,88 @@ export default function AssistantPage() {
     [],
   );
 
-  const { completion, isLoading, complete, error } = useCompletion({
-    api: "/api/assistant/query",
-    fetch: customFetch,
-    streamProtocol: "text", // Use plain text streaming (matches toTextStreamResponse)
+  // Create transport for useChat
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/assistant/query",
+        body: () => requestBodyRef.current,
+        fetch: customFetch,
+      }),
+    [customFetch],
+  );
+
+  const { messages, setMessages, sendMessage, status, error } = useChat({
+    transport,
   });
+
+  const isLoading = status === "streaming";
+
+  // Type alias for message from useChat
+  type ChatMessage = (typeof messages)[number];
+
+  // Helper to extract text from UIMessage parts
+  const getMessageText = useCallback((msg: ChatMessage): string => {
+    return msg.parts
+      .filter((p): p is Extract<typeof p, { type: "text" }> => p.type === "text")
+      .map((p) => p.text)
+      .join("");
+  }, []);
+
+  // Helper to extract tool invocations from UIMessage parts
+  const getToolInvocations = useCallback((msg: ChatMessage) => {
+    // Tool parts have type starting with "tool-" or "dynamic-tool"
+    return msg.parts
+      .filter(
+        (p): p is Extract<typeof p, { type: `tool-${string}` }> =>
+          typeof p.type === "string" && p.type.startsWith("tool-"),
+      )
+      .map((p) => {
+        // Extract tool info from the part
+        const part = p as {
+          type: string;
+          toolCallId: string;
+          toolName?: string;
+          input?: unknown;
+          output?: unknown;
+          state?: string;
+        };
+        return {
+          toolCallId: part.toolCallId,
+          toolName:
+            part.toolName ||
+            part.type.replace("tool-", "").replace("agent_", "agent_"),
+          args: (part.input || {}) as Record<string, unknown>,
+          result:
+            part.state === "result" ? String(part.output || "") : undefined,
+          state: (part.state === "result" ? "result" : "pending") as
+            | "pending"
+            | "result",
+        };
+      });
+  }, []);
+
+  // Get last assistant message
+  const lastAssistantMessage = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === "assistant") {
+        return messages[i];
+      }
+    }
+    return null;
+  }, [messages]);
+
+  // Get completion text from last assistant message
+  const completion = useMemo(() => {
+    if (!lastAssistantMessage) return "";
+    return getMessageText(lastAssistantMessage);
+  }, [lastAssistantMessage, getMessageText]);
+
+  // Get tool invocations from last assistant message
+  const toolInvocations = useMemo(() => {
+    if (!lastAssistantMessage) return [];
+    return getToolInvocations(lastAssistantMessage);
+  }, [lastAssistantMessage, getToolInvocations]);
 
   // Parse mode and content from AI response
   const parsedResponse = useMemo(() => {
@@ -629,16 +711,18 @@ export default function AssistantPage() {
     // Store the query that was submitted
     setSubmittedQuery(query);
 
-    await complete(query, {
-      body: {
-        inputText: query,
-        outputType,
-        sources,
-        deepAnalysis,
-        attachedFiles: files,
-        agentIds,
-      },
-    });
+    // Update request body ref before sending
+    requestBodyRef.current = {
+      inputText: query,
+      outputType,
+      sources,
+      deepAnalysis,
+      attachedFiles: files,
+      agentIds,
+    };
+
+    // Send message using useChat
+    await sendMessage({ text: query });
   };
 
   // Switch mode based on AI-detected mode prefix and sync content
@@ -720,7 +804,7 @@ export default function AssistantPage() {
     [isLoading, mode, currentQueryId, documentId, debouncedSaveDocument],
   );
 
-  const hasResponse = completion.length > 0;
+  const hasResponse = messages.length > 0 && completion.length > 0;
   const displayContent = parsedResponse.content;
 
   // Get starred prompts first, then others
@@ -914,6 +998,8 @@ export default function AssistantPage() {
     setAvailableVersions([1]);
     // Reset mentions
     setMentions([]);
+    // Clear messages
+    setMessages([]);
   };
 
   // Handle citation click - fetch presigned URL and open viewer
@@ -1781,6 +1867,10 @@ export default function AssistantPage() {
               <p className="text-sm text-muted-foreground mb-2">Query:</p>
               <MarkdownRenderer content={submittedQuery} />
             </div>
+            {/* Tool call display (agent consultations) */}
+            {toolInvocations.length > 0 && (
+              <ToolCallDisplay toolInvocations={toolInvocations} />
+            )}
             <MarkdownRenderer
               content={displayContent}
               onCitationClick={handleCitationClick}

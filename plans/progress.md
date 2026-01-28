@@ -1646,3 +1646,31 @@
 - app/(dashboard)/assistant/page.tsx - integrated MentionInput, added mentions state, passes agentIds
 - components/ui/command.tsx - shadcn command component (new)
 - components/ui/dialog.tsx - updated by shadcn
+
+## 2026-01-28: useChat Migration and Tool Call Display
+
+### Completed
+- Migrated assistant page from useCompletion to useChat hook
+- Created DefaultChatTransport with custom fetch for X-Query-Id header capture
+- Created getMessageText helper to extract text from UIMessage parts array
+- Created getToolInvocations helper to extract tool calls from message parts
+- Created ToolCallDisplay component for collapsible agent consultation display
+- Integrated tool call display into chat response area
+- Updated handleSubmit to use sendMessage() with requestBodyRef pattern
+- Updated hasResponse check to work with messages array
+- Reset messages on new thread
+- All 4 PRD items (useChat migration, UIMessage rendering, tool-call-display, integration) now passes:true
+
+### Notes for next dev
+- useChat uses messages array, not completion string
+- Tool parts have type `tool-{toolName}` not `tool-invocation`
+- DefaultChatTransport body uses ref pattern to pass dynamic request body
+- Custom fetch intercepts response headers for query ID tracking
+- ToolCallDisplay shows collapsed by default, expands to show query/response
+- ALL PRD items now complete (passes:true)
+
+### Files created
+- components/assistant/tool-call-display.tsx - collapsible tool call display
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - useChat migration, tool invocations, message parts handling

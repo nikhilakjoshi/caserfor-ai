@@ -840,7 +840,7 @@
       "Access messages from useChat instead of completion string",
       "Access status for streaming state"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -852,7 +852,7 @@
       "Handle tool parts: msg.parts.filter(p => p.type === 'tool-invocation')",
       "Render text parts in message bubble"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -865,7 +865,7 @@
       "Expanded content shows: query passed, response received",
       "Style with muted colors, border, small text"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -877,7 +877,7 @@
       "Pass tool invocation data to component",
       "Ensure collapsible works (click to expand/collapse)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

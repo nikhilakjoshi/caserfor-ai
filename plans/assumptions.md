@@ -65,3 +65,11 @@
 - Tool calls have `input` property (not `args` as in some older SDK versions)
 - Tool results have `output` property (not `result`)
 - Final step detected by checking `finishReason !== "tool-calls"`
+
+## AI SDK useChat Hook
+- useChat returns messages array with UIMessage format (not completion string)
+- UIMessage has .parts array containing TextUIPart, ToolUIPart, etc.
+- Tool parts have type `tool-{toolName}` (e.g., `tool-agent_legal_advisor`), not `tool-invocation`
+- DefaultChatTransport body option uses function returning object (ref pattern for dynamic values)
+- Custom fetch option on transport allows header interception (e.g., X-Query-Id)
+- status === "streaming" replaces isLoading boolean
