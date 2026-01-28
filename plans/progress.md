@@ -1522,3 +1522,30 @@
 
 ### Files modified
 - components/app-sidebar.tsx - added Bot icon import, Agents nav item
+
+## 2026-01-28: Agent Create/Edit Pages with Test Console
+
+### Completed
+- Created /agents/new page with name, description, instruction fields
+- Created /agents/[id]/edit page pre-populated from API
+- Built TestConsole component with streaming chat interface
+- Side-by-side layout: config form (left) + test console (right)
+- Console disabled until name and instruction filled
+- Conversation resets when instruction changes
+- Edit page has unsaved changes warning (beforeunload)
+- Save button disabled when no changes or invalid
+- Inline validation, error states, loading states
+- Styling uses global design system (0 shadows, 0-4px radius, minimal buttons)
+- Updated 5 PRD items to passes:true - ALL PRD items now complete
+
+### Notes for next dev
+- No toast system - uses inline error banners and redirect on success
+- Test console streams from /api/agents/test endpoint
+- Edit page tracks initial values via ref for dirty detection
+- Console width fixed at 400px, form takes remaining flex space
+- All PRD items passes:true
+
+### Files created
+- components/agents/test-console.tsx - streaming test console component
+- app/(dashboard)/agents/new/page.tsx - agent creation form
+- app/(dashboard)/agents/[id]/edit/page.tsx - agent edit form

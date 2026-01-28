@@ -578,7 +578,7 @@
       "Save button disabled until valid",
       "Success toast, redirect to list"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -589,7 +589,7 @@
       "Save via PUT",
       "Unsaved changes warning on navigate away"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -610,7 +610,7 @@
       "Stream response",
       "Multi-turn conversation support"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -620,7 +620,7 @@
       "Console activates when all fields filled",
       "Reset conversation when instruction changes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -632,6 +632,6 @@
       "White text fields",
       "Minimal buttons"
     ],
-    "passes": false
+    "passes": true
   }
 ]
