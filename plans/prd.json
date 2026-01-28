@@ -660,7 +660,7 @@
       "Export buildAgentTools(agents: Agent[], deepAnalysis: boolean) returning Record<string, Tool>",
       "Use agent slug as tool name: `agent_${agent.slug}`"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",

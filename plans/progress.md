@@ -1570,3 +1570,23 @@
 ### Files modified
 - prisma/schema.prisma - added 'document' and 'agent' to SourceType enum
 - components/agents/test-console.tsx - refactored to key-based reset pattern
+
+## 2026-01-28: Agent-to-Tool Converter (lib/agent-tools.ts)
+
+### Completed
+- Created lib/agent-tools.ts with createAgentTool and buildAgentTools functions
+- createAgentTool wraps Agent record as a Tool using AI SDK tool() function
+- Uses inputSchema (not parameters) per AI SDK v5+ naming convention
+- Tool execute uses generateText with agent.instruction as system prompt
+- buildAgentTools creates Record of tools keyed by `agent_{slug}`
+- Supports deepAnalysis flag to switch between defaultModel and analysisModel
+- Updated 1 PRD item to passes:true
+
+### Notes for next dev
+- AI SDK v5+ renamed `parameters` to `inputSchema` for tool definitions
+- Tool returns string (the generated text from sub-agent)
+- Uses generateText (not ToolLoopAgent) for sub-agent execution since agents have no tools
+- Next priority: Update /api/assistant/query to accept agentIds and use buildAgentTools
+
+### Files created
+- lib/agent-tools.ts - agent-to-tool converter with createAgentTool, buildAgentTools

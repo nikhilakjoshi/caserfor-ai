@@ -53,3 +53,8 @@
 - 'document' added to SourceType enum (PRD said "after 'document'" but it wasn't there)
 - Code was already using sourceType: "document" - enum needed to match
 - Order: vault, document, agent, external_database, system_knowledge
+
+## AI SDK Tool Definition
+- AI SDK v5+ renamed `parameters` to `inputSchema` for tool definitions
+- PRD mentions `parameters` but codebase uses `inputSchema` per current SDK
+- Agent sub-tools use generateText (not ToolLoopAgent) since they have no tools themselves
