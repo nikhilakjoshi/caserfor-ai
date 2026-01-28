@@ -556,7 +556,7 @@
       "Edit and delete actions",
       "Loading/empty/error states"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
@@ -565,7 +565,7 @@
       "Add nav item to app-sidebar.tsx",
       "Match existing nav style"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
@@ -578,7 +578,7 @@
       "Save button disabled until valid",
       "Success toast, redirect to list"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
@@ -589,7 +589,7 @@
       "Save via PUT",
       "Unsaved changes warning on navigate away"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
@@ -599,7 +599,7 @@
       "Remove from list on success",
       "Error toast on failure"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
@@ -610,7 +610,7 @@
       "Stream response",
       "Multi-turn conversation support"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
@@ -620,7 +620,7 @@
       "Console activates when all fields filled",
       "Reset conversation when instruction changes"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
@@ -632,6 +632,6 @@
       "White text fields",
       "Minimal buttons"
     ],
-    "passes": true
+    "passes": false
   }
 ]

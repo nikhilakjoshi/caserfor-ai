@@ -86,6 +86,7 @@ model User {
   prompts        Prompt[]
   starredItems   StarredItem[]
   historyEntries HistoryEntry[]
+  agents         Agent[]
 
   @@map("users")
 }
@@ -269,6 +270,24 @@ model StarredItem {
   @@unique([userId, itemType, itemId])
   @@index([userId])
   @@map("starred_items")
+}
+
+model Agent {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  slug        String
+  description String?
+  instruction String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, slug])
+  @@index([userId])
+  @@map("agents")
 }
 
 model EditorDocument {

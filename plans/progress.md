@@ -1467,3 +1467,33 @@
 
 ### Files created
 - types/react-pdf.d.ts - CSS module declarations for react-pdf
+
+## 2026-01-28: Agent Model and CRUD API
+
+### Completed
+- Added Agent model to Prisma schema (id, userId, name, slug, description, instruction, timestamps)
+- Unique constraint on (userId, slug), index on userId
+- Added agents relation to User model
+- Regenerated Prisma client
+- Created GET /api/agents - list agents filtered by userId, ordered by updatedAt desc
+- Created POST /api/agents - create agent with auto-slug, uniqueness check, validation
+- Created GET /api/agents/[id] - fetch by id + userId, 404 if not found
+- Created PUT /api/agents/[id] - update with slug re-generation on name change, uniqueness check excluding self
+- Created DELETE /api/agents/[id] - delete by id + userId, returns 204
+- Created POST /api/agents/test - streaming test console, accepts instruction + messages, no DB persistence
+- Updated 7 PRD items to passes:true
+
+### Notes for next dev
+- Uses MOCK_USER_ID - wire to auth session when implemented
+- Slug conflicts resolved by appending timestamp suffix
+- Test console streams via Vercel AI SDK streamText + toTextStreamResponse
+- Next priority: Agent UI pages (/agents list, /agents/new, /agents/[id]/edit) and sidebar nav
+- Remaining false PRD items: all UI agent items (list page, sidebar nav, create/edit forms, delete dialog, test console component, styling)
+
+### Files created
+- app/api/agents/route.ts - GET and POST endpoints
+- app/api/agents/[id]/route.ts - GET, PUT, DELETE endpoints
+- app/api/agents/test/route.ts - streaming test console endpoint
+
+### Files modified
+- prisma/schema.prisma - added Agent model, updated User relations
