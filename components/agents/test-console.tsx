@@ -1,102 +1,76 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Loader2, Send, RotateCcw, Bot, User } from "lucide-react"
-
-interface Message {
-  role: "user" | "assistant"
-  content: string
-}
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Loader2, Send, RotateCcw, Bot, User } from "lucide-react";
+import Markdown from "react-markdown";
 
 interface TestConsoleProps {
-  instruction: string
-  disabled?: boolean
+  instruction: string;
+  disabled?: boolean;
 }
 
-export function TestConsole({ instruction, disabled = false }: TestConsoleProps) {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState("")
-  const [isStreaming, setIsStreaming] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const prevInstructionRef = useRef(instruction)
+// Wrapper that uses key to reset inner component when instruction changes
+export function TestConsole(props: TestConsoleProps) {
+  // Use instruction as key to force remount on change, resetting all state
+  return <TestConsoleInner key={props.instruction} {...props} />;
+}
 
-  // Reset conversation when instruction changes
+function TestConsoleInner({
+  instruction,
+  disabled = false,
+}: TestConsoleProps) {
+  const [input, setInput] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Create transport with current instruction
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/agents/test",
+        body: () => ({ instruction }),
+      }),
+    [instruction],
+  );
+  const { messages, setMessages, sendMessage, status } = useChat({ transport });
+
+  const isStreaming = status === "streaming";
+
   useEffect(() => {
-    if (prevInstructionRef.current !== instruction) {
-      setMessages([])
-      prevInstructionRef.current = instruction
-    }
-  }, [instruction])
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+  const handleSend = useCallback(() => {
+    const trimmed = input.trim();
+    if (!trimmed || isStreaming || disabled) return;
+    sendMessage({ text: trimmed });
+    setInput("");
+  }, [input, isStreaming, disabled, sendMessage]);
 
-  const handleSend = async () => {
-    const trimmed = input.trim()
-    if (!trimmed || isStreaming || disabled) return
+  const handleReset = useCallback(() => {
+    setMessages([]);
+    setInput("");
+  }, [setMessages]);
 
-    const userMessage: Message = { role: "user", content: trimmed }
-    const newMessages = [...messages, userMessage]
-    setMessages(newMessages)
-    setInput("")
-    setIsStreaming(true)
-
-    try {
-      const res = await fetch("/api/agents/test", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          instruction,
-          messages: newMessages.map((m) => ({ role: m.role, content: m.content })),
-        }),
-      })
-
-      if (!res.ok) throw new Error("Failed to get response")
-
-      const reader = res.body?.getReader()
-      if (!reader) throw new Error("No response body")
-
-      const decoder = new TextDecoder()
-      let assistantContent = ""
-
-      setMessages((prev) => [...prev, { role: "assistant", content: "" }])
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        assistantContent += decoder.decode(value, { stream: true })
-        const currentContent = assistantContent
-        setMessages((prev) => {
-          const updated = [...prev]
-          updated[updated.length - 1] = { role: "assistant", content: currentContent }
-          return updated
-        })
-      }
-    } catch (err) {
-      console.error("Test console error:", err)
-      setMessages((prev) => [
-        ...prev,
-        ...(prev[prev.length - 1]?.role === "assistant" ? [] : []),
-        { role: "assistant" as const, content: "Error: Failed to get response. Check your API key." },
-      ])
-    } finally {
-      setIsStreaming(false)
-    }
-  }
-
-  const handleReset = () => {
-    setMessages([])
-    setInput("")
-  }
+  const getMessageText = (msg: (typeof messages)[number]) => {
+    return msg.parts
+      .filter(
+        (p): p is Extract<typeof p, { type: "text" }> => p.type === "text",
+      )
+      .map((p) => p.text)
+      .join("");
+  };
 
   return (
     <div className="flex flex-col h-full border rounded bg-background">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 border-b">
-        <span className="text-sm font-medium text-muted-foreground">Test Console</span>
+        <span className="text-sm font-medium text-muted-foreground">
+          Test Console
+        </span>
         <Button
           variant="ghost"
           size="sm"
@@ -117,38 +91,42 @@ export function TestConsole({ instruction, disabled = false }: TestConsoleProps)
             <p className="text-sm">Send a message to test your agent</p>
           </div>
         )}
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
-            {msg.role === "assistant" && (
-              <div className="flex-shrink-0 mt-0.5">
-                <div className="rounded-md bg-muted p-1.5">
-                  <Bot className="h-3 w-3" />
-                </div>
-              </div>
-            )}
+        {messages.map((msg) => {
+          const text = getMessageText(msg);
+          return (
             <div
-              className={`max-w-[80%] rounded px-3 py-2 text-sm whitespace-pre-wrap ${
-                msg.role === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted/50"
-              }`}
+              key={msg.id}
+              className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
-              {msg.content || (isStreaming && i === messages.length - 1 ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : null)}
-            </div>
-            {msg.role === "user" && (
-              <div className="flex-shrink-0 mt-0.5">
-                <div className="rounded-md bg-primary/10 p-1.5">
-                  <User className="h-3 w-3" />
+              {msg.role === "assistant" && (
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className="rounded-md bg-muted p-1.5">
+                    <Bot className="h-3 w-3" />
+                  </div>
                 </div>
+              )}
+              <div
+                className={`max-w-[80%] rounded px-3 py-2 text-sm whitespace-pre-wrap markdown-body ${
+                  msg.role === "user"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted/50"
+                }`}
+              >
+                {(text && <Markdown>{text}</Markdown>) ||
+                  (isStreaming && msg.role === "assistant" ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : null)}
               </div>
-            )}
-          </div>
-        ))}
+              {msg.role === "user" && (
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className="rounded-md bg-primary/10 p-1.5">
+                    <User className="h-3 w-3" />
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
 
@@ -156,14 +134,18 @@ export function TestConsole({ instruction, disabled = false }: TestConsoleProps)
       <div className="border-t p-2">
         <div className="flex gap-2">
           <Textarea
-            placeholder={disabled ? "Fill in all required fields to test" : "Type a test message..."}
+            placeholder={
+              disabled
+                ? "Fill in all required fields to test"
+                : "Type a test message..."
+            }
             value={input}
             onChange={(e) => setInput(e.target.value)}
             className="min-h-[40px] max-h-[100px] resize-none text-sm"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault()
-                handleSend()
+                e.preventDefault();
+                handleSend();
               }
             }}
             disabled={isStreaming || disabled}
@@ -183,5 +165,5 @@ export function TestConsole({ instruction, disabled = false }: TestConsoleProps)
         </div>
       </div>
     </div>
-  )
+  );
 }

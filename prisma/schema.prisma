@@ -60,6 +60,8 @@ enum QueryStatus {
 
 enum SourceType {
   vault
+  document
+  agent
   external_database
   system_knowledge
 }

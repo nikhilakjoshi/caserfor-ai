@@ -633,5 +633,271 @@
       "Minimal buttons"
     ],
     "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Add 'agent' to SourceType enum in Prisma schema",
+    "steps": [
+      "Open prisma/schema.prisma",
+      "Add 'agent' value to SourceType enum after 'document'",
+      "Run npx prisma migrate dev --name add-agent-source-type",
+      "Run npx prisma generate"
+    ],
+    "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Create lib/agent-tools.ts with agent-to-tool converter",
+    "steps": [
+      "Create lib/agent-tools.ts",
+      "Import tool, ToolLoopAgent, z from 'ai'",
+      "Import defaultModel, analysisModel from '@/lib/ai'",
+      "Import Agent type from '@prisma/client'",
+      "Export createAgentTool(agent: Agent, useAnalysisModel: boolean) function",
+      "Tool description: '{agent.name}: {agent.description}'",
+      "Tool parameters: z.object({ query: z.string(), context: z.string().optional() })",
+      "Tool execute: create sub-ToolLoopAgent with agent.instruction, empty tools, generate response",
+      "Export buildAgentTools(agents: Agent[], deepAnalysis: boolean) returning Record<string, Tool>",
+      "Use agent slug as tool name: `agent_${agent.slug}`"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Update /api/assistant/query to accept agentIds parameter",
+    "steps": [
+      "Open app/api/assistant/query/route.ts",
+      "Add agentIds to destructured request body: const { ..., agentIds } = await req.json()",
+      "Type agentIds as string[] | undefined"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Fetch selected agents from database in query route",
+    "steps": [
+      "In app/api/assistant/query/route.ts",
+      "Import Agent from '@prisma/client'",
+      "After request parsing, check if agentIds?.length > 0",
+      "Query prisma.agent.findMany({ where: { id: { in: agentIds }, userId: MOCK_USER_ID } })",
+      "Store result in selectedAgents variable"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Build agent tools and update system prompt with agent availability",
+    "steps": [
+      "Import buildAgentTools from '@/lib/agent-tools'",
+      "Call buildAgentTools(selectedAgents, deepAnalysis) to get agentTools object",
+      "If selectedAgents.length > 0, append to systemPrompt:",
+      "Add text: 'You have access to these specialized agents:\\n' + agent names/descriptions",
+      "Add instruction: 'Call the appropriate agent tool when their expertise is relevant'"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Replace streamText with ToolLoopAgent in query route",
+    "steps": [
+      "Import ToolLoopAgent, createAgentUIStreamResponse, UIMessage from 'ai'",
+      "Remove existing streamText() call",
+      "Create ToolLoopAgent instance with: model, instructions: systemPrompt, tools: agentTools",
+      "Build uiMessages array from userPrompt (single user message with id)",
+      "Return createAgentUIStreamResponse({ agent, uiMessages })"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Preserve onFinish callback logic with ToolLoopAgent",
+    "steps": [
+      "Pass onFinish callback to createAgentUIStreamResponse",
+      "Migrate existing onFinish logic (query update, source references, history entry)",
+      "Add agent tool call tracking to SourceReference table with sourceType: 'agent'"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Install shadcn command and popover components",
+    "steps": [
+      "Run: npx shadcn@latest add command",
+      "Run: npx shadcn@latest add popover",
+      "Verify components/ui/command.tsx created",
+      "Verify components/ui/popover.tsx created"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create hooks/use-mentions.ts for fetching vaults and agents",
+    "steps": [
+      "Create hooks/use-mentions.ts",
+      "Define MentionableVault interface: { id, name, type, description, fileCount }",
+      "Define MentionableAgent interface: { id, name, slug, description }",
+      "Create useMentions(searchQuery: string) hook",
+      "Fetch GET /api/vaults on mount, store in state",
+      "Fetch GET /api/agents on mount, store in state",
+      "Filter vaults and agents by searchQuery (case-insensitive name match)",
+      "Return { vaults: filtered, agents: filtered, loading }"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create components/assistant/mention-dropdown.tsx",
+    "steps": [
+      "Create components/assistant/mention-dropdown.tsx",
+      "Import Command, CommandList, CommandGroup, CommandItem, CommandEmpty from '@/components/ui/command'",
+      "Import Popover, PopoverContent from '@/components/ui/popover'",
+      "Import useMentions hook",
+      "Props: open, onOpenChange, position: {x,y}, searchQuery, onSelect(mention)",
+      "Render Popover with absolute positioning at position coords",
+      "Render CommandList with two CommandGroups: 'Vaults' and 'Agents'",
+      "Vaults group: Database icon, name, file count",
+      "Agents group: Bot icon, name",
+      "On CommandItem select, call onSelect with mention object"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create components/assistant/mention-badge.tsx",
+    "steps": [
+      "Create components/assistant/mention-badge.tsx",
+      "Import Badge from '@/components/ui/badge'",
+      "Import Database, Bot, X icons from lucide-react",
+      "Props: mention: { id, type, name }, onRemove?: () => void",
+      "Render Badge with icon (Database for vault, Bot for agent) + name",
+      "Style: blue tones for vault, purple for agent",
+      "If onRemove provided, render X button that calls onRemove"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create components/assistant/mention-input.tsx with @ detection",
+    "steps": [
+      "Create components/assistant/mention-input.tsx",
+      "Import Textarea from '@/components/ui/textarea'",
+      "Import MentionDropdown, MentionBadge components",
+      "Props: value, onChange, mentions, onMentionsChange, placeholder, disabled, onKeyDown",
+      "State: dropdownOpen, dropdownPosition, mentionQuery, mentionStartIndex",
+      "On input change: detect @word pattern before cursor using regex /@(\\w*)$/",
+      "If @ detected: set mentionStartIndex, mentionQuery, open dropdown",
+      "Calculate dropdown position from cursor (use getBoundingClientRect or estimate)",
+      "On mention select: replace @query with inline styled text @[type:id:name], add to mentions array, close dropdown",
+      "Close dropdown on Escape key"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Style inline mentions in MentionInput textarea",
+    "steps": [
+      "In mention-input.tsx, after mention selection",
+      "Insert mention as colored text: @AgentName or @VaultName",
+      "Use CSS class or inline style for mention text (blue for vault, purple for agent)",
+      "Store mention tokens in format parseable for extraction: @[vault:id:name] or @[agent:id:name]",
+      "On backspace over mention token, remove entire token and from mentions array"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Integrate MentionInput into assistant page",
+    "steps": [
+      "Open app/(dashboard)/assistant/page.tsx",
+      "Add state: const [mentions, setMentions] = useState<Mention[]>([])",
+      "Replace Textarea in chat input area with MentionInput component",
+      "Pass value={query}, onChange={setQuery}, mentions, onMentionsChange={setMentions}",
+      "Pass other props: placeholder, disabled, onKeyDown for submit"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Extract and pass agentIds in assistant submit handler",
+    "steps": [
+      "In handleSubmit function in assistant page",
+      "Extract agent mentions: const agentMentions = mentions.filter(m => m.type === 'agent')",
+      "Map to IDs: const agentIds = agentMentions.map(m => m.id)",
+      "Add agentIds to request body in complete() call",
+      "Optionally also add vault mentions to sources array"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Migrate assistant page from useCompletion to useChat",
+    "steps": [
+      "Import useChat from '@ai-sdk/react'",
+      "Import DefaultChatTransport from 'ai'",
+      "Replace useCompletion hook with useChat",
+      "Create DefaultChatTransport with api: '/api/assistant/query', body function returning request params",
+      "Use sendMessage() instead of complete()",
+      "Access messages from useChat instead of completion string",
+      "Access status for streaming state"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Update message rendering for UIMessage parts format",
+    "steps": [
+      "In assistant page message display",
+      "UIMessage has .parts array instead of .content string",
+      "Extract text: msg.parts.filter(p => p.type === 'text').map(p => p.text).join('')",
+      "Handle tool parts: msg.parts.filter(p => p.type === 'tool-invocation')",
+      "Render text parts in message bubble"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create collapsible tool call display component",
+    "steps": [
+      "Create components/assistant/tool-call-display.tsx",
+      "Props: toolCalls: array of tool invocation parts",
+      "Render as collapsible accordion (collapsed by default)",
+      "Header shows: 'Agent consulted: {agentName}'",
+      "Expanded content shows: query passed, response received",
+      "Style with muted colors, border, small text"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Integrate tool call display into assistant message rendering",
+    "steps": [
+      "In assistant page, when rendering assistant messages",
+      "Check if message.parts contains tool-invocation parts",
+      "If yes, render ToolCallDisplay component below/above text content",
+      "Pass tool invocation data to component",
+      "Ensure collapsible works (click to expand/collapse)"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Reset mentions on conversation clear/new thread",
+    "steps": [
+      "In assistant page onNewThread or clear handler",
+      "Call setMentions([]) to clear selected mentions",
+      "Ensure MentionInput reflects cleared state"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add keyboard navigation to mention dropdown",
+    "steps": [
+      "In mention-dropdown.tsx, Command component handles arrow keys by default",
+      "Ensure Enter key selects highlighted item",
+      "Ensure Escape closes dropdown",
+      "Test up/down navigation through vault and agent groups"
+    ],
+    "passes": false
   }
 ]

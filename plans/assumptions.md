@@ -48,3 +48,8 @@
 - S3 bucket already exists and is configured for the account
 - downloadFile uses async iteration on response Body stream (Node.js compatible)
 - Presigned URLs default to 1 hour expiry
+
+## SourceType Enum
+- 'document' added to SourceType enum (PRD said "after 'document'" but it wasn't there)
+- Code was already using sourceType: "document" - enum needed to match
+- Order: vault, document, agent, external_database, system_knowledge

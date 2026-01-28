@@ -1549,3 +1549,24 @@
 - components/agents/test-console.tsx - streaming test console component
 - app/(dashboard)/agents/new/page.tsx - agent creation form
 - app/(dashboard)/agents/[id]/edit/page.tsx - agent edit form
+
+## 2026-01-28: SourceType Enum Update for Agent Integration
+
+### Completed
+- Added 'document' and 'agent' values to SourceType enum in Prisma schema
+- 'document' was missing but already used in code (sourceType: "document" in query route)
+- 'agent' added for upcoming agent-as-tool integration
+- Regenerated Prisma client
+- Fixed lint error in test-console.tsx (refs during render)
+- Refactored TestConsole to use key-based reset pattern instead of refs
+- Updated 1 PRD item to passes:true
+
+### Notes for next dev
+- SourceType now has: vault, document, agent, external_database, system_knowledge
+- TestConsole uses wrapper component with key={instruction} to force remount on instruction change
+- This avoids all ref-during-render issues the strict eslint rule catches
+- Next priority: lib/agent-tools.ts (agent-to-tool converter) for agent integration backend
+
+### Files modified
+- prisma/schema.prisma - added 'document' and 'agent' to SourceType enum
+- components/agents/test-console.tsx - refactored to key-based reset pattern
