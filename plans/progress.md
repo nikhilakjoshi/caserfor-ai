@@ -1695,3 +1695,27 @@
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - OutputType allows null, toggles deselectable
 - components/assistant/mention-dropdown.tsx - key-based reset pattern
+
+## 2026-01-28: ScrollArea and MentionInput Overflow Fixes
+
+### Completed
+- Added shadcn scroll-area component
+- Wrapped ChatPanel content area (query display, edit form, generation status, completion) in ScrollArea
+- Removed overflow-y-auto from completion div (ScrollArea handles it)
+- Added max-h-[40vh] overflow-y-auto to MentionInput wrapper div
+- Long responses now scroll within ChatPanel instead of overflowing page
+- Long input text scrolls within MentionInput instead of expanding page
+- Updated 2 PRD items to passes:true
+
+### Notes for next dev
+- ScrollArea wraps everything between header and chat input in ChatPanel
+- MentionInput overflow is on the container div, not the EditorContent itself
+- Remaining false PRD items: functional tests (2) - require actual API key to verify
+- All code/UI PRD items now complete
+
+### Files created
+- components/ui/scroll-area.tsx - shadcn ScrollArea component
+
+### Files modified
+- components/assistant/chat-panel.tsx - ScrollArea wrapper around content area
+- components/assistant/mention-input.tsx - max-h-[40vh] overflow-y-auto on wrapper

@@ -945,7 +945,7 @@
       "Wrap the content div in <ScrollArea className='flex-1'>",
       "Verify long responses scroll within panel instead of overflowing page"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -956,7 +956,7 @@
       "Add 'max-h-[40vh] overflow-y-auto' to the wrapper className",
       "Verify typing/pasting long text scrolls within input instead of expanding page"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

@@ -26,6 +26,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarkdownRenderer, stripMarkdown } from "@/components/ui/markdown-renderer";
 
 interface ChatPanelProps {
@@ -141,107 +142,107 @@ export function ChatPanel({
         </Button>
       </div>
 
-      {/* Query display area */}
-      {hasResponse && !isEditing && (
-        <div className="p-4 border-b space-y-3">
-          <div className="p-3 bg-muted/30 rounded">
-            <MarkdownRenderer content={query} className="text-sm" />
+      {/* Scrollable content area */}
+      <ScrollArea className="flex-1">
+        {/* Query display area */}
+        {hasResponse && !isEditing && (
+          <div className="p-4 border-b space-y-3">
+            <div className="p-3 bg-muted/30 rounded">
+              <MarkdownRenderer content={query} className="text-sm" />
+            </div>
+            {/* Action buttons */}
+            <div className="flex items-center gap-2">
+              <Tooltip open={copyTooltip === "markdown"}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs gap-1"
+                    onClick={handleCopyMarkdown}
+                  >
+                    <Copy className="h-3 w-3" />
+                    Copy Markdown
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Copied!</TooltipContent>
+              </Tooltip>
+              <Tooltip open={copyTooltip === "plain"}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs gap-1"
+                    onClick={handleCopyPlainText}
+                  >
+                    <FileText className="h-3 w-3" />
+                    Copy Text
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Copied!</TooltipContent>
+              </Tooltip>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-xs gap-1"
+                onClick={handleSavePrompt}
+              >
+                <Bookmark className="h-3 w-3" />
+                Save prompt
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-xs gap-1"
+                onClick={handleEditQuery}
+              >
+                <Pencil className="h-3 w-3" />
+                Edit query
+              </Button>
+            </div>
           </div>
-          {/* Action buttons */}
-          <div className="flex items-center gap-2">
-            <Tooltip open={copyTooltip === "markdown"}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 px-2 text-xs gap-1"
-                  onClick={handleCopyMarkdown}
-                >
-                  <Copy className="h-3 w-3" />
-                  Copy Markdown
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Copied!</TooltipContent>
-            </Tooltip>
-            <Tooltip open={copyTooltip === "plain"}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 px-2 text-xs gap-1"
-                  onClick={handleCopyPlainText}
-                >
-                  <FileText className="h-3 w-3" />
-                  Copy Text
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Copied!</TooltipContent>
-            </Tooltip>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs gap-1"
-              onClick={handleSavePrompt}
-            >
-              <Bookmark className="h-3 w-3" />
-              Save prompt
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs gap-1"
-              onClick={handleEditQuery}
-            >
-              <Pencil className="h-3 w-3" />
-              Edit query
-            </Button>
+        )}
+
+        {/* Edit query form */}
+        {isEditing && (
+          <div className="p-4 border-b space-y-3">
+            <Textarea
+              value={editedQuery}
+              onChange={(e) => setEditedQuery(e.target.value)}
+              className="min-h-[80px] text-sm"
+            />
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleEditSubmit}>
+                Resubmit
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditing(false)}
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Edit query form */}
-      {isEditing && (
-        <div className="p-4 border-b space-y-3">
-          <Textarea
-            value={editedQuery}
-            onChange={(e) => setEditedQuery(e.target.value)}
-            className="min-h-[80px] text-sm"
-          />
-          <div className="flex gap-2">
-            <Button size="sm" onClick={handleEditSubmit}>
-              Resubmit
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsEditing(false)}
-            >
-              Cancel
-            </Button>
+        {/* Generation status */}
+        {isLoading && (
+          <div className="px-4 py-3 border-b">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span className="font-medium">Answering</span>
+              <Loader2 className="h-3 w-3 animate-spin" />
+              <span>Generating new version...</span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Generation status */}
-      {isLoading && (
-        <div className="px-4 py-3 border-b">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span className="font-medium">Answering</span>
-            <Loader2 className="h-3 w-3 animate-spin" />
-            <span>Generating new version...</span>
+        {/* Completion display (only in chat mode / full width) */}
+        {hasResponse && !compact && (
+          <div className="p-4">
+            <MarkdownRenderer content={completion} />
           </div>
-        </div>
-      )}
-
-      {/* Completion display (only in chat mode / full width) */}
-      {hasResponse && !compact && (
-        <div className="flex-1 overflow-y-auto p-4">
-          <MarkdownRenderer content={completion} />
-        </div>
-      )}
-
-      {/* Spacer when in compact mode */}
-      {compact && <div className="flex-1" />}
+        )}
+      </ScrollArea>
 
       {/* Chat input at bottom */}
       <div className="mt-auto border-t p-4">

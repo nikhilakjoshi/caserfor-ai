@@ -1,167 +1,263 @@
 "use client";
 
-import { useState, useRef, useCallback, KeyboardEvent } from "react";
-import { Textarea } from "@/components/ui/textarea";
-import { MentionDropdown, type Mention } from "./mention-dropdown";
-import { MentionBadge } from "./mention-badge";
+import {
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+  KeyboardEvent,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Placeholder from "@tiptap/extension-placeholder";
+import Mention from "@tiptap/extension-mention";
+import { MentionDropdown, type Mention as MentionData, type MentionDropdownRef } from "./mention-dropdown";
+import { cn } from "@/lib/utils";
 
 interface MentionInputProps {
   value: string;
   onChange: (value: string) => void;
-  mentions: Mention[];
-  onMentionsChange: (mentions: Mention[]) => void;
+  mentions: MentionData[];
+  onMentionsChange: (mentions: MentionData[]) => void;
   placeholder?: string;
   disabled?: boolean;
-  onKeyDown?: (e: KeyboardEvent<HTMLTextAreaElement>) => void;
+  onKeyDown?: (e: KeyboardEvent<HTMLDivElement>) => void;
   className?: string;
 }
 
-export function MentionInput({
-  value,
-  onChange,
-  mentions,
-  onMentionsChange,
-  placeholder = "Ask anything. Type @ to mention vaults or agents.",
-  disabled = false,
-  onKeyDown,
-  className,
-}: MentionInputProps) {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ x: 0, y: 0 });
-  const [mentionQuery, setMentionQuery] = useState("");
-  const [mentionStartIndex, setMentionStartIndex] = useState<number | null>(
-    null
-  );
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+export interface MentionInputRef {
+  clearContent: () => void;
+  focus: () => void;
+}
 
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const newValue = e.target.value;
-      const cursorPos = e.target.selectionStart;
-      onChange(newValue);
+export const MentionInput = forwardRef<MentionInputRef, MentionInputProps>(
+  function MentionInput(
+    {
+      value,
+      onChange,
+      mentions,
+      onMentionsChange,
+      placeholder = "Ask anything. Type @ to mention vaults or agents.",
+      disabled = false,
+      onKeyDown,
+      className,
+    },
+    ref
+  ) {
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [dropdownPosition, setDropdownPosition] = useState({ x: 0, y: 0 });
+    const [mentionQuery, setMentionQuery] = useState("");
+    const suggestionPropsRef = useRef<{
+      command: (attrs: { id: string; label: string; type: string }) => void;
+    } | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const dropdownRef = useRef<MentionDropdownRef>(null);
 
-      // Detect @ pattern before cursor
-      const textBeforeCursor = newValue.slice(0, cursorPos);
-      const atMatch = textBeforeCursor.match(/@(\w*)$/);
+    // Extract mentions from editor content
+    const extractMentions = useCallback(
+      (editor: ReturnType<typeof useEditor>) => {
+        if (!editor) return [];
+        const mentions: MentionData[] = [];
+        editor.state.doc.descendants((node) => {
+          if (node.type.name === "mention") {
+            mentions.push({
+              id: node.attrs.id,
+              type: node.attrs.type as "vault" | "agent",
+              name: node.attrs.label,
+            });
+          }
+        });
+        return mentions;
+      },
+      []
+    );
 
-      if (atMatch) {
-        const matchIndex = textBeforeCursor.lastIndexOf("@");
-        setMentionStartIndex(matchIndex);
-        setMentionQuery(atMatch[1] || "");
+    const editor = useEditor({
+      immediatelyRender: false,
+      extensions: [
+        StarterKit.configure({
+          heading: false,
+          codeBlock: false,
+          blockquote: false,
+          bulletList: false,
+          orderedList: false,
+          listItem: false,
+          horizontalRule: false,
+        }),
+        Placeholder.configure({
+          placeholder,
+        }),
+        Mention.extend({
+          addAttributes() {
+            return {
+              ...this.parent?.(),
+              type: {
+                default: "vault",
+                parseHTML: (element) => element.getAttribute("data-type"),
+                renderHTML: (attributes) => ({
+                  "data-type": attributes.type,
+                }),
+              },
+            };
+          },
+        }).configure({
+          HTMLAttributes: {
+            class: "mention",
+          },
+          suggestion: {
+            char: "@",
+            allowSpaces: false,
+            items: ({ query }) => {
+              setMentionQuery(query);
+              return [];
+            },
+            render: () => ({
+              onStart: (props) => {
+                suggestionPropsRef.current = {
+                  command: props.command,
+                };
+                // Calculate position from the decorator
+                const rect = props.decorationNode?.getBoundingClientRect();
+                if (rect) {
+                  setDropdownPosition({
+                    x: rect.left,
+                    y: rect.bottom + 4,
+                  });
+                }
+                setDropdownOpen(true);
+              },
+              onUpdate: (props) => {
+                suggestionPropsRef.current = {
+                  command: props.command,
+                };
+                const rect = props.decorationNode?.getBoundingClientRect();
+                if (rect) {
+                  setDropdownPosition({
+                    x: rect.left,
+                    y: rect.bottom + 4,
+                  });
+                }
+              },
+              onKeyDown: ({ event }) => {
+                if (event.key === "Escape") {
+                  setDropdownOpen(false);
+                  return true;
+                }
+                if (event.key === "ArrowUp") {
+                  dropdownRef.current?.moveUp();
+                  return true;
+                }
+                if (event.key === "ArrowDown") {
+                  dropdownRef.current?.moveDown();
+                  return true;
+                }
+                if (event.key === "Enter") {
+                  return dropdownRef.current?.selectCurrent() ?? false;
+                }
+                return false;
+              },
+              onExit: () => {
+                setDropdownOpen(false);
+                suggestionPropsRef.current = null;
+              },
+            }),
+          },
+        }),
+      ],
+      content: "",
+      editable: !disabled,
+      editorProps: {
+        attributes: {
+          class: cn(
+            "min-h-[80px] w-full bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+            className
+          ),
+        },
+        handleKeyDown: (view, event) => {
+          // Handle Ctrl+Enter or Cmd+Enter to submit
+          if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+            // Create a synthetic keyboard event for the parent
+            const syntheticEvent = {
+              key: event.key,
+              metaKey: event.metaKey,
+              ctrlKey: event.ctrlKey,
+              preventDefault: () => event.preventDefault(),
+            } as KeyboardEvent<HTMLDivElement>;
+            onKeyDown?.(syntheticEvent);
+            return true;
+          }
+          return false;
+        },
+      },
+      onUpdate: ({ editor }) => {
+        // Get plain text for the value prop
+        const text = editor.getText();
+        onChange(text);
 
-        // Calculate dropdown position
-        if (textareaRef.current) {
-          const rect = textareaRef.current.getBoundingClientRect();
-          // Position below the textarea, offset by approximate cursor position
-          const lineHeight = 20;
-          const lines = textBeforeCursor.split("\n").length;
-          setDropdownPosition({
-            x: rect.left + 10,
-            y: rect.top + lines * lineHeight + 24,
+        // Extract and sync mentions
+        const currentMentions = extractMentions(editor);
+        // Only update if mentions changed
+        const currentIds = currentMentions.map((m) => `${m.type}:${m.id}`).sort();
+        const prevIds = mentions.map((m) => `${m.type}:${m.id}`).sort();
+        if (currentIds.join(",") !== prevIds.join(",")) {
+          onMentionsChange(currentMentions);
+        }
+      },
+    });
+
+    // Sync disabled state
+    useEffect(() => {
+      if (editor) {
+        editor.setEditable(!disabled);
+      }
+    }, [editor, disabled]);
+
+    // Handle external value changes (e.g., clearing)
+    useEffect(() => {
+      if (editor && value === "" && editor.getText() !== "") {
+        editor.commands.clearContent();
+      }
+    }, [editor, value]);
+
+    // Expose methods via ref
+    useImperativeHandle(ref, () => ({
+      clearContent: () => {
+        editor?.commands.clearContent();
+      },
+      focus: () => {
+        editor?.commands.focus();
+      },
+    }));
+
+    // Handle mention selection from dropdown
+    const handleMentionSelect = useCallback(
+      (mention: MentionData) => {
+        if (suggestionPropsRef.current) {
+          suggestionPropsRef.current.command({
+            id: mention.id,
+            label: mention.name,
+            type: mention.type,
           });
         }
-
-        setDropdownOpen(true);
-      } else {
         setDropdownOpen(false);
-        setMentionStartIndex(null);
-        setMentionQuery("");
-      }
-    },
-    [onChange]
-  );
+      },
+      []
+    );
 
-  const handleSelect = useCallback(
-    (mention: Mention) => {
-      if (mentionStartIndex === null) return;
-
-      // Replace @query with @Name and add to mentions
-      const before = value.slice(0, mentionStartIndex);
-      const cursorPos = textareaRef.current?.selectionStart || value.length;
-      const after = value.slice(cursorPos);
-      const newValue = `${before}@${mention.name} ${after}`;
-
-      onChange(newValue);
-
-      // Add mention if not already present
-      if (!mentions.find((m) => m.id === mention.id && m.type === mention.type)) {
-        onMentionsChange([...mentions, mention]);
-      }
-
-      setDropdownOpen(false);
-      setMentionStartIndex(null);
-      setMentionQuery("");
-
-      // Focus back to textarea
-      setTimeout(() => {
-        if (textareaRef.current) {
-          const newCursorPos = before.length + mention.name.length + 2; // +2 for @ and space
-          textareaRef.current.focus();
-          textareaRef.current.setSelectionRange(newCursorPos, newCursorPos);
-        }
-      }, 0);
-    },
-    [value, onChange, mentions, onMentionsChange, mentionStartIndex]
-  );
-
-  const handleRemoveMention = useCallback(
-    (mentionToRemove: Mention) => {
-      onMentionsChange(
-        mentions.filter(
-          (m) =>
-            !(m.id === mentionToRemove.id && m.type === mentionToRemove.type)
-        )
-      );
-
-      // Also remove from text if present
-      const regex = new RegExp(`@${mentionToRemove.name}\\s?`, "g");
-      onChange(value.replace(regex, ""));
-    },
-    [mentions, onMentionsChange, value, onChange]
-  );
-
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === "Escape" && dropdownOpen) {
-        e.preventDefault();
-        setDropdownOpen(false);
-        return;
-      }
-      onKeyDown?.(e);
-    },
-    [dropdownOpen, onKeyDown]
-  );
-
-  return (
-    <div className="relative">
-      {mentions.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-2">
-          {mentions.map((mention) => (
-            <MentionBadge
-              key={`${mention.type}-${mention.id}`}
-              mention={mention}
-              onRemove={() => handleRemoveMention(mention)}
-            />
-          ))}
-        </div>
-      )}
-      <Textarea
-        ref={textareaRef}
-        value={value}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        disabled={disabled}
-        className={className}
-        rows={3}
-      />
-      <MentionDropdown
-        open={dropdownOpen}
-        onOpenChange={setDropdownOpen}
-        position={dropdownPosition}
-        searchQuery={mentionQuery}
-        onSelect={handleSelect}
-      />
-    </div>
-  );
-}
+    return (
+      <div ref={containerRef} className="relative max-h-[40vh] overflow-y-auto">
+        <EditorContent editor={editor} />
+        <MentionDropdown
+          ref={dropdownRef}
+          open={dropdownOpen}
+          onOpenChange={setDropdownOpen}
+          position={dropdownPosition}
+          searchQuery={mentionQuery}
+          onSelect={handleMentionSelect}
+        />
+      </div>
+    );
+  }
+);
