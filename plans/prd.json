@@ -474,5 +474,164 @@
       "On click, call retry endpoint and resume polling"
     ],
     "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Add Agent model to Prisma schema",
+    "steps": [
+      "Add Agent model (id, userId, name, slug, description, instruction, createdAt, updatedAt)",
+      "Add unique constraint on (userId, slug)",
+      "Run prisma migrate"
+    ],
+    "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Create POST /api/agents (create agent)",
+    "steps": [
+      "Accept name/description/instruction",
+      "Auto-generate slug from name (lowercase, hyphens)",
+      "Validate slug uniqueness per user",
+      "Validate non-empty fields",
+      "Save to DB, return agent"
+    ],
+    "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Create GET /api/agents (list agents)",
+    "steps": [
+      "Filter by userId",
+      "Order by updatedAt desc",
+      "Return agent array"
+    ],
+    "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Create GET /api/agents/[id] (get agent)",
+    "steps": [
+      "Fetch by id + userId",
+      "Return 404 if not found"
+    ],
+    "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Create PUT /api/agents/[id] (update agent)",
+    "steps": [
+      "Validate fields",
+      "Re-generate slug if name changed",
+      "Check slug uniqueness excluding self",
+      "Update record"
+    ],
+    "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Create DELETE /api/agents/[id] (delete agent)",
+    "steps": [
+      "Delete by id + userId",
+      "Return 204"
+    ],
+    "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Create POST /api/agents/test (test console backend)",
+    "steps": [
+      "Accept instruction + messages array",
+      "Use instruction as system prompt",
+      "Stream LLM response via Vercel AI SDK",
+      "No DB persistence"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create /agents route with agent list page",
+    "steps": [
+      "Card layout showing name/description/updatedAt",
+      "Create New Agent button",
+      "Edit and delete actions",
+      "Loading/empty/error states"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add /agents to app sidebar navigation",
+    "steps": [
+      "Add nav item to app-sidebar.tsx",
+      "Match existing nav style"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create /agents/new route with creation form",
+    "steps": [
+      "Name input (free-form)",
+      "Description textarea",
+      "Instruction textarea (multiline)",
+      "Inline validation",
+      "Save button disabled until valid",
+      "Success toast, redirect to list"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create /agents/[id]/edit route with edit form",
+    "steps": [
+      "Pre-populate from GET /api/agents/[id]",
+      "Same validation as create",
+      "Save via PUT",
+      "Unsaved changes warning on navigate away"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add delete confirmation dialog",
+    "steps": [
+      "Confirm dialog before DELETE",
+      "Remove from list on success",
+      "Error toast on failure"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Build agent test console component",
+    "steps": [
+      "Chat-style interface with input + message list",
+      "Send to POST /api/agents/test with current instruction + full message history",
+      "Stream response",
+      "Multi-turn conversation support"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Integrate test console into create/edit pages",
+    "steps": [
+      "Side-by-side layout (config left, console right)",
+      "Console activates when all fields filled",
+      "Reset conversation when instruction changes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Style agent pages per global design",
+    "steps": [
+      "0 shadows",
+      "0-4px border radius",
+      "bg-gray-50 cards/panels",
+      "White text fields",
+      "Minimal buttons"
+    ],
+    "passes": true
   }
 ]

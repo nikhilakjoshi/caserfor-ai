@@ -1452,3 +1452,18 @@
 - app/(dashboard)/vault/[id]/page.tsx - document row click handler, preview state, DocumentViewer render
 - app/(dashboard)/assistant/page.tsx - citation click handler, citationPreview state, DocumentViewer render
 - package.json - added react-pdf dependency
+
+## 2026-01-28: Typecheck Fix for react-pdf CSS Imports
+
+### Completed
+- Created types/react-pdf.d.ts with module declarations for react-pdf CSS files
+- Fixed TS2307 errors for react-pdf/dist/Page/AnnotationLayer.css and TextLayer.css
+- Typecheck and lint both pass clean
+
+### Notes for next dev
+- All PRD items are passes:true - feature work complete
+- Agent creation PRD items added to prd.json but not yet implemented (separate PRD in prd/agent_creation_prd.md)
+- Remaining work: agent CRUD, test console, sidebar nav for agents
+
+### Files created
+- types/react-pdf.d.ts - CSS module declarations for react-pdf

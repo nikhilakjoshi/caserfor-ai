@@ -32,7 +32,6 @@ import {
   Search,
   Plus,
   ChevronLeft,
-
   Calendar,
   ArrowUpDown,
   Trash2,
@@ -113,7 +112,6 @@ type OutputType = "draft" | "review_table";
 type OwnerType = "system" | "personal";
 type AssistantMode = "chat" | "document";
 
-
 interface Prompt {
   id: string;
   name: string;
@@ -122,7 +120,6 @@ interface Prompt {
   category: string | null;
   isStarred: boolean;
 }
-
 
 const recommendedWorkflows = [
   {
@@ -257,7 +254,11 @@ export default function AssistantPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Document preview state
-  const [citationPreview, setCitationPreview] = useState<{ url: string; fileName: string; fileType: string } | null>(null);
+  const [citationPreview, setCitationPreview] = useState<{
+    url: string;
+    fileName: string;
+    fileType: string;
+  } | null>(null);
 
   // Mode state for split-panel layout
   const [mode, setMode] = useState<AssistantMode>("chat");
@@ -361,9 +362,7 @@ export default function AssistantPage() {
           if (filesToAdd.length > 0) setAttachedFiles(filesToAdd);
         })
         .catch(() => {});
-      setSelectedVaults((prev) =>
-        prev.includes(vaultId) ? prev : [vaultId],
-      );
+      setSelectedVaults((prev) => (prev.includes(vaultId) ? prev : [vaultId]));
     } else if (vaultId) {
       // Just vault selected, no specific files
       setPreloadedContext({
@@ -391,7 +390,9 @@ export default function AssistantPage() {
       }
     }
     if (oversized.length > 0) {
-      alert(`Files exceed 25MB limit and were not added:\n${oversized.join("\n")}`);
+      alert(
+        `Files exceed 25MB limit and were not added:\n${oversized.join("\n")}`,
+      );
     }
     if (validFiles.length === 0) return;
     const newFiles: AttachedFile[] = validFiles.map((file) => ({
@@ -427,14 +428,23 @@ export default function AssistantPage() {
       if (!res.ok) throw new Error("Failed to fetch vaults");
       const data = await res.json();
       setVaults(
-        data.map((v: { id: string; name: string; type: string; description: string | null; fileCount: number; createdAt: string }) => ({
-          id: v.id,
-          name: v.name,
-          type: v.type as "knowledge_base" | "sandbox",
-          description: v.description,
-          fileCount: v.fileCount,
-          createdAt: v.createdAt,
-        })),
+        data.map(
+          (v: {
+            id: string;
+            name: string;
+            type: string;
+            description: string | null;
+            fileCount: number;
+            createdAt: string;
+          }) => ({
+            id: v.id,
+            name: v.name,
+            type: v.type as "knowledge_base" | "sandbox",
+            description: v.description,
+            fileCount: v.fileCount,
+            createdAt: v.createdAt,
+          }),
+        ),
       );
     } catch (e) {
       setVaultsError(e instanceof Error ? e.message : "Failed to fetch vaults");
@@ -452,17 +462,28 @@ export default function AssistantPage() {
       if (!res.ok) throw new Error("Failed to fetch documents");
       const data = await res.json();
       setVaultFiles(
-        data.map((d: { id: string; name: string; fileType: string; documentType: string | null; sizeBytes: number; createdAt: string }) => ({
-          id: d.id,
-          name: d.name,
-          fileType: d.fileType || "unknown",
-          documentType: d.documentType,
-          size: d.sizeBytes || 0,
-          createdAt: d.createdAt,
-        })),
+        data.map(
+          (d: {
+            id: string;
+            name: string;
+            fileType: string;
+            documentType: string | null;
+            sizeBytes: number;
+            createdAt: string;
+          }) => ({
+            id: d.id,
+            name: d.name,
+            fileType: d.fileType || "unknown",
+            documentType: d.documentType,
+            size: d.sizeBytes || 0,
+            createdAt: d.createdAt,
+          }),
+        ),
       );
     } catch (e) {
-      setVaultFilesError(e instanceof Error ? e.message : "Failed to fetch documents");
+      setVaultFilesError(
+        e instanceof Error ? e.message : "Failed to fetch documents",
+      );
     } finally {
       setVaultFilesLoading(false);
     }
@@ -535,7 +556,10 @@ export default function AssistantPage() {
           case "name":
             return direction * a.name.localeCompare(b.name);
           case "documentType":
-            return direction * (a.documentType || "").localeCompare(b.documentType || "");
+            return (
+              direction *
+              (a.documentType || "").localeCompare(b.documentType || "")
+            );
           case "size":
             return direction * (a.size - b.size);
           case "createdAt":
@@ -760,7 +784,9 @@ export default function AssistantPage() {
       }
     }
     if (oversized.length > 0) {
-      alert(`Files exceed 25MB limit and were not added:\n${oversized.join("\n")}`);
+      alert(
+        `Files exceed 25MB limit and were not added:\n${oversized.join("\n")}`,
+      );
     }
     if (validFiles.length === 0) return;
     const newFiles: NewVaultFile[] = validFiles.map((file) => ({
@@ -879,23 +905,31 @@ export default function AssistantPage() {
   };
 
   // Handle citation click - fetch presigned URL and open viewer
-  const handleCitationClick = useCallback(async (documentName: string) => {
-    // Find matching attached file by name
-    const match = attachedFiles.find((f) =>
-      f.name.toLowerCase().includes(documentName.toLowerCase()) ||
-      documentName.toLowerCase().includes(f.name.replace(/\.[^.]+$/, "").toLowerCase())
-    );
-    if (!match || !match.vaultId) return;
-    try {
-      const res = await fetch(`/api/vaults/${match.vaultId}/documents/${match.id}/presign`);
-      if (!res.ok) return;
-      const { url } = await res.json();
-      const ext = match.name.split(".").pop()?.toLowerCase() || "";
-      setCitationPreview({ url, fileName: match.name, fileType: ext });
-    } catch {
-      // silently fail
-    }
-  }, [attachedFiles]);
+  const handleCitationClick = useCallback(
+    async (documentName: string) => {
+      // Find matching attached file by name
+      const match = attachedFiles.find(
+        (f) =>
+          f.name.toLowerCase().includes(documentName.toLowerCase()) ||
+          documentName
+            .toLowerCase()
+            .includes(f.name.replace(/\.[^.]+$/, "").toLowerCase()),
+      );
+      if (!match || !match.vaultId) return;
+      try {
+        const res = await fetch(
+          `/api/vaults/${match.vaultId}/documents/${match.id}/presign`,
+        );
+        if (!res.ok) return;
+        const { url } = await res.json();
+        const ext = match.name.split(".").pop()?.toLowerCase() || "";
+        setCitationPreview({ url, fileName: match.name, fileType: ext });
+      } catch {
+        // silently fail
+      }
+    },
+    [attachedFiles],
+  );
 
   // Handle version switching
   const handleVersionChange = useCallback(
@@ -1129,7 +1163,7 @@ export default function AssistantPage() {
         }}
       >
         <DialogContent
-          className="w-[90vw] max-w-[90vw] h-[90vh] max-h-[90vh] bg-gray-50 dark:bg-muted/50 border border-neutral-200 dark:border-neutral-700 p-0 flex flex-col overflow-hidden"
+          className="sm:w-[90vw] sm:max-w-[90vw] h-[90vh] max-h-[90vh] bg-gray-50 dark:bg-muted/50 border border-neutral-200 dark:border-neutral-700 p-0 flex flex-col overflow-hidden"
           showCloseButton={false}
         >
           {/* Header */}
@@ -1198,115 +1232,137 @@ export default function AssistantPage() {
                   )}
                   {vaultFilesError && (
                     <div className="flex flex-col items-center justify-center h-full gap-3">
-                      <p className="text-sm text-destructive">{vaultFilesError}</p>
-                      <Button variant="outline" size="sm" onClick={() => fetchVaultFiles(selectedVaultForFiles.id)}>
+                      <p className="text-sm text-destructive">
+                        {vaultFilesError}
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          fetchVaultFiles(selectedVaultForFiles.id)
+                        }
+                      >
                         Retry
                       </Button>
                     </div>
                   )}
-                  {!vaultFilesLoading && !vaultFilesError && vaultFiles.length === 0 && (
-                    <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-                      No files in this vault
-                    </div>
-                  )}
-                  {!vaultFilesLoading && !vaultFilesError && vaultFiles.length > 0 && (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-10">
-                          <TableCheckbox
-                            checked={
-                              selectedVaultFiles.length ===
-                                filteredFiles.length &&
-                              filteredFiles.length > 0
-                            }
-                            onCheckedChange={toggleSelectAllFiles}
-                          />
-                        </TableHead>
-                        <TableHead>
-                          <button
-                            className="flex items-center gap-1 hover:text-foreground"
-                            onClick={() => handleFileSort("name")}
-                          >
-                            File Name
-                            <ArrowUpDown className="h-3 w-3" />
-                          </button>
-                        </TableHead>
-                        <TableHead>
-                          <button
-                            className="flex items-center gap-1 hover:text-foreground"
-                            onClick={() => handleFileSort("documentType")}
-                          >
-                            File Type
-                            <ArrowUpDown className="h-3 w-3" />
-                          </button>
-                        </TableHead>
-                        <TableHead>
-                          <button
-                            className="flex items-center gap-1 hover:text-foreground"
-                            onClick={() => handleFileSort("size")}
-                          >
-                            File Size
-                            <ArrowUpDown className="h-3 w-3" />
-                          </button>
-                        </TableHead>
-                        <TableHead>
-                          <button
-                            className="flex items-center gap-1 hover:text-foreground"
-                            onClick={() => handleFileSort("createdAt")}
-                          >
-                            Created
-                            <ArrowUpDown className="h-3 w-3" />
-                          </button>
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {sortedFiles.map((file) => {
-                        const isSelected = selectedVaultFiles.includes(file.id);
-                        const isFocused = focusedFile?.id === file.id;
-                        return (
-                          <TableRow
-                            key={file.id}
-                            className={`cursor-pointer ${isFocused ? "bg-primary/10" : ""}`}
-                            onClick={() => {
-                              toggleVaultFileSelection(file.id);
-                              setFocusedFile(file);
-                            }}
-                            data-state={isSelected ? "selected" : undefined}
-                          >
-                            <TableCell>
+                  {!vaultFilesLoading &&
+                    !vaultFilesError &&
+                    vaultFiles.length === 0 && (
+                      <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+                        No files in this vault
+                      </div>
+                    )}
+                  {!vaultFilesLoading &&
+                    !vaultFilesError &&
+                    vaultFiles.length > 0 && (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-10">
                               <TableCheckbox
-                                checked={isSelected}
-                                onCheckedChange={() =>
-                                  toggleVaultFileSelection(file.id)
+                                checked={
+                                  selectedVaultFiles.length ===
+                                    filteredFiles.length &&
+                                  filteredFiles.length > 0
                                 }
-                                onClick={(e) => e.stopPropagation()}
+                                onCheckedChange={toggleSelectAllFiles}
                               />
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              <div className="flex items-center gap-2">
-                                <File className="h-4 w-4 text-muted-foreground" />
-                                {file.name}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              {file.documentType ? (
-                                <Badge variant="secondary">
-                                  {file.documentType}
-                                </Badge>
-                              ) : (
-                                <span className="text-xs text-muted-foreground">-</span>
-                              )}
-                            </TableCell>
-                            <TableCell>{formatFileSize(file.size)}</TableCell>
-                            <TableCell>{new Date(file.createdAt).toLocaleDateString()}</TableCell>
+                            </TableHead>
+                            <TableHead>
+                              <button
+                                className="flex items-center gap-1 hover:text-foreground"
+                                onClick={() => handleFileSort("name")}
+                              >
+                                File Name
+                                <ArrowUpDown className="h-3 w-3" />
+                              </button>
+                            </TableHead>
+                            <TableHead>
+                              <button
+                                className="flex items-center gap-1 hover:text-foreground"
+                                onClick={() => handleFileSort("documentType")}
+                              >
+                                File Type
+                                <ArrowUpDown className="h-3 w-3" />
+                              </button>
+                            </TableHead>
+                            <TableHead>
+                              <button
+                                className="flex items-center gap-1 hover:text-foreground"
+                                onClick={() => handleFileSort("size")}
+                              >
+                                File Size
+                                <ArrowUpDown className="h-3 w-3" />
+                              </button>
+                            </TableHead>
+                            <TableHead>
+                              <button
+                                className="flex items-center gap-1 hover:text-foreground"
+                                onClick={() => handleFileSort("createdAt")}
+                              >
+                                Created
+                                <ArrowUpDown className="h-3 w-3" />
+                              </button>
+                            </TableHead>
                           </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                  )}
+                        </TableHeader>
+                        <TableBody>
+                          {sortedFiles.map((file) => {
+                            const isSelected = selectedVaultFiles.includes(
+                              file.id,
+                            );
+                            const isFocused = focusedFile?.id === file.id;
+                            return (
+                              <TableRow
+                                key={file.id}
+                                className={`cursor-pointer ${isFocused ? "bg-primary/10" : ""}`}
+                                onClick={() => {
+                                  toggleVaultFileSelection(file.id);
+                                  setFocusedFile(file);
+                                }}
+                                data-state={isSelected ? "selected" : undefined}
+                              >
+                                <TableCell>
+                                  <TableCheckbox
+                                    checked={isSelected}
+                                    onCheckedChange={() =>
+                                      toggleVaultFileSelection(file.id)
+                                    }
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                  <div className="flex items-center gap-2">
+                                    <File className="h-4 w-4 text-muted-foreground" />
+                                    {file.name}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  {file.documentType ? (
+                                    <Badge variant="secondary">
+                                      {file.documentType}
+                                    </Badge>
+                                  ) : (
+                                    <span className="text-xs text-muted-foreground">
+                                      -
+                                    </span>
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  {formatFileSize(file.size)}
+                                </TableCell>
+                                <TableCell>
+                                  {new Date(
+                                    file.createdAt,
+                                  ).toLocaleDateString()}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    )}
                 </div>
 
                 {/* Metadata Panel - Right Side */}
@@ -1380,7 +1436,11 @@ export default function AssistantPage() {
                           <p className="text-xs text-muted-foreground mb-1">
                             Created
                           </p>
-                          <p className="text-sm">{new Date(focusedFile.createdAt).toLocaleDateString()}</p>
+                          <p className="text-sm">
+                            {new Date(
+                              focusedFile.createdAt,
+                            ).toLocaleDateString()}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -1398,74 +1458,82 @@ export default function AssistantPage() {
                 {vaultsError && (
                   <div className="flex flex-col items-center justify-center py-12 gap-3">
                     <p className="text-sm text-destructive">{vaultsError}</p>
-                    <Button variant="outline" size="sm" onClick={fetchVaults}>Retry</Button>
+                    <Button variant="outline" size="sm" onClick={fetchVaults}>
+                      Retry
+                    </Button>
                   </div>
                 )}
                 {!vaultsLoading && !vaultsError && (
-                <>
-                {/* Create New Vault option */}
-                <button
-                  className="w-full p-4 border-2 border-dashed border-neutral-300 dark:border-neutral-600 bg-white dark:bg-background hover:border-primary hover:bg-primary/5 transition-colors flex items-center gap-3"
-                  onClick={() => {
-                    setShowCreateVaultModal(true);
-                  }}
-                >
-                  <div className="h-10 w-10 bg-primary/10 flex items-center justify-center">
-                    <Plus className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-medium">Create New Vault</p>
-                    <p className="text-sm text-muted-foreground">
-                      Start a new knowledge base or sandbox
-                    </p>
-                  </div>
-                </button>
-
-                {/* Vault Cards Grid */}
-                <div className="grid grid-cols-3 gap-4">
-                  {filteredVaults.map((vault) => (
+                  <>
+                    {/* Create New Vault option */}
                     <button
-                      key={vault.id}
-                      onClick={() => handleVaultSelect(vault)}
-                      className="p-4 bg-white dark:bg-background border border-neutral-200 dark:border-neutral-700 hover:border-primary transition-colors text-left"
+                      className="w-full p-4 border-2 border-dashed border-neutral-300 dark:border-neutral-600 bg-white dark:bg-background hover:border-primary hover:bg-primary/5 transition-colors flex items-center gap-3"
+                      onClick={() => {
+                        setShowCreateVaultModal(true);
+                      }}
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          {vault.type === "knowledge_base" ? (
-                            <Database className="h-5 w-5 text-primary" />
-                          ) : (
-                            <Folder className="h-5 w-5 text-amber-500" />
-                          )}
-                          <span className="font-medium">{vault.name}</span>
-                        </div>
-                        <Badge variant="outline" className="text-xs">
-                          {vault.type === "knowledge_base" ? "KB" : "Sandbox"}
-                        </Badge>
+                      <div className="h-10 w-10 bg-primary/10 flex items-center justify-center">
+                        <Plus className="h-5 w-5 text-primary" />
                       </div>
-                      {vault.description && (
-                        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{vault.description}</p>
-                      )}
-                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1.5">
-                          <File className="h-3.5 w-3.5" />
-                          <span>{vault.fileCount} files</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <Calendar className="h-3.5 w-3.5" />
-                          <span>{new Date(vault.createdAt).toLocaleDateString()}</span>
-                        </div>
+                      <div className="text-left">
+                        <p className="font-medium">Create New Vault</p>
+                        <p className="text-sm text-muted-foreground">
+                          Start a new knowledge base or sandbox
+                        </p>
                       </div>
                     </button>
-                  ))}
-                </div>
 
-                {/* Empty state */}
-                {filteredVaults.length === 0 && vaultSearchQuery && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No vaults found matching &quot;{vaultSearchQuery}&quot;
-                  </div>
-                )}
-                </>
+                    {/* Vault Cards Grid */}
+                    <div className="grid grid-cols-3 gap-4">
+                      {filteredVaults.map((vault) => (
+                        <button
+                          key={vault.id}
+                          onClick={() => handleVaultSelect(vault)}
+                          className="p-4 bg-white dark:bg-background border border-neutral-200 dark:border-neutral-700 hover:border-primary transition-colors text-left"
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              {vault.type === "knowledge_base" ? (
+                                <Database className="h-5 w-5 text-primary" />
+                              ) : (
+                                <Folder className="h-5 w-5 text-amber-500" />
+                              )}
+                              <span className="font-medium">{vault.name}</span>
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {vault.type === "knowledge_base"
+                                ? "KB"
+                                : "Sandbox"}
+                            </Badge>
+                          </div>
+                          {vault.description && (
+                            <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                              {vault.description}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1.5">
+                              <File className="h-3.5 w-3.5" />
+                              <span>{vault.fileCount} files</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <Calendar className="h-3.5 w-3.5" />
+                              <span>
+                                {new Date(vault.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Empty state */}
+                    {filteredVaults.length === 0 && vaultSearchQuery && (
+                      <div className="text-center py-8 text-muted-foreground">
+                        No vaults found matching &quot;{vaultSearchQuery}&quot;
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -1701,7 +1769,10 @@ export default function AssistantPage() {
               <p className="text-sm text-muted-foreground mb-2">Query:</p>
               <MarkdownRenderer content={submittedQuery} />
             </div>
-            <MarkdownRenderer content={displayContent} onCitationClick={handleCitationClick} />
+            <MarkdownRenderer
+              content={displayContent}
+              onCitationClick={handleCitationClick}
+            />
             {isLoading && (
               <span className="inline-flex items-center gap-1 text-muted-foreground">
                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -1798,27 +1869,32 @@ export default function AssistantPage() {
                     Loading vaults...
                   </div>
                 )}
-                {!vaultsLoading && vaults.map((vault) => {
-                  const isSelected = selectedVaults.includes(vault.id);
-                  return (
-                    <Button
-                      key={vault.id}
-                      variant={isSelected ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => toggleVault(vault.id)}
-                      className="gap-1.5"
-                      disabled={isLoading}
-                    >
-                      {isSelected && <Check className="h-3 w-3" />}
-                      {vault.name}
-                    </Button>
-                  );
-                })}
+                {!vaultsLoading &&
+                  vaults.map((vault) => {
+                    const isSelected = selectedVaults.includes(vault.id);
+                    return (
+                      <Button
+                        key={vault.id}
+                        variant={isSelected ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => toggleVault(vault.id)}
+                        className="gap-1.5"
+                        disabled={isLoading}
+                      >
+                        {isSelected && <Check className="h-3 w-3" />}
+                        {vault.name}
+                      </Button>
+                    );
+                  })}
                 {!vaultsLoading && vaults.length === 0 && !vaultsError && (
-                  <span className="text-sm text-muted-foreground">No vaults found</span>
+                  <span className="text-sm text-muted-foreground">
+                    No vaults found
+                  </span>
                 )}
                 {vaultsError && (
-                  <span className="text-sm text-destructive">{vaultsError}</span>
+                  <span className="text-sm text-destructive">
+                    {vaultsError}
+                  </span>
                 )}
               </div>
             )}

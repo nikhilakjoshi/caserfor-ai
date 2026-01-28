@@ -1,9 +1,7 @@
 "use client"
 
-import { useState, useCallback } from "react"
-import { Document, Page, pdfjs } from "react-pdf"
-import "react-pdf/dist/Page/AnnotationLayer.css"
-import "react-pdf/dist/Page/TextLayer.css"
+import { useState, useCallback, useEffect } from "react"
+import dynamic from "next/dynamic"
 import {
   X,
   ChevronLeft,
@@ -15,11 +13,21 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-// Configure pdf.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url
-).toString()
+// Lazy-load react-pdf components (requires DOM APIs like DOMMatrix)
+const ReactPdfDocument = dynamic(
+  () => import("react-pdf").then((mod) => {
+    mod.pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+      "pdfjs-dist/build/pdf.worker.min.mjs",
+      import.meta.url
+    ).toString()
+    return { default: mod.Document }
+  }),
+  { ssr: false }
+)
+const ReactPdfPage = dynamic(
+  () => import("react-pdf").then((mod) => ({ default: mod.Page })),
+  { ssr: false }
+)
 
 interface DocumentViewerProps {
   url: string
@@ -38,6 +46,11 @@ export function DocumentViewer({
   targetPage,
   onClose,
 }: DocumentViewerProps) {
+  useEffect(() => {
+    import("react-pdf/dist/Page/AnnotationLayer.css")
+    import("react-pdf/dist/Page/TextLayer.css")
+  }, [])
+
   const [numPages, setNumPages] = useState<number | null>(null)
   const [currentPage, setCurrentPage] = useState(targetPage || 1)
   const [scale, setScale] = useState(1.2)
@@ -102,7 +115,7 @@ export function DocumentViewer({
         {/* Content */}
         <div className="flex-1 overflow-auto flex items-start justify-center p-4 bg-muted/10">
           {isPdf && !pdfError ? (
-            <Document
+            <ReactPdfDocument
               file={url}
               onLoadSuccess={onDocumentLoadSuccess}
               onLoadError={() => setPdfError(true)}
@@ -113,8 +126,8 @@ export function DocumentViewer({
                 </div>
               }
             >
-              <Page pageNumber={currentPage} scale={scale} />
-            </Document>
+              <ReactPdfPage pageNumber={currentPage} scale={scale} />
+            </ReactPdfDocument>
           ) : (
             <div className="max-w-3xl w-full bg-background border p-8">
               <pre className="whitespace-pre-wrap text-sm font-mono leading-relaxed">
