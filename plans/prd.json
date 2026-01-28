@@ -670,7 +670,7 @@
       "Add agentIds to destructured request body: const { ..., agentIds } = await req.json()",
       "Type agentIds as string[] | undefined"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -682,7 +682,7 @@
       "Query prisma.agent.findMany({ where: { id: { in: agentIds }, userId: MOCK_USER_ID } })",
       "Store result in selectedAgents variable"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -694,7 +694,7 @@
       "Add text: 'You have access to these specialized agents:\\n' + agent names/descriptions",
       "Add instruction: 'Call the appropriate agent tool when their expertise is relevant'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -706,7 +706,7 @@
       "Build uiMessages array from userPrompt (single user message with id)",
       "Return createAgentUIStreamResponse({ agent, uiMessages })"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -716,7 +716,7 @@
       "Migrate existing onFinish logic (query update, source references, history entry)",
       "Add agent tool call tracking to SourceReference table with sourceType: 'agent'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

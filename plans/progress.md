@@ -1590,3 +1590,26 @@
 
 ### Files created
 - lib/agent-tools.ts - agent-to-tool converter with createAgentTool, buildAgentTools
+
+## 2026-01-28: Agent Tools Integration in Query Route
+
+### Completed
+- Added agentIds parameter to /api/assistant/query request body
+- Fetches selected agents from database filtered by userId
+- Builds agent tools using buildAgentTools() from lib/agent-tools.ts
+- Appends agent availability info to system prompt when agents selected
+- Replaced streamText with ToolLoopAgent for tool loop support
+- Uses createAgentUIStreamResponse for UI message streaming
+- onStepFinish callback tracks agent tool calls and persists on final step
+- Stores agent tool calls as SourceReference with sourceType: 'agent'
+- History entry includes agent consultation count in sourcesSummary
+- Updated 5 PRD items to passes:true
+
+### Notes for next dev
+- createAgentUIStreamResponse uses onStepFinish (not onFinish) for step callbacks
+- Tool calls use `input` property (not `args`), results use `output` (not `result`)
+- Final step detected by `finishReason !== "tool-calls"`
+- Next priority: UI mention system for @ mentioning agents/vaults in chat input
+
+### Files modified
+- app/api/assistant/query/route.ts - replaced streamText with ToolLoopAgent, added agent integration

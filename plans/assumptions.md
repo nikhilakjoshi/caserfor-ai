@@ -58,3 +58,10 @@
 - AI SDK v5+ renamed `parameters` to `inputSchema` for tool definitions
 - PRD mentions `parameters` but codebase uses `inputSchema` per current SDK
 - Agent sub-tools use generateText (not ToolLoopAgent) since they have no tools themselves
+
+## AI SDK ToolLoopAgent
+- ToolLoopAgent uses `instructions` (not `system`) for system prompt
+- createAgentUIStreamResponse uses onStepFinish callback (not onFinish) for per-step events
+- Tool calls have `input` property (not `args` as in some older SDK versions)
+- Tool results have `output` property (not `result`)
+- Final step detected by checking `finishReason !== "tool-calls"`
