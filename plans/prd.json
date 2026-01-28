@@ -727,7 +727,7 @@
       "Verify components/ui/command.tsx created",
       "Verify components/ui/popover.tsx created"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -742,7 +742,7 @@
       "Filter vaults and agents by searchQuery (case-insensitive name match)",
       "Return { vaults: filtered, agents: filtered, loading }"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -759,7 +759,7 @@
       "Agents group: Bot icon, name",
       "On CommandItem select, call onSelect with mention object"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -773,7 +773,7 @@
       "Style: blue tones for vault, purple for agent",
       "If onRemove provided, render X button that calls onRemove"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -790,7 +790,7 @@
       "On mention select: replace @query with inline styled text @[type:id:name], add to mentions array, close dropdown",
       "Close dropdown on Escape key"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -802,7 +802,7 @@
       "Store mention tokens in format parseable for extraction: @[vault:id:name] or @[agent:id:name]",
       "On backspace over mention token, remove entire token and from mentions array"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -814,7 +814,7 @@
       "Pass value={query}, onChange={setQuery}, mentions, onMentionsChange={setMentions}",
       "Pass other props: placeholder, disabled, onKeyDown for submit"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -826,7 +826,7 @@
       "Add agentIds to request body in complete() call",
       "Optionally also add vault mentions to sources array"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -887,7 +887,7 @@
       "Call setMentions([]) to clear selected mentions",
       "Ensure MentionInput reflects cleared state"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -898,6 +898,6 @@
       "Ensure Escape closes dropdown",
       "Test up/down navigation through vault and agent groups"
     ],
-    "passes": false
+    "passes": true
   }
 ]

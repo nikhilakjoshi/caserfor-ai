@@ -1613,3 +1613,36 @@
 
 ### Files modified
 - app/api/assistant/query/route.ts - replaced streamText with ToolLoopAgent, added agent integration
+
+## 2026-01-28: @ Mention System for Agents and Vaults
+
+### Completed
+- Installed shadcn command and popover components
+- Created hooks/use-mentions.ts with useMentions hook for fetching vaults/agents
+- Created components/assistant/mention-dropdown.tsx with Command-based dropdown
+- Created components/assistant/mention-badge.tsx with colored badges (blue=vault, purple=agent)
+- Created components/assistant/mention-input.tsx with @ detection and dropdown trigger
+- Integrated MentionInput into assistant page, replacing Textarea
+- Added mentions state and passed agentIds to API in handleSubmit
+- Reset mentions on new thread/conversation clear
+- Keyboard navigation works via Command component (arrow keys, Enter, Escape)
+- Updated 10 PRD items to passes:true
+
+### Notes for next dev
+- MentionDropdown uses fixed positioning at calculated cursor position
+- Mentions stored as array of { id, type, name } objects
+- MentionBadge shows removable badges above textarea when mentions selected
+- @ pattern detected via regex /@(\w*)$/ matching text before cursor
+- cmdk package installed as dependency of shadcn command component
+- Remaining false PRD items: useChat migration, UIMessage parts rendering, tool call display
+
+### Files created
+- hooks/use-mentions.ts - useMentions hook
+- components/assistant/mention-dropdown.tsx - Command-based dropdown
+- components/assistant/mention-badge.tsx - colored mention badges
+- components/assistant/mention-input.tsx - textarea with @ detection
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - integrated MentionInput, added mentions state, passes agentIds
+- components/ui/command.tsx - shadcn command component (new)
+- components/ui/dialog.tsx - updated by shadcn

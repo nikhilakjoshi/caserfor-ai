@@ -7,7 +7,8 @@ import { useDebouncedCallback } from "use-debounce";
 import { useDropzone } from "react-dropzone";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { MentionInput } from "@/components/assistant/mention-input";
+import { type Mention } from "@/components/assistant/mention-dropdown";
 import { Toggle } from "@/components/ui/toggle";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -289,6 +290,9 @@ export default function AssistantPage() {
   const [newVaultName, setNewVaultName] = useState("");
   const [newVaultFiles, setNewVaultFiles] = useState<NewVaultFile[]>([]);
   const [isCreatingVault, setIsCreatingVault] = useState(false);
+
+  // Mention system state
+  const [mentions, setMentions] = useState<Mention[]>([]);
 
   // Custom fetch to capture X-Query-Id header from response
   const customFetch = useCallback(
@@ -617,6 +621,11 @@ export default function AssistantPage() {
       vaultId: af.vaultId,
     }));
 
+    // Extract agent IDs from mentions
+    const agentIds = mentions
+      .filter((m) => m.type === "agent")
+      .map((m) => m.id);
+
     // Store the query that was submitted
     setSubmittedQuery(query);
 
@@ -627,6 +636,7 @@ export default function AssistantPage() {
         sources,
         deepAnalysis,
         attachedFiles: files,
+        agentIds,
       },
     });
   };
@@ -902,6 +912,8 @@ export default function AssistantPage() {
     // Reset version state
     setCurrentVersion(1);
     setAvailableVersions([1]);
+    // Reset mentions
+    setMentions([]);
   };
 
   // Handle citation click - fetch presigned URL and open viewer
@@ -1795,11 +1807,13 @@ export default function AssistantPage() {
         >
           {/* Unified Chat Input Container */}
           <div className="border rounded bg-background">
-            {/* Textarea */}
-            <Textarea
+            {/* MentionInput with @ detection */}
+            <MentionInput
               placeholder={textareaPlaceholder}
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={setQuery}
+              mentions={mentions}
+              onMentionsChange={setMentions}
               className="min-h-[100px] resize-none text-base border-0 focus-visible:ring-0 rounded-b-none"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
