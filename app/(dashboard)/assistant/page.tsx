@@ -111,7 +111,7 @@ interface Vault {
   createdAt: string;
 }
 
-type OutputType = "draft" | "review_table";
+type OutputType = "draft" | "review_table" | null;
 type OwnerType = "system" | "personal";
 type AssistantMode = "chat" | "document";
 
@@ -234,7 +234,7 @@ export default function AssistantPage() {
   const [query, setQuery] = useState("");
   const [preloadedContext, setPreloadedContext] =
     useState<PreloadedVaultContext | null>(null);
-  const [outputType, setOutputType] = useState<OutputType>("draft");
+  const [outputType, setOutputType] = useState<OutputType>(null);
   const [selectedVaults, setSelectedVaults] = useState<string[]>([]);
   const [deepAnalysis, setDeepAnalysis] = useState(false);
   const [showVaultSelector, setShowVaultSelector] = useState(false);
@@ -1924,7 +1924,9 @@ export default function AssistantPage() {
             <div className="flex gap-1">
               <Toggle
                 pressed={outputType === "draft"}
-                onPressedChange={() => setOutputType("draft")}
+                onPressedChange={(pressed) =>
+                  setOutputType(pressed ? "draft" : null)
+                }
                 size="sm"
                 className="gap-1.5"
                 disabled={isLoading}
@@ -1934,7 +1936,9 @@ export default function AssistantPage() {
               </Toggle>
               <Toggle
                 pressed={outputType === "review_table"}
-                onPressedChange={() => setOutputType("review_table")}
+                onPressedChange={(pressed) =>
+                  setOutputType(pressed ? "review_table" : null)
+                }
                 size="sm"
                 className="gap-1.5"
                 disabled={isLoading}

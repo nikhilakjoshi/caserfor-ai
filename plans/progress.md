@@ -1674,3 +1674,24 @@
 
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - useChat migration, tool invocations, message parts handling
+
+## 2026-01-28: Deselectable Output Type Toggles
+
+### Completed
+- Changed OutputType to allow null (no forced output type)
+- Default outputType now null instead of "draft" - page loads with no toggle pressed
+- Draft Document toggle now deselectable - clicking pressed toggle sets outputType to null
+- Review Table toggle now deselectable - clicking pressed toggle sets outputType to null
+- Fixed pre-existing lint error in mention-dropdown.tsx (setState in effect)
+- Used key-based remount pattern to reset selectedIndex without useEffect
+- Updated 3 PRD items to passes:true
+
+### Notes for next dev
+- OutputType is "draft" | "review_table" | null - null means AI auto-detects mode
+- API maps null outputType to "chat" QueryOutputType enum
+- MentionDropdown uses wrapper component with key={searchQuery-open} to force remount
+- Remaining false PRD items: ScrollArea (1), MentionInput max-height (1), functional tests (2)
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - OutputType allows null, toggles deselectable
+- components/assistant/mention-dropdown.tsx - key-based reset pattern

@@ -899,5 +899,85 @@
       "Test up/down navigation through vault and agent groups"
     ],
     "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Change default outputType from 'draft' to 'chat'",
+    "steps": [
+      "Open app/(dashboard)/assistant/page.tsx",
+      "Find useState<OutputType>('draft') around line 237",
+      "Change initial value from 'draft' to 'chat'",
+      "Verify page loads with no toggle pressed"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Make Draft Document toggle deselectable",
+    "steps": [
+      "Open app/(dashboard)/assistant/page.tsx",
+      "Find Draft document Toggle around line 1925",
+      "Change onPressedChange={() => setOutputType('draft')}",
+      "To onPressedChange={(pressed) => setOutputType(pressed ? 'draft' : 'chat')}",
+      "Verify clicking pressed toggle deselects it"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Make Review Table toggle deselectable",
+    "steps": [
+      "Open app/(dashboard)/assistant/page.tsx",
+      "Find Review table Toggle around line 1935",
+      "Change onPressedChange={() => setOutputType('review_table')}",
+      "To onPressedChange((pressed) => setOutputType(pressed ? 'review_table' : 'chat'))",
+      "Verify clicking pressed toggle deselects it"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add ScrollArea to ChatPanel content in document mode",
+    "steps": [
+      "Open components/assistant/chat-panel.tsx",
+      "Import ScrollArea from '@/components/ui/scroll-area'",
+      "Find the content area containing query display and completion (around lines 135-245)",
+      "Wrap the content div in <ScrollArea className='flex-1'>",
+      "Verify long responses scroll within panel instead of overflowing page"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add max-height and scroll to MentionInput wrapper",
+    "steps": [
+      "Open app/(dashboard)/assistant/page.tsx",
+      "Find the MentionInput wrapper div around line 1898",
+      "Add 'max-h-[40vh] overflow-y-auto' to the wrapper className",
+      "Verify typing/pasting long text scrolls within input instead of expanding page"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Verify auto mode routes Q&A to chat layout",
+    "steps": [
+      "Load assistant page (no toggle selected)",
+      "Ask a question like 'What is consideration in contract law?'",
+      "Verify response renders in full-width chat mode layout",
+      "Verify AI uses [MODE:chat] prefix"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Verify auto mode routes drafts to document layout",
+    "steps": [
+      "Load assistant page (no toggle selected)",
+      "Request 'Draft a cease and desist letter'",
+      "Verify response renders in split-panel document mode layout",
+      "Verify AI uses [MODE:document] prefix"
+    ],
+    "passes": false
   }
 ]
