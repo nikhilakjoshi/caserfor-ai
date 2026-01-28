@@ -1497,3 +1497,28 @@
 
 ### Files modified
 - prisma/schema.prisma - added Agent model, updated User relations
+
+## 2026-01-28: Agent List Page and Sidebar Nav
+
+### Completed
+- Created /agents route with full agent list page
+- Card layout: 3-column grid, name, description (line-clamp-2), updatedAt
+- Create New Agent button links to /agents/new
+- Edit links to /agents/[id]/edit, delete with AlertDialog confirmation
+- Loading spinner, empty state with Bot icon, error state with retry
+- Search filters agents by name/description
+- Added Agents nav item (Bot icon) to sidebar between Vault and Workflows
+- Updated 3 PRD items to passes:true
+
+### Notes for next dev
+- Agent cards link to /agents/[id]/edit (edit page not yet created)
+- /agents/new page not yet created - will 404
+- Delete uses same AlertDialog pattern as vault page
+- No toast system - errors show inline banner
+- Remaining false PRD items: /agents/new (1), /agents/[id]/edit (1), test console (1), test console integration (1), agent page styling (1)
+
+### Files created
+- app/(dashboard)/agents/page.tsx - agent list page
+
+### Files modified
+- components/app-sidebar.tsx - added Bot icon import, Agents nav item

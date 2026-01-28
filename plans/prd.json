@@ -556,7 +556,7 @@
       "Edit and delete actions",
       "Loading/empty/error states"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -565,7 +565,7 @@
       "Add nav item to app-sidebar.tsx",
       "Match existing nav style"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -599,7 +599,7 @@
       "Remove from list on success",
       "Error toast on failure"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

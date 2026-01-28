@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   BookOpen,
+  Bot,
   ChevronRight,
   Database,
   FolderOpen,
@@ -56,6 +57,7 @@ const navItemsTop = [
 ]
 
 const navItemsBottom = [
+  { title: "Agents", url: "/agents", icon: Bot },
   { title: "Workflows", url: "/workflows", icon: Workflow },
   { title: "History", url: "/history", icon: History },
   { title: "Library", url: "/library", icon: BookOpen },
