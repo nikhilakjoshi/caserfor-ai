@@ -1024,7 +1024,7 @@
       "Delete hardcoded mock history entries (lines 64-134)",
       "Replace with empty initial state"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1035,7 +1035,7 @@
       "Parse response: { entries, pagination }",
       "Store entries and pagination info in state"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1047,7 +1047,7 @@
       "Re-fetch /api/history?search={query} on search change",
       "Verify typing filters results"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1058,7 +1058,7 @@
       "Re-fetch /api/history?dateFrom=X&dateTo=Y on change",
       "Verify selecting date range filters results"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1070,7 +1070,7 @@
       "Display total pages from API response",
       "Verify navigating pages loads correct entries"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1081,7 +1081,7 @@
       "Show empty state message when no entries returned",
       "Show error state with retry button on fetch failure"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1096,7 +1096,7 @@
       "Clear queryId param from URL after loading",
       "Verify clicking history entry restores full conversation in assistant"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",

@@ -424,8 +424,45 @@ export default function AssistantPage() {
     return { mode: null, content: completion };
   }, [completion]);
 
-  // Read URL params and set up preloaded vault context (runs once on mount)
+  // Read URL params: queryId for history restore, vault context for preloading
   useEffect(() => {
+    const queryId = searchParams.get("queryId");
+    if (queryId) {
+      // Restore conversation from history
+      fetch(`/api/assistant/query/${queryId}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (!data) return;
+          setSubmittedQuery(data.inputText || "");
+          setCurrentQueryId(data.id);
+          queryIdRef.current = data.id;
+          // Determine mode from outputType
+          if (data.outputType === "draft") {
+            setMode("document");
+            setEditorContent(data.outputText || "");
+          } else {
+            setMode("chat");
+          }
+          // Hydrate messages for useChat display
+          setMessages([
+            {
+              id: `user-${data.id}`,
+              role: "user" as const,
+              parts: [{ type: "text" as const, text: data.inputText }],
+            },
+            {
+              id: `assistant-${data.id}`,
+              role: "assistant" as const,
+              parts: [{ type: "text" as const, text: data.outputText || "" }],
+            },
+          ]);
+          // Clear queryId from URL without navigation
+          window.history.replaceState({}, "", "/assistant");
+        })
+        .catch(() => {});
+      return;
+    }
+
     const vaultId = searchParams.get("vault");
     const vaultName = searchParams.get("vaultName");
     const filesParam = searchParams.get("files");
@@ -471,7 +508,7 @@ export default function AssistantPage() {
     if (queryParam) {
       setQuery(queryParam);
     }
-  }, [searchParams]);
+  }, [searchParams, setMessages]);
 
   const addFiles = useCallback((files: FileList | File[]) => {
     const validFiles: File[] = [];

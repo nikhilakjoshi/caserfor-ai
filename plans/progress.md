@@ -1753,3 +1753,36 @@
 ### Files modified
 - components/ui/markdown-renderer.tsx - added markdown-body class to wrapper div
 - app/globals.css - changed .markdown-body font-family to var(--font-sans)
+
+## 2026-01-28: History Page API Integration and Conversation Restore
+
+### Completed
+- Removed all mock history data from history page
+- Fetches real entries from GET /api/history on mount
+- Debounced search (300ms) re-fetches with ?search= param, resets page to 1
+- Date range filter computes dateFrom and passes to API
+- Pagination controls: Previous/Next buttons, page count display
+- Loading spinner during fetch
+- Empty state with contextual message (search vs no entries)
+- Error state with retry button
+- Removed Group By dropdown (was UI-only, not useful without server-side grouping)
+- Added MarkdownRenderer to detail dialog response display
+- "Open in Assistant" button in detail dialog navigates to /assistant?queryId=X
+- Created GET /api/assistant/query/[id] endpoint for fetching single query data
+- Assistant page reads queryId from URL params on mount
+- Fetches query data, hydrates messages/mode/submittedQuery
+- Clears queryId from URL after loading via history.replaceState
+- Updated 6 PRD items to passes:true
+
+### Notes for next dev
+- Remaining false PRD items: agent generate-instruction (3), functional tests (2)
+- History conversation restore creates synthetic UIMessage objects for useChat
+- Draft outputType restores in document mode with editor content
+- GET /api/assistant/query/[id] uses MOCK_USER_ID - wire to auth when ready
+
+### Files created
+- app/api/assistant/query/[id]/route.ts - GET endpoint for single query
+
+### Files modified
+- app/(dashboard)/history/page.tsx - full rewrite with API integration
+- app/(dashboard)/assistant/page.tsx - queryId URL param handling for conversation restore
