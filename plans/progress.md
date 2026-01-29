@@ -1719,3 +1719,21 @@
 ### Files modified
 - components/assistant/chat-panel.tsx - ScrollArea wrapper around content area
 - components/assistant/mention-input.tsx - max-h-[40vh] overflow-y-auto on wrapper
+
+## 2026-01-28: Ask Button Immediate Loader
+
+### Completed
+- Added isSubmitting state to bridge gap between click and stream start
+- isLoading now derived from: status === "streaming" || isSubmitting
+- setIsSubmitting(true) called before sendMessage() in handleSubmit
+- useEffect clears isSubmitting when status becomes "streaming" or "error"
+- Ask button spinner shows immediately on click, not after server responds
+- Updated 1 PRD item to passes:true
+
+### Notes for next dev
+- isSubmitting is separate from streaming status to cover the network latency gap
+- useEffect watches both status and error to ensure cleanup on failures
+- Remaining false PRD items: markdown-body class (1), markdown font (1), history page (6), agent generate-instruction (3), functional tests (2)
+
+### Files modified
+- app/(dashboard)/assistant/page.tsx - added isSubmitting state, useEffect cleanup

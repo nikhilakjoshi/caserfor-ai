@@ -328,7 +328,15 @@ export default function AssistantPage() {
     transport,
   });
 
-  const isLoading = status === "streaming";
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isLoading = status === "streaming" || isSubmitting;
+
+  // Clear isSubmitting once streaming starts or errors
+  useEffect(() => {
+    if (status === "streaming" || status === "error" || error) {
+      setIsSubmitting(false);
+    }
+  }, [status, error]);
 
   // Type alias for message from useChat
   type ChatMessage = (typeof messages)[number];
@@ -720,6 +728,9 @@ export default function AssistantPage() {
       attachedFiles: files,
       agentIds,
     };
+
+    // Show loader immediately before stream starts
+    setIsSubmitting(true);
 
     // Send message using useChat
     await sendMessage({ text: query });

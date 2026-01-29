@@ -979,5 +979,175 @@
       "Verify AI uses [MODE:document] prefix"
     ],
     "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Ask button shows loader immediately on click (not after server responds)",
+    "steps": [
+      "Open app/(dashboard)/assistant/page.tsx",
+      "Add useState<boolean>(false) for isSubmitting state",
+      "Change isLoading derivation to: status === 'streaming' || isSubmitting",
+      "In handleSubmit, call setIsSubmitting(true) before sendMessage()",
+      "Add useEffect: when status becomes 'streaming' or 'error', set isSubmitting(false)",
+      "Verify clicking Ask shows spinner immediately"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add markdown-body class to MarkdownRenderer wrapper div",
+    "steps": [
+      "Open components/ui/markdown-renderer.tsx",
+      "Find wrapper div className with 'prose prose-sm dark:prose-invert max-w-none'",
+      "Append 'markdown-body' to the className string",
+      "Verify rendered markdown picks up global .markdown-body CSS styles"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Change .markdown-body font-family to use app's Geist font",
+    "steps": [
+      "Open app/globals.css",
+      "Find .markdown-body font-family declaration (~line 364)",
+      "Replace default system font stack with var(--font-sans), sans-serif",
+      "Leave all monospace/code font rules unchanged",
+      "Verify markdown text renders in Geist font"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Remove mock data from history page",
+    "steps": [
+      "Open app/(dashboard)/history/page.tsx",
+      "Delete hardcoded mock history entries (lines 64-134)",
+      "Replace with empty initial state"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Fetch real history entries from GET /api/history",
+    "steps": [
+      "Open app/(dashboard)/history/page.tsx",
+      "Add fetch call to GET /api/history on mount",
+      "Parse response: { entries, pagination }",
+      "Store entries and pagination info in state"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Wire history page search input to API filter",
+    "steps": [
+      "Open app/(dashboard)/history/page.tsx",
+      "Connect search input onChange to search state",
+      "Debounce search input ~300ms",
+      "Re-fetch /api/history?search={query} on search change",
+      "Verify typing filters results"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Wire history page date range filter to API",
+    "steps": [
+      "Open app/(dashboard)/history/page.tsx",
+      "Connect date range picker to dateFrom/dateTo state",
+      "Re-fetch /api/history?dateFrom=X&dateTo=Y on change",
+      "Verify selecting date range filters results"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Wire history page pagination to API",
+    "steps": [
+      "Open app/(dashboard)/history/page.tsx",
+      "Connect pagination controls to page state",
+      "Re-fetch /api/history?page=N on page change",
+      "Display total pages from API response",
+      "Verify navigating pages loads correct entries"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add loading, empty, and error states to history page",
+    "steps": [
+      "Open app/(dashboard)/history/page.tsx",
+      "Show loading skeleton/spinner during fetch",
+      "Show empty state message when no entries returned",
+      "Show error state with retry button on fetch failure"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "History entry click navigates to assistant with conversation restored",
+    "steps": [
+      "Open app/(dashboard)/history/page.tsx",
+      "On entry click, navigate to /assistant?queryId={queryId}",
+      "Open app/(dashboard)/assistant/page.tsx",
+      "Read queryId from URL search params on mount",
+      "Fetch query data (inputText, outputText, outputType, sources) from API",
+      "Hydrate chat state: set messages, outputType, submittedQuery, sources",
+      "Clear queryId param from URL after loading",
+      "Verify clicking history entry restores full conversation in assistant"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create POST /api/agents/generate-instruction route",
+    "steps": [
+      "Create app/api/agents/generate-instruction/route.ts",
+      "Accept POST with { mode: 'generate' | 'improve', text: string }",
+      "For generate mode: prompt LLM to produce structured system instruction from rough idea",
+      "For improve mode: prompt LLM to refine existing instruction",
+      "Use streamText from AI SDK, return toTextStreamResponse()",
+      "Verify streaming response works for both modes"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create InstructionActions component with Generate and Improve buttons",
+    "steps": [
+      "Create components/agents/instruction-actions.tsx",
+      "Props: currentValue, onChange, disabled",
+      "Render Generate button (Wand2 icon) and Improve button (Sparkles icon)",
+      "Generate button opens Dialog with textarea for rough idea + submit button",
+      "On generate submit: POST /api/agents/generate-instruction with mode 'generate', stream result into onChange",
+      "Improve button: POST with mode 'improve' and currentValue, stream result into onChange",
+      "Disable Improve when currentValue is empty",
+      "Show Loader2 spinner on both buttons while streaming"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add InstructionActions to agent create page",
+    "steps": [
+      "Open app/(dashboard)/agents/new/page.tsx",
+      "Import InstructionActions from components/agents/instruction-actions",
+      "Add InstructionActions next to System Instruction label",
+      "Pass instruction state and setInstruction as props",
+      "Verify Generate and Improve buttons work on create page"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add InstructionActions to agent edit page",
+    "steps": [
+      "Open app/(dashboard)/agents/[id]/edit/page.tsx",
+      "Import InstructionActions from components/agents/instruction-actions",
+      "Add InstructionActions next to System Instruction label",
+      "Pass instruction state and setInstruction as props",
+      "Verify Generate and Improve buttons work on edit page"
+    ],
+    "passes": false
   }
 ]
