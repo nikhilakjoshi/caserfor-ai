@@ -1786,3 +1786,34 @@
 ### Files modified
 - app/(dashboard)/history/page.tsx - full rewrite with API integration
 - app/(dashboard)/assistant/page.tsx - queryId URL param handling for conversation restore
+
+## 2026-01-28: Agent Instruction Generate/Improve Feature
+
+### Completed
+- Created POST /api/agents/generate-instruction endpoint
+- Accepts { mode: 'generate' | 'improve', text: string }
+- Generate mode: LLM produces structured system instruction from rough idea
+- Improve mode: LLM refines existing instruction
+- Streams response via streamText + toTextStreamResponse
+- Created InstructionActions component with Generate (Wand2) and Improve (Sparkles) buttons
+- Generate opens Dialog for rough idea input, streams result into instruction field
+- Improve streams refined version of current instruction
+- Both buttons show Loader2 spinner while streaming
+- Improve disabled when instruction empty
+- Integrated InstructionActions into /agents/new and /agents/[id]/edit pages
+- Positioned next to System Instruction label via flex justify-between
+- Updated 4 PRD items to passes:true
+
+### Notes for next dev
+- Remaining false PRD items: functional tests (2) - require actual API key to verify
+- All code/UI PRD items now complete
+- Generate/Improve use defaultModel (gemini-2.5-flash)
+- No DB persistence for generation requests (stateless)
+
+### Files created
+- app/api/agents/generate-instruction/route.ts - streaming instruction generation endpoint
+- components/agents/instruction-actions.tsx - Generate/Improve buttons component
+
+### Files modified
+- app/(dashboard)/agents/new/page.tsx - added InstructionActions import and integration
+- app/(dashboard)/agents/[id]/edit/page.tsx - added InstructionActions import and integration

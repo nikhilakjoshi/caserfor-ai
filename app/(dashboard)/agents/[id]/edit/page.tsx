@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { TestConsole } from "@/components/agents/test-console"
+import { InstructionActions } from "@/components/agents/instruction-actions"
 import { ArrowLeft, Loader2, AlertCircle } from "lucide-react"
 import Link from "next/link"
 
@@ -194,7 +195,10 @@ export default function EditAgentPage() {
           </div>
 
           <div className="space-y-2 flex-1 flex flex-col">
-            <Label htmlFor="instruction">System Instruction <span className="text-destructive">*</span></Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="instruction">System Instruction <span className="text-destructive">*</span></Label>
+              <InstructionActions currentValue={instruction} onChange={setInstruction} />
+            </div>
             <Textarea
               id="instruction"
               placeholder="You are a legal assistant that..."

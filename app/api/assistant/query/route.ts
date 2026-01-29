@@ -248,7 +248,12 @@ Call the appropriate agent tool when their expertise is relevant to the user's q
     {
       id: crypto.randomUUID(),
       role: "user" as const,
-      content: userPrompt,
+      parts: [
+        {
+          type: "text" as const,
+          text: userPrompt,
+        },
+      ],
     },
   ];
 
@@ -312,11 +317,6 @@ Call the appropriate agent tool when their expertise is relevant to the user's q
                 sourceType: "document" as SourceType,
                 sourceId: c.documentId,
                 sourceName: c.documentName,
-                metadata: {
-                  chunkIndex: c.chunkIndex,
-                  score: c.score,
-                  textSnippet: c.text.substring(0, 200),
-                },
               })),
             });
           }
@@ -329,10 +329,6 @@ Call the appropriate agent tool when their expertise is relevant to the user's q
                 sourceType: "agent" as SourceType,
                 sourceId: tc.agentId,
                 sourceName: tc.agentName,
-                metadata: {
-                  query: tc.query,
-                  responseSnippet: tc.response.substring(0, 200),
-                },
               })),
             });
           }

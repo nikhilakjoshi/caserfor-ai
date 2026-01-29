@@ -1109,7 +1109,7 @@
       "Use streamText from AI SDK, return toTextStreamResponse()",
       "Verify streaming response works for both modes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1124,7 +1124,7 @@
       "Disable Improve when currentValue is empty",
       "Show Loader2 spinner on both buttons while streaming"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1136,7 +1136,7 @@
       "Pass instruction state and setInstruction as props",
       "Verify Generate and Improve buttons work on create page"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1148,6 +1148,6 @@
       "Pass instruction state and setInstruction as props",
       "Verify Generate and Improve buttons work on edit page"
     ],
-    "passes": false
+    "passes": true
   }
 ]
