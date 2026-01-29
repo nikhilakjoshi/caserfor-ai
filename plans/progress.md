@@ -1737,3 +1737,19 @@
 
 ### Files modified
 - app/(dashboard)/assistant/page.tsx - added isSubmitting state, useEffect cleanup
+
+## 2026-01-28: Markdown Body Class and Geist Font
+
+### Completed
+- Added markdown-body class to MarkdownRenderer wrapper div
+- Changed .markdown-body font-family from system font stack to var(--font-sans), sans-serif
+- Markdown content now picks up global .markdown-body CSS styles and renders in Geist font
+- Updated 2 PRD items to passes:true
+
+### Notes for next dev
+- Remaining false PRD items: history page (6), agent generate-instruction (3), functional tests (2)
+- Monospace/code font rules unchanged
+
+### Files modified
+- components/ui/markdown-renderer.tsx - added markdown-body class to wrapper div
+- app/globals.css - changed .markdown-body font-family to var(--font-sans)

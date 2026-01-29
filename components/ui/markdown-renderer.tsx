@@ -94,7 +94,7 @@ interface MarkdownRendererProps {
 
 export function MarkdownRenderer({ content, className, onCitationClick }: MarkdownRendererProps) {
   return (
-    <div className={cn("prose prose-sm dark:prose-invert max-w-none", className)}>
+    <div className={cn("prose prose-sm dark:prose-invert max-w-none markdown-body", className)}>
       <ReactMarkdown
         components={{
           // Code blocks with syntax highlighting style

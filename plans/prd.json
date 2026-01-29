@@ -1002,7 +1002,7 @@
       "Append 'markdown-body' to the className string",
       "Verify rendered markdown picks up global .markdown-body CSS styles"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1014,7 +1014,7 @@
       "Leave all monospace/code font rules unchanged",
       "Verify markdown text renders in Geist font"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
