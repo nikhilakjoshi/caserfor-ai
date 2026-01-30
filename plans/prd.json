@@ -1149,5 +1149,393 @@
       "Verify Generate and Improve buttons work on edit page"
     ],
     "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Add IntakeStatus and EligibilityVerdict enums to Prisma schema",
+    "steps": [
+      "Add IntakeStatus enum (draft, submitted, under_review, reviewed)",
+      "Add EligibilityVerdict enum (strong, moderate, weak, insufficient)",
+      "Run prisma generate to verify syntax"
+    ],
+    "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Add Client model to Prisma schema",
+    "steps": [
+      "Add Client model with all fields from PRD (personal, US intent, achievement, impact, recommenders, standing, timeline, alt categories)",
+      "Add currentStep Int @default(1), status IntakeStatus @default(draft)",
+      "Add vaultId String? @unique, vault relation",
+      "Add criterionResponses and eligibilityReport relations",
+      "@@map(\"clients\")"
+    ],
+    "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Add CriterionResponse model to Prisma schema",
+    "steps": [
+      "Add CriterionResponse model (id, clientId, criterion String, responses Json)",
+      "Add @@unique([clientId, criterion]), @@index([clientId])",
+      "Add client relation with onDelete: Cascade",
+      "@@map(\"criterion_responses\")"
+    ],
+    "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Add EligibilityReport model to Prisma schema",
+    "steps": [
+      "Add EligibilityReport model (id, clientId @unique, verdict EligibilityVerdict, summary @db.Text, criteria Json, rawOutput @db.Text?)",
+      "Add client relation with onDelete: Cascade",
+      "@@map(\"eligibility_reports\")"
+    ],
+    "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Add client back-relation to Vault model",
+    "steps": [
+      "Add 'client Client?' optional relation to existing Vault model",
+      "Run prisma migrate dev",
+      "Run prisma generate"
+    ],
+    "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Install react-hook-form and @hookform/resolvers",
+    "steps": [
+      "Run npm install react-hook-form @hookform/resolvers",
+      "Verify packages in package.json"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create GET /api/onboarding/draft route (fetch or create draft)",
+    "steps": [
+      "Create app/api/onboarding/draft/route.ts",
+      "GET: find Client with status=draft for MOCK_USER_ID, or create new",
+      "On create: auto-create vault named 'Intake - {firstName} {lastName} - {date}'",
+      "Return Client with vault info"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create PATCH /api/onboarding/draft route (update draft fields)",
+    "steps": [
+      "Add PATCH handler to app/api/onboarding/draft/route.ts",
+      "Accept partial Client fields + currentStep",
+      "Update Client record",
+      "Return updated Client"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create GET/PUT /api/onboarding/[clientId]/criteria route",
+    "steps": [
+      "Create app/api/onboarding/[clientId]/criteria/route.ts",
+      "GET: return all CriterionResponses for clientId",
+      "PUT: upsert single CriterionResponse by clientId + criterion slug",
+      "Accept { criterion, responses } in body"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create POST /api/onboarding/[clientId]/upload route",
+    "steps": [
+      "Create app/api/onboarding/[clientId]/upload/route.ts",
+      "Look up Client to get vaultId",
+      "Reuse existing vault upload pattern (S3 + embedding pipeline)",
+      "Return uploaded document record"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create POST /api/onboarding/[clientId]/submit route",
+    "steps": [
+      "Create app/api/onboarding/[clientId]/submit/route.ts",
+      "Validate required fields (firstName, lastName, email, fieldOfExpertise)",
+      "Set Client status to submitted then under_review",
+      "Trigger EB1A evaluator agent (non-blocking)",
+      "Return 202 accepted"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create GET /api/onboarding/[clientId]/report route",
+    "steps": [
+      "Create app/api/onboarding/[clientId]/report/route.ts",
+      "Fetch EligibilityReport for clientId",
+      "Return report if exists, 404 if not yet generated",
+      "Include Client status for polling"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create onboarding layout with minimal chrome (no sidebar)",
+    "steps": [
+      "Create app/onboarding/layout.tsx",
+      "Render logo + minimal header, no dashboard sidebar",
+      "Centered content area",
+      "Children slot"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create onboarding shell component with progress bar and step nav",
+    "steps": [
+      "Create app/onboarding/_components/onboarding-shell.tsx",
+      "Progress bar showing step X of 6",
+      "Step labels: Personal, Achievement, Criteria, Impact, Documents, Review",
+      "Back/Next navigation buttons",
+      "Auto-save indicator (saved/saving/error)"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create onboarding root page that loads draft and redirects to current step",
+    "steps": [
+      "Create app/onboarding/page.tsx",
+      "Fetch GET /api/onboarding/draft on mount",
+      "Redirect to /onboarding/steps/{currentStep}",
+      "Show loading spinner during fetch"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create step router page at /onboarding/steps/[step]",
+    "steps": [
+      "Create app/onboarding/steps/[step]/page.tsx",
+      "Parse step param (1-6)",
+      "Render OnboardingShell wrapping correct step component",
+      "Redirect to /onboarding if invalid step"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create zod schemas per onboarding step",
+    "steps": [
+      "Create app/onboarding/_lib/onboarding-schema.ts",
+      "Step 1 schema: firstName*, lastName*, email*, phone?, DOB?, citizenship?, field*, education?, employer?, US intent fields",
+      "Step 2 schema: hasMajorAchievement?, majorAchievementDetails?",
+      "Step 4 schema: social?, keynotes?, recommenders?, selfAssessment?",
+      "Step 5 schema: evidence checklist, urgency?, timeline?, alt categories",
+      "Export all schemas"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create use-onboarding hook for draft loading, saving, step transitions",
+    "steps": [
+      "Create app/onboarding/_lib/use-onboarding.ts",
+      "Fetch draft on mount via GET /api/onboarding/draft",
+      "Expose clientData, updateFields (PATCH), goToStep, currentStep",
+      "Debounced auto-save every 30s",
+      "PATCH on step transition (next/back)",
+      "Track save status (saved/saving/error)"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create step-personal.tsx (Step 1: Personal Background)",
+    "steps": [
+      "Create app/onboarding/_components/step-personal.tsx",
+      "Use react-hook-form with step 1 zod schema",
+      "Fields: name, email, phone, DOB, citizenship, field, education (repeatable), employer, US intent section",
+      "Pre-populate from draft data",
+      "Call updateFields on blur/change"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create step-achievement.tsx (Step 2: Major Achievement)",
+    "steps": [
+      "Create app/onboarding/_components/step-achievement.tsx",
+      "Use react-hook-form with step 2 zod schema",
+      "Fields: hasMajorAchievement toggle, conditionally show majorAchievementDetails textarea",
+      "Pre-populate from draft data"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create criteria-questions.ts with sub-question definitions per EB1A criterion",
+    "steps": [
+      "Create app/onboarding/_lib/criteria-questions.ts",
+      "Define sub-questions for each of 10 EB1A criteria slugs",
+      "Each criterion has label, description, and array of { key, label, type, placeholder }",
+      "Types: text, textarea, number, boolean",
+      "Export CRITERIA_QUESTIONS map"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create criteria-tab.tsx for single criterion sub-form",
+    "steps": [
+      "Create app/onboarding/_components/criteria-tab.tsx",
+      "Props: criterion slug, sub-questions config, initial responses",
+      "Render sub-question fields dynamically from config",
+      "On change, PUT /api/onboarding/[clientId]/criteria with criterion + responses",
+      "Show saved indicator per criterion"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create step-criteria.tsx (Step 3: EB1A Criteria with vertical tabs)",
+    "steps": [
+      "Create app/onboarding/_components/step-criteria.tsx",
+      "Vertical tabs (desktop) / accordion (mobile) for 10 criteria",
+      "Each tab renders criteria-tab.tsx for that criterion",
+      "Load existing CriterionResponses via GET /api/onboarding/[clientId]/criteria",
+      "Show completion indicator per criterion tab"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create step-impact.tsx (Step 4: Impact & Standing)",
+    "steps": [
+      "Create app/onboarding/_components/step-impact.tsx",
+      "Use react-hook-form with step 4 zod schema",
+      "Fields: social following, keynotes, collaborations, recommenders (repeatable), self-assessment, standing level, recognition scope",
+      "Pre-populate from draft data"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create step-docs-timeline.tsx (Step 5: Documents & Timeline)",
+    "steps": [
+      "Create app/onboarding/_components/step-docs-timeline.tsx",
+      "Evidence checklist (checkboxes of available doc types)",
+      "File upload dropzone (reuse existing react-dropzone + S3 pattern)",
+      "Upload via POST /api/onboarding/[clientId]/upload",
+      "Timeline fields: urgency, ideal date, willingness, prior consultations",
+      "Alternative categories: EB1B, EB2-NIW toggles"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create step-review.tsx (Step 6: Review & Submit)",
+    "steps": [
+      "Create app/onboarding/_components/step-review.tsx",
+      "Display summary of all entered data across steps",
+      "Show uploaded documents list",
+      "Submit button calls POST /api/onboarding/[clientId]/submit",
+      "On submit success, show loading/polling state",
+      "Poll GET /api/onboarding/[clientId]/report until available",
+      "Render eligibility report when ready"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create review-summary.tsx for post-submit eligibility report display",
+    "steps": [
+      "Create app/onboarding/_components/review-summary.tsx",
+      "Display overall verdict badge (strong/moderate/weak/insufficient)",
+      "Per-criterion breakdown: name, score 1-5, analysis text, evidence refs",
+      "Summary paragraph",
+      "Alternative category suggestions if applicable"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create lib/eb1a-evaluator.ts with system prompt and tool definitions",
+    "steps": [
+      "Create lib/eb1a-evaluator.ts",
+      "Define system prompt: review 10 EB1A criteria against USCIS standards, score 1-5, verdict logic",
+      "Define search_evidence tool wrapping RAG over client vault",
+      "Define get_intake_data tool fetching Client + CriterionResponses",
+      "Export runEvaluation(clientId) function"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Implement EB1A evaluation runner in lib/eb1a-evaluator.ts",
+    "steps": [
+      "Use ToolLoopAgent with gemini-2.5-pro (analysisModel)",
+      "Pass search_evidence and get_intake_data tools",
+      "Parse structured JSON output into EligibilityReport fields",
+      "Save EligibilityReport to DB",
+      "Update Client status to reviewed",
+      "Handle errors: set status back to submitted"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Verify onboarding draft create and resume flow",
+    "steps": [
+      "Visit /onboarding, verify Client + Vault created in DB",
+      "Fill steps 1-2, navigate away",
+      "Return to /onboarding, verify redirects to correct step",
+      "Verify previously entered data persists"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Verify step 3 criteria form saves per-criterion responses",
+    "steps": [
+      "Navigate to step 3",
+      "Fill sub-questions for 2+ criteria",
+      "Switch between criteria tabs, verify data persists",
+      "Refresh page, verify CriterionResponses loaded from DB"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Verify step 5 document upload triggers S3 + embedding",
+    "steps": [
+      "Navigate to step 5",
+      "Upload 2+ documents via dropzone",
+      "Verify files stored in S3 under client vault",
+      "Verify embedding pipeline triggered"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Verify submit triggers EB1A agent and produces report",
+    "steps": [
+      "Fill all required fields, submit in step 6",
+      "Verify Client status changes: submitted -> under_review -> reviewed",
+      "Verify EligibilityReport created with per-criterion scores + verdict",
+      "Verify review-summary renders report correctly"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Verify required field validation prevents incomplete submission",
+    "steps": [
+      "Attempt submit without firstName/lastName/email/fieldOfExpertise",
+      "Verify 400 error returned with validation message",
+      "Verify UI shows validation errors on step 1 fields"
+    ],
+    "passes": false
   }
 ]

@@ -71,6 +71,20 @@ enum StarredItemType {
   example
 }
 
+enum IntakeStatus {
+  draft
+  submitted
+  under_review
+  reviewed
+}
+
+enum EligibilityVerdict {
+  strong
+  moderate
+  weak
+  insufficient
+}
+
 // ============================================
 // MODELS
 // ============================================
@@ -105,6 +119,7 @@ model Vault {
 
   // Relations
   documents Document[]
+  client    Client?
 
   @@map("vaults")
 }
@@ -322,4 +337,78 @@ model DocumentVersion {
   @@unique([documentId, version])
   @@index([documentId])
   @@map("document_versions")
+}
+
+model Client {
+  id                       String            @id @default(cuid())
+  userId                   String
+  firstName                String?
+  lastName                 String?
+  email                    String?
+  phone                    String?
+  dateOfBirth              DateTime?
+  citizenship              String?
+  fieldOfExpertise         String?
+  education                Json?
+  currentEmployer          String?
+  usIntentType             String?
+  usIntentDetails          String?
+  hasMajorAchievement      Boolean?
+  majorAchievementDetails  String?           @db.Text
+  socialFollowing          String?
+  keynotes                 String?           @db.Text
+  recommenders             Json?
+  selfAssessment           String?           @db.Text
+  standingLevel            String?
+  recognitionScope         String?
+  evidenceChecklist        Json?
+  urgency                  String?
+  idealTimeline            String?
+  priorConsultations       String?           @db.Text
+  altCategories            Json?
+  currentStep              Int               @default(1)
+  status                   IntakeStatus      @default(draft)
+  vaultId                  String?           @unique
+  createdAt                DateTime          @default(now())
+  updatedAt                DateTime          @updatedAt
+
+  // Relations
+  vault              Vault?              @relation(fields: [vaultId], references: [id])
+  criterionResponses CriterionResponse[]
+  eligibilityReport  EligibilityReport?
+
+  @@index([userId])
+  @@index([status])
+  @@map("clients")
+}
+
+model CriterionResponse {
+  id        String   @id @default(cuid())
+  clientId  String
+  criterion String
+  responses Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, criterion])
+  @@index([clientId])
+  @@map("criterion_responses")
+}
+
+model EligibilityReport {
+  id        String              @id @default(cuid())
+  clientId  String              @unique
+  verdict   EligibilityVerdict
+  summary   String              @db.Text
+  criteria  Json
+  rawOutput String?             @db.Text
+  createdAt DateTime            @default(now())
+
+  // Relations
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("eligibility_reports")
 }

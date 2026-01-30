@@ -1817,3 +1817,25 @@
 ### Files modified
 - app/(dashboard)/agents/new/page.tsx - added InstructionActions import and integration
 - app/(dashboard)/agents/[id]/edit/page.tsx - added InstructionActions import and integration
+
+## 2026-01-30: Client Intake Prisma Schema (Onboarding Foundation)
+
+### Completed
+- Added IntakeStatus enum (draft, submitted, under_review, reviewed)
+- Added EligibilityVerdict enum (strong, moderate, weak, insufficient)
+- Added Client model with all intake fields (personal, US intent, achievement, impact, recommenders, standing, timeline, alt categories)
+- Client has currentStep, status, vaultId (unique optional) fields
+- Added CriterionResponse model (clientId + criterion unique, responses Json, cascade delete)
+- Added EligibilityReport model (clientId unique, verdict, summary, criteria Json, rawOutput)
+- Added client back-relation to Vault model (Client?)
+- Regenerated Prisma client
+- Updated 5 PRD items to passes:true
+
+### Notes for next dev
+- Requires db:push after setting DATABASE_URL for new tables
+- Client.userId not a foreign key relation (no User relation) - matches MOCK_USER_ID pattern
+- Next priority: install react-hook-form, create onboarding API routes (draft, criteria, upload, submit, report)
+- Then: onboarding UI (layout, shell, step pages)
+
+### Files modified
+- prisma/schema.prisma - added enums, Client, CriterionResponse, EligibilityReport models, Vault back-relation
