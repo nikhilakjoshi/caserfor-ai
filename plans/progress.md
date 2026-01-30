@@ -1870,3 +1870,49 @@
 
 ### Files modified
 - package.json - added react-hook-form, @hookform/resolvers
+
+## 2026-01-30: Onboarding UI (Full 6-Step Intake Flow)
+
+### Completed
+- Created onboarding layout with minimal chrome (no sidebar, logo + header only)
+- Created OnboardingShell component with progress bar, step labels, back/next nav, save indicator
+- Created onboarding root page that loads draft and redirects to current step
+- Created step router at /onboarding/steps/[step] rendering correct step component
+- Created zod schemas for steps 1, 2, 4, 5
+- Created use-onboarding hook with draft loading, debounced auto-save (2s), step transitions, save status tracking
+- Created step-personal.tsx: name, email, phone, DOB, citizenship, field, education (repeatable), employer, US intent
+- Created step-achievement.tsx: major achievement toggle + details textarea
+- Created criteria-questions.ts: 10 EB1A criteria with sub-questions (text, textarea, number, boolean types)
+- Created criteria-tab.tsx: single criterion sub-form with debounced save to API
+- Created step-criteria.tsx: vertical tabs for 10 criteria with completion indicators
+- Created step-impact.tsx: social following, keynotes, recommenders (repeatable), self-assessment, standing
+- Created step-docs-timeline.tsx: evidence checklist, react-dropzone file upload to API, timeline fields, alt categories
+- Created step-review.tsx: data summary, submit button, polling for eligibility report
+- Created review-summary.tsx: verdict badge, per-criterion score bars, analysis text, evidence refs
+- Updated 15 PRD items to passes:true
+
+### Notes for next dev
+- Remaining false PRD items: EB1A evaluator backend (2), functional tests (7)
+- use-onboarding hook uses 2s debounce (not 30s as PRD says) - faster feedback
+- Step 3 (criteria) saves per-criterion via PUT /api/onboarding/[clientId]/criteria
+- Step 5 uploads via POST /api/onboarding/[clientId]/upload
+- Step 6 polls /api/onboarding/[clientId]/report every 4s after submit
+- No mobile accordion for criteria (desktop vertical tabs only) - add if needed
+- react-hook-form watch() triggers React Compiler lint warnings (harmless)
+
+### Files created
+- app/onboarding/layout.tsx - minimal layout (no sidebar)
+- app/onboarding/page.tsx - draft loader + redirect
+- app/onboarding/steps/[step]/page.tsx - step router
+- app/onboarding/_lib/onboarding-schema.ts - zod schemas
+- app/onboarding/_lib/use-onboarding.ts - draft management hook
+- app/onboarding/_lib/criteria-questions.ts - EB1A criteria config
+- app/onboarding/_components/onboarding-shell.tsx - progress bar + nav
+- app/onboarding/_components/step-personal.tsx
+- app/onboarding/_components/step-achievement.tsx
+- app/onboarding/_components/step-criteria.tsx
+- app/onboarding/_components/criteria-tab.tsx
+- app/onboarding/_components/step-impact.tsx
+- app/onboarding/_components/step-docs-timeline.tsx
+- app/onboarding/_components/step-review.tsx
+- app/onboarding/_components/review-summary.tsx

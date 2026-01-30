@@ -1288,7 +1288,7 @@
       "Centered content area",
       "Children slot"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1300,7 +1300,7 @@
       "Back/Next navigation buttons",
       "Auto-save indicator (saved/saving/error)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1311,7 +1311,7 @@
       "Redirect to /onboarding/steps/{currentStep}",
       "Show loading spinner during fetch"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1322,7 +1322,7 @@
       "Render OnboardingShell wrapping correct step component",
       "Redirect to /onboarding if invalid step"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1335,7 +1335,7 @@
       "Step 5 schema: evidence checklist, urgency?, timeline?, alt categories",
       "Export all schemas"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1348,7 +1348,7 @@
       "PATCH on step transition (next/back)",
       "Track save status (saved/saving/error)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1360,7 +1360,7 @@
       "Pre-populate from draft data",
       "Call updateFields on blur/change"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1371,7 +1371,7 @@
       "Fields: hasMajorAchievement toggle, conditionally show majorAchievementDetails textarea",
       "Pre-populate from draft data"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1383,7 +1383,7 @@
       "Types: text, textarea, number, boolean",
       "Export CRITERIA_QUESTIONS map"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1395,7 +1395,7 @@
       "On change, PUT /api/onboarding/[clientId]/criteria with criterion + responses",
       "Show saved indicator per criterion"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1407,7 +1407,7 @@
       "Load existing CriterionResponses via GET /api/onboarding/[clientId]/criteria",
       "Show completion indicator per criterion tab"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1418,7 +1418,7 @@
       "Fields: social following, keynotes, collaborations, recommenders (repeatable), self-assessment, standing level, recognition scope",
       "Pre-populate from draft data"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1431,7 +1431,7 @@
       "Timeline fields: urgency, ideal date, willingness, prior consultations",
       "Alternative categories: EB1B, EB2-NIW toggles"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1445,7 +1445,7 @@
       "Poll GET /api/onboarding/[clientId]/report until available",
       "Render eligibility report when ready"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1457,7 +1457,7 @@
       "Summary paragraph",
       "Alternative category suggestions if applicable"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
