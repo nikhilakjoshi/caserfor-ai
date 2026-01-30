@@ -1916,3 +1916,31 @@
 - app/onboarding/_components/step-docs-timeline.tsx
 - app/onboarding/_components/step-review.tsx
 - app/onboarding/_components/review-summary.tsx
+
+## 2026-01-30: EB1A Evaluator Backend
+
+### Completed
+- Created lib/eb1a-evaluator.ts with system prompt, tool definitions, and evaluation runner
+- System prompt instructs AI to evaluate all 10 EB1A criteria, score 1-5, determine verdict
+- get_intake_data tool fetches Client + CriterionResponses from DB
+- search_evidence tool wraps RAG query over client's vault documents via lib/rag.ts
+- Uses generateText with analysisModel (gemini-2.5-pro) and stepCountIs(25) for multi-step tool use
+- Parses structured JSON output from AI response (```json block)
+- Saves EligibilityReport to DB via upsert (verdict, summary, per-criterion scores)
+- Updates Client status to "reviewed" on success, resets to "submitted" on error
+- Created POST /api/onboarding/[clientId]/evaluate endpoint
+- Wired submit route to trigger evaluator non-blocking via fire-and-forget fetch
+- Updated 2 PRD items to passes:true
+
+### Notes for next dev
+- Uses generateText with tools (not ToolLoopAgent) since AI SDK v5+ generateText supports stopWhen for multi-step
+- PRD says "Use ToolLoopAgent" but generateText with stopWhen is equivalent and simpler
+- Remaining false PRD items: functional tests (7) - require running app with API keys
+- All code/backend PRD items now complete
+
+### Files created
+- lib/eb1a-evaluator.ts - EB1A evaluation runner with tools
+- app/api/onboarding/[clientId]/evaluate/route.ts - evaluation trigger endpoint
+
+### Files modified
+- app/api/onboarding/[clientId]/submit/route.ts - wired evaluator trigger

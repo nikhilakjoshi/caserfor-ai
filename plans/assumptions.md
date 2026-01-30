@@ -73,3 +73,9 @@
 - DefaultChatTransport body option uses function returning object (ref pattern for dynamic values)
 - Custom fetch option on transport allows header interception (e.g., X-Query-Id)
 - status === "streaming" replaces isLoading boolean
+
+## AI SDK generateText Multi-Step
+- AI SDK v5+ removed `maxSteps` from generateText - use `stopWhen: stepCountIs(N)` instead
+- `stepCountIs` imported from `ai` package
+- Default stopWhen is stepCountIs(1) - must set explicitly for multi-step tool use
+- generateText with tools + stopWhen is equivalent to ToolLoopAgent for non-streaming use cases

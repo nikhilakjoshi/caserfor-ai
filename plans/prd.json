@@ -1469,7 +1469,7 @@
       "Define get_intake_data tool fetching Client + CriterionResponses",
       "Export runEvaluation(clientId) function"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1482,7 +1482,7 @@
       "Update Client status to reviewed",
       "Handle errors: set status back to submitted"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

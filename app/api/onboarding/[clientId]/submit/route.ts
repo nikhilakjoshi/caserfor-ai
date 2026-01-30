@@ -43,9 +43,12 @@ export async function POST(
       data: { status: "under_review" },
     })
 
-    // Trigger EB1A evaluator non-blocking (when implemented)
-    // const baseUrl = request.nextUrl.origin
-    // fetch(`${baseUrl}/api/onboarding/${clientId}/evaluate`, { ... })
+    // Trigger EB1A evaluator non-blocking
+    const baseUrl = request.nextUrl.origin
+    fetch(`${baseUrl}/api/onboarding/${clientId}/evaluate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    }).catch((err) => console.error("Failed to trigger evaluator:", err))
 
     return NextResponse.json(updated, { status: 202 })
   } catch (error) {
