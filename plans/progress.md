@@ -1839,3 +1839,34 @@
 
 ### Files modified
 - prisma/schema.prisma - added enums, Client, CriterionResponse, EligibilityReport models, Vault back-relation
+
+## 2026-01-30: Onboarding API Routes and react-hook-form Install
+
+### Completed
+- Installed react-hook-form and @hookform/resolvers
+- Created GET /api/onboarding/draft - finds existing draft Client or creates new with auto-created vault
+- Created PATCH /api/onboarding/draft - updates partial Client fields, renames vault when name fields change
+- Created GET /api/onboarding/[clientId]/criteria - returns all CriterionResponses for client
+- Created PUT /api/onboarding/[clientId]/criteria - upserts single CriterionResponse by criterion slug
+- Created POST /api/onboarding/[clientId]/upload - uploads files to S3 via client's vault, triggers embedding pipeline
+- Created POST /api/onboarding/[clientId]/submit - validates required fields, sets status to under_review, returns 202
+- Created GET /api/onboarding/[clientId]/report - returns EligibilityReport + client status for polling
+- Updated 7 PRD items to passes:true
+
+### Notes for next dev
+- Uses MOCK_USER_ID - wire to auth when implemented
+- Submit endpoint has placeholder comment for EB1A evaluator trigger (not yet built)
+- Report endpoint returns { status, report: null } when report not yet generated (not 404)
+- Upload reuses S3 + embedding pipeline pattern from vault documents
+- Draft PATCH updates vault name to "Intake - {firstName} {lastName} - {date}" when name fields change
+- Next priority: onboarding UI (layout, shell, step components, zod schemas, use-onboarding hook)
+
+### Files created
+- app/api/onboarding/draft/route.ts - GET and PATCH endpoints
+- app/api/onboarding/[clientId]/criteria/route.ts - GET and PUT endpoints
+- app/api/onboarding/[clientId]/upload/route.ts - POST endpoint
+- app/api/onboarding/[clientId]/submit/route.ts - POST endpoint
+- app/api/onboarding/[clientId]/report/route.ts - GET endpoint
+
+### Files modified
+- package.json - added react-hook-form, @hookform/resolvers

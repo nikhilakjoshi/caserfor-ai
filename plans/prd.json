@@ -1210,7 +1210,7 @@
       "Run npm install react-hook-form @hookform/resolvers",
       "Verify packages in package.json"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1221,7 +1221,7 @@
       "On create: auto-create vault named 'Intake - {firstName} {lastName} - {date}'",
       "Return Client with vault info"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1232,7 +1232,7 @@
       "Update Client record",
       "Return updated Client"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1243,7 +1243,7 @@
       "PUT: upsert single CriterionResponse by clientId + criterion slug",
       "Accept { criterion, responses } in body"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1254,7 +1254,7 @@
       "Reuse existing vault upload pattern (S3 + embedding pipeline)",
       "Return uploaded document record"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1266,7 +1266,7 @@
       "Trigger EB1A evaluator agent (non-blocking)",
       "Return 202 accepted"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1277,7 +1277,7 @@
       "Return report if exists, 404 if not yet generated",
       "Include Client status for polling"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
