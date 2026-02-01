@@ -2135,7 +2135,7 @@
       "Scope assistant context to client vault",
       "Ensure lawyer cannot access other client data"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

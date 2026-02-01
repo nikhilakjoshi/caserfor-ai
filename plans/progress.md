@@ -1,5 +1,21 @@
 # Progress Log
 
+## 2026-02-01: Scope vault/assistant to client context in lawyer view
+
+### Completed
+- Created components/lawyer/client-vault-documents.tsx - reusable document list with search, sort, preview, status badges
+- Embedded ClientVaultDocuments in lawyer case detail vault tab (read-only mode)
+- Added `autoSelectAll=1` URL param support to assistant page
+- Lawyer assistant link now passes autoSelectAll so all vault files are pre-attached
+- Vault tab shows inline doc list + "Full Vault View" link for edit access
+- Access control inherited from existing canAccessVault middleware on API routes
+
+### Notes for next dev
+- ClientVaultDocuments supports readOnly prop (hides category edit, retry buttons)
+- autoSelectAll fetches all docs from vault and attaches them - no file picker needed
+- Remaining false PRD items: 2 functional verification tasks (auto mode routing) + 1 intentionally skipped rename
+- Category editing still available via "Full Vault View" link to /vault/[id]
+
 ## 2026-02-01: Shared FileDropzone Component
 
 ### Completed

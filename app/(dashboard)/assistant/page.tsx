@@ -467,8 +467,31 @@ export default function AssistantPage() {
     const vaultName = searchParams.get("vaultName");
     const filesParam = searchParams.get("files");
     const queryParam = searchParams.get("query");
+    const autoSelectAll = searchParams.get("autoSelectAll");
 
-    if (vaultId && filesParam) {
+    if (vaultId && autoSelectAll) {
+      // Auto-select all vault files (used by lawyer case detail)
+      setPreloadedContext({
+        vaultId,
+        vaultName: vaultName || "Vault",
+        fileIds: [],
+      });
+      fetch(`/api/vaults/${vaultId}/documents`)
+        .then((res) => (res.ok ? res.json() : []))
+        .then((docs: { id: string; name: string; sizeBytes: number }[]) => {
+          const filesToAdd: AttachedFile[] = docs.map((d) => ({
+            id: `vault-${d.id}`,
+            file: null,
+            name: d.name,
+            size: d.sizeBytes || 0,
+            source: "vault" as const,
+            vaultId: vaultId,
+          }));
+          if (filesToAdd.length > 0) setAttachedFiles(filesToAdd);
+        })
+        .catch(() => {});
+      setSelectedVaults((prev) => (prev.includes(vaultId) ? prev : [vaultId]));
+    } else if (vaultId && filesParam) {
       const fileIds = filesParam.split(",");
       setPreloadedContext({
         vaultId,

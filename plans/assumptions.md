@@ -130,5 +130,7 @@
 - GapAnalysis is a separate model (not reusing EligibilityReport) - stores multiple runs per client
 - Uses defaultModel (gemini-2.5-flash) not analysisModel for speed
 - Refresh endpoint runs async, client polls for results
-- Case detail page vault/assistant tabs link out to existing pages (not embedded) pending "scope to client context" work
+- Case detail vault tab now embeds ClientVaultDocuments inline (read-only); "Full Vault View" link preserved for edit access
+- Case detail assistant tab uses autoSelectAll=1 param to pre-attach all vault files on assistant page
+- Assistant page autoSelectAll fetches all docs and attaches them without file picker step
 - Case detail requires CaseAssignment for lawyer access (admin bypasses)

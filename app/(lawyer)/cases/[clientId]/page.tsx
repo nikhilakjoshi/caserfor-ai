@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { GapAnalysisView } from "@/components/lawyer/gap-analysis-view"
+import { ClientVaultDocuments } from "@/components/lawyer/client-vault-documents"
 import {
   AlertCircle,
   ArrowLeft,
@@ -233,10 +234,11 @@ export default function CaseDetailPage() {
                 <Button variant="outline" size="sm" asChild>
                   <Link href={`/vault/${caseData.vault.id}`}>
                     <ExternalLink className="mr-1 h-3 w-3" />
-                    Open Vault
+                    Full Vault View
                   </Link>
                 </Button>
               </div>
+              <ClientVaultDocuments vaultId={caseData.vault.id} readOnly />
             </div>
           ) : (
             <p className="py-8 text-center text-sm text-muted-foreground">
@@ -309,7 +311,7 @@ export default function CaseDetailPage() {
                 Open the AI assistant scoped to this client&apos;s vault to ask questions about their case.
               </p>
               <Button variant="outline" size="sm" asChild>
-                <Link href={`/assistant?vault=${caseData.vault.id}&vaultName=${encodeURIComponent(caseData.vault.name)}`}>
+                <Link href={`/assistant?vault=${caseData.vault.id}&vaultName=${encodeURIComponent(caseData.vault.name)}&autoSelectAll=1`}>
                   <ExternalLink className="mr-1 h-3 w-3" />
                   Open Assistant
                 </Link>
