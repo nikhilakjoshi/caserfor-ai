@@ -1982,7 +1982,7 @@
       "Lawyer: return vaults for assigned cases",
       "Admin: return all vaults"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1993,7 +1993,7 @@
       "Hide vault selection modal for applicants",
       "Show vault name as static text instead"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -2004,7 +2004,7 @@
       "Lawyer: only assigned client vaults",
       "Return 403 if unauthorized"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

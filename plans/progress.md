@@ -1,5 +1,20 @@
 # Progress Log
 
+## 2026-02-01: Role-Based Vault Access Control
+
+### Completed
+- Added role-based filtering to GET /api/vaults (applicant: own vault via Client, lawyer: assigned case vaults, admin: all)
+- Added auth + role-based access checks to GET/POST /api/vaults/[id]/documents (returns 403 if unauthorized)
+- Created lib/vault-access.ts reusable helper for canAccessVault(userId, role, vaultId)
+- Auto-load vaults on assistant page mount; auto-select if single vault (applicant case)
+- Vault name shows in Sources indicator when auto-selected
+
+### Notes for next dev
+- Vault modal still accessible for applicants to browse/select specific files - not hidden entirely
+- Auto-select uses vault count heuristic (1 vault = auto-select) instead of checking session role client-side, since no SessionProvider is set up
+- canAccessVault helper can be reused in any API route needing vault access checks
+- Other vault-related routes (presign, process, retry, docId) should also add canAccessVault checks
+
 ## 2026-01-25: Prisma ORM Setup
 
 ### Completed

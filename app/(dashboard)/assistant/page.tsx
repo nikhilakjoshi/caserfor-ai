@@ -620,6 +620,19 @@ export default function AssistantPage() {
     }
   }, []);
 
+  // Auto-load vaults on mount; auto-select if single vault (applicant)
+  const [autoSelectedVault, setAutoSelectedVault] = useState(false);
+  useEffect(() => {
+    fetchVaults();
+  }, [fetchVaults]);
+
+  useEffect(() => {
+    if (!autoSelectedVault && vaults.length === 1 && !vaultsLoading) {
+      setSelectedVaults([vaults[0].id]);
+      setAutoSelectedVault(true);
+    }
+  }, [vaults, vaultsLoading, autoSelectedVault]);
+
   // Fetch vaults when modal opens
   useEffect(() => {
     if (showVaultModal) {

@@ -113,3 +113,9 @@
 - S3/Pinecone failures during reset are non-fatal - DB cleanup always proceeds
 - Reset redirects to /onboarding (root) which re-fetches draft and redirects to step 1
 - Vault is preserved (not deleted) - only its contents and name are reset
+
+## Role-Based Vault Access
+- No SessionProvider on client side - auto-select uses vault count heuristic (1 vault = applicant) instead of role check
+- Vault modal not fully hidden for applicants - still accessible for file browsing, just auto-selected
+- canAccessVault checks Vault->Client->userId path for applicants, Vault->Client->CaseAssignment for lawyers
+- Other vault sub-routes (presign, process, retry, doc PATCH) not yet protected - should add canAccessVault

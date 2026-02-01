@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import { randomUUID } from "crypto"
 import { uploadFile } from "@/lib/s3"
+import { getUser } from "@/lib/get-user"
+import { canAccessVault } from "@/lib/vault-access"
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB
 
@@ -11,6 +13,11 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getUser()
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const { id: vaultId } = await params
 
     // Verify vault exists
@@ -24,6 +31,12 @@ export async function POST(
         { error: "Vault not found" },
         { status: 404 }
       )
+    }
+
+    // Role-based access check
+    const hasAccess = await canAccessVault(user.id, user.role, vaultId)
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
     const formData = await request.formData()
@@ -121,6 +134,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getUser()
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const { id: vaultId } = await params
     const { searchParams } = new URL(request.url)
     const search = searchParams.get("search")
@@ -138,6 +156,12 @@ export async function GET(
         { error: "Vault not found" },
         { status: 404 }
       )
+    }
+
+    // Role-based access check
+    const hasAccess = await canAccessVault(user.id, user.role, vaultId)
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
     const orderByField = ["name", "documentType", "fileType", "sizeBytes", "updatedAt", "createdAt"].includes(sortBy)
