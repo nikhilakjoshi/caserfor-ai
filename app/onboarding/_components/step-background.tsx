@@ -7,14 +7,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Plus, X } from "lucide-react"
-import type { ClientData } from "@/app/onboarding/_lib/use-onboarding"
+import type { ClientData, ResumeConfidence } from "@/app/onboarding/_lib/use-onboarding"
+import { ConfidenceBadge } from "./confidence-badge"
 
 interface Props {
   data: ClientData
   onUpdate: (fields: Record<string, unknown>) => void
+  resumeConfidence?: ResumeConfidence
 }
 
-export function StepBackground({ data, onUpdate }: Props) {
+export function StepBackground({ data, onUpdate, resumeConfidence = {} }: Props) {
   const { register, watch, setValue, formState: { errors } } = useForm<Step4Data>({
     resolver: zodResolver(step4Schema),
     defaultValues: {
@@ -62,7 +64,10 @@ export function StepBackground({ data, onUpdate }: Props) {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <Label htmlFor="citizenship">Citizenship</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="citizenship">Citizenship</Label>
+            {resumeConfidence.citizenship && <ConfidenceBadge confidence={resumeConfidence.citizenship} />}
+          </div>
           <Input id="citizenship" {...register("citizenship")} onBlur={() => handleBlur("citizenship")} />
         </div>
         <div className="space-y-1.5">
@@ -73,19 +78,28 @@ export function StepBackground({ data, onUpdate }: Props) {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <Label htmlFor="fieldOfExpertise">Field of Expertise *</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="fieldOfExpertise">Field of Expertise *</Label>
+            {resumeConfidence.fieldOfExpertise && <ConfidenceBadge confidence={resumeConfidence.fieldOfExpertise} />}
+          </div>
           <Input id="fieldOfExpertise" {...register("fieldOfExpertise")} onBlur={() => handleBlur("fieldOfExpertise")} />
           {errors.fieldOfExpertise && <p className="text-xs text-red-500">{errors.fieldOfExpertise.message}</p>}
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="currentEmployer">Current Employer</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="currentEmployer">Current Employer</Label>
+            {resumeConfidence.currentEmployer && <ConfidenceBadge confidence={resumeConfidence.currentEmployer} />}
+          </div>
           <Input id="currentEmployer" {...register("currentEmployer")} onBlur={() => handleBlur("currentEmployer")} />
         </div>
       </div>
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label>Education</Label>
+          <div className="flex items-center gap-2">
+            <Label>Education</Label>
+            {resumeConfidence.education && <ConfidenceBadge confidence={resumeConfidence.education} />}
+          </div>
           <Button type="button" variant="outline" size="sm" onClick={addEducation}>
             <Plus className="h-3 w-3 mr-1" /> Add
           </Button>

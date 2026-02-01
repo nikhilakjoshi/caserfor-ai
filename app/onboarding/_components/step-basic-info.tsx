@@ -5,14 +5,16 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { step2Schema, type Step2Data } from "@/app/onboarding/_lib/onboarding-schema"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import type { ClientData } from "@/app/onboarding/_lib/use-onboarding"
+import type { ClientData, ResumeConfidence } from "@/app/onboarding/_lib/use-onboarding"
+import { ConfidenceBadge } from "./confidence-badge"
 
 interface Props {
   data: ClientData
   onUpdate: (fields: Record<string, unknown>) => void
+  resumeConfidence?: ResumeConfidence
 }
 
-export function StepBasicInfo({ data, onUpdate }: Props) {
+export function StepBasicInfo({ data, onUpdate, resumeConfidence = {} }: Props) {
   const { register, watch, formState: { errors } } = useForm<Step2Data>({
     resolver: zodResolver(step2Schema),
     defaultValues: {
@@ -43,12 +45,18 @@ export function StepBasicInfo({ data, onUpdate }: Props) {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <Label htmlFor="firstName">First Name *</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="firstName">First Name *</Label>
+            {resumeConfidence.firstName && <ConfidenceBadge confidence={resumeConfidence.firstName} />}
+          </div>
           <Input id="firstName" {...register("firstName")} onBlur={() => handleBlur("firstName")} />
           {errors.firstName && <p className="text-xs text-red-500">{errors.firstName.message}</p>}
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="lastName">Last Name *</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="lastName">Last Name *</Label>
+            {resumeConfidence.lastName && <ConfidenceBadge confidence={resumeConfidence.lastName} />}
+          </div>
           <Input id="lastName" {...register("lastName")} onBlur={() => handleBlur("lastName")} />
           {errors.lastName && <p className="text-xs text-red-500">{errors.lastName.message}</p>}
         </div>
@@ -56,12 +64,18 @@ export function StepBasicInfo({ data, onUpdate }: Props) {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <Label htmlFor="email">Email *</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="email">Email *</Label>
+            {resumeConfidence.email && <ConfidenceBadge confidence={resumeConfidence.email} />}
+          </div>
           <Input id="email" type="email" {...register("email")} onBlur={() => handleBlur("email")} />
           {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="phone">Phone</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="phone">Phone</Label>
+            {resumeConfidence.phone && <ConfidenceBadge confidence={resumeConfidence.phone} />}
+          </div>
           <Input id="phone" {...register("phone")} onBlur={() => handleBlur("phone")} />
         </div>
       </div>

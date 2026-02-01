@@ -1881,7 +1881,7 @@
       "Extract name, email, education, employer, field, achievements",
       "Return parsed data with confidence scores"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1892,7 +1892,7 @@
       "Call lib/resume-parser.ts",
       "Return parsed fields with confidence"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1902,7 +1902,7 @@
       "Color code: green >0.8, yellow >0.5, red <0.5",
       "Allow user to override any field"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1913,7 +1913,7 @@
       "Show pre-populated fields in subsequent steps",
       "Preserve any user-edited fields over parsed data"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",

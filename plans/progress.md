@@ -2141,3 +2141,23 @@
 - app/onboarding/_components/step-review.tsx - 6-section summary with edit links
 - app/onboarding/_components/step-achievement.tsx - fixed schema import
 - app/onboarding/_components/step-impact.tsx - fixed schema import
+
+## 2026-02-01: Resume Parser Feature
+
+### Completed
+- Created lib/resume-parser.ts with generateObject + zod schema, extracts 10 fields with confidence scores
+- Created POST /api/onboarding/[clientId]/parse-resume endpoint (downloads from S3, extracts text, parses via AI)
+- Created confidence-badge.tsx component (green/yellow/red color coding)
+- Updated step-resume-upload.tsx: after upload, calls parse-resume API, shows field preview, auto-fills form
+- Updated use-onboarding.ts: added resumeConfidence state, intercepts _resumeConfidence metadata from updateFields
+- Added confidence badges to step-basic-info.tsx (firstName, lastName, email, phone)
+- Added confidence badges to step-background.tsx (citizenship, fieldOfExpertise, currentEmployer, education)
+- Updated step page to pass resumeConfidence and onUpdate to components
+- Marked 4 PRD items as passes:true
+
+### Notes for next dev
+- Resume parsing uses defaultModel (gemini-2.5-flash) not gemini-2.0-flash as PRD says - 2.0 not available
+- Confidence is transient client state in useOnboarding hook, not persisted to DB
+- Fields only auto-fill if confidence > 0.3; user can freely override
+- Parse is non-fatal: if it fails, file is still uploaded to vault
+- _resumeConfidence key in updateFields is intercepted and removed before PATCH to API

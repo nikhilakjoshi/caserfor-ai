@@ -29,6 +29,7 @@ export default function StepPage() {
     goToStep,
     flushAndSave,
     saveDraft,
+    resumeConfidence,
   } = useOnboarding()
 
   if (isNaN(step) || step < 1 || step > 10) {
@@ -64,11 +65,11 @@ export default function StepPage() {
       case 1:
         return <StepWelcome />
       case 2:
-        return <StepBasicInfo data={clientData} onUpdate={updateFields} />
+        return <StepBasicInfo data={clientData} onUpdate={updateFields} resumeConfidence={resumeConfidence} />
       case 3:
-        return <StepResumeUpload clientId={clientData.id} />
+        return <StepResumeUpload clientId={clientData.id} onUpdate={updateFields} />
       case 4:
-        return <StepBackground data={clientData} onUpdate={updateFields} />
+        return <StepBackground data={clientData} onUpdate={updateFields} resumeConfidence={resumeConfidence} />
       case 5:
         return <StepCriteria clientId={clientData.id} />
       case 6:

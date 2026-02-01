@@ -49,12 +49,15 @@ export interface CriterionResponseData {
   responses: Record<string, unknown>
 }
 
+export type ResumeConfidence = Record<string, number>
+
 export function useOnboarding() {
   const router = useRouter()
   const [clientData, setClientData] = useState<ClientData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
+  const [resumeConfidence, setResumeConfidence] = useState<ResumeConfidence>({})
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingUpdatesRef = useRef<Record<string, unknown>>({})
@@ -97,6 +100,11 @@ export function useOnboarding() {
 
   const updateFields = useCallback(
     (fields: Record<string, unknown>) => {
+      // Extract resume confidence metadata before saving
+      if (fields._resumeConfidence) {
+        setResumeConfidence(prev => ({ ...prev, ...(fields._resumeConfidence as ResumeConfidence) }))
+        delete fields._resumeConfidence
+      }
       // Merge into pending updates
       pendingUpdatesRef.current = { ...pendingUpdatesRef.current, ...fields }
       // Update local state immediately
@@ -151,5 +159,6 @@ export function useOnboarding() {
     goToStep,
     flushAndSave,
     saveDraft,
+    resumeConfidence,
   }
 }
