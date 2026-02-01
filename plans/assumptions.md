@@ -95,3 +95,12 @@
 - Module augmentation for JWT type uses `as` casts since nested @auth/core/jwt module path doesn't resolve reliably
 - Public routes: /, /login, /api/auth/*, /api/payments/webhook, /_next/*, /favicon*
 - Admin role has access to all protected routes
+
+## Expanded Onboarding (10-Step Flow)
+- step-criteria.tsx NOT renamed to step-evidence.tsx - kept existing name for stability
+- step-personal.tsx, step-docs-timeline.tsx, step-impact.tsx are now unused but not deleted (avoid breaking any potential imports)
+- Resume upload in step 3 stores file to vault but does NOT parse/pre-fill (resume-parser not built)
+- Impact & Standing data not collected in 10-step flow (was step 4 in old flow, removed to simplify)
+- Evidence checklist and document upload from old step-docs-timeline moved to step-criteria (step 5)
+- Old step 5 timeline fields moved to step-circumstances (step 8)
+- Old step 5 alt categories moved to step-preferences (step 9)

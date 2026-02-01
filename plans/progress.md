@@ -2092,3 +2092,52 @@
 - app/api/onboarding/[clientId]/report/route.ts - replaced MOCK_USER_ID
 - app/api/payments/checkout/route.ts - replaced MOCK_USER_ID
 - app/api/payments/status/[clientId]/route.ts - replaced MOCK_USER_ID
+
+## 2026-02-01: Expanded Onboarding (10-Step Flow)
+
+### Completed
+- Added 8 new fields to Client model in Prisma schema (consentToProcess, currentImmigrationStatus, desiredStatus, previousApplications, urgencyReason, specialCircumstances, communicationPreference, timezone)
+- Updated onboarding-schema.ts with new zod schemas for all 10 steps (step2=basic-info, step4=background, step6=achievement, step7=immigration, step8=circumstances, step9=preferences, impactSchema, docsSchema)
+- Updated ClientData interface in use-onboarding.ts with new fields
+- Created step-welcome.tsx: welcome screen with process overview and 9-step breakdown
+- Created step-basic-info.tsx: name, email, phone, consent checkbox
+- Created step-resume-upload.tsx: dropzone for resume upload to vault (no parse yet)
+- Created step-background.tsx: citizenship, DOB, field, education (repeatable), employer
+- Created step-immigration.tsx: current status, desired status, previous applications, US intent
+- Created step-circumstances.tsx: urgency, timeline, urgency reason, special circumstances
+- Created step-preferences.tsx: communication preference, timezone, alt category toggles
+- Updated onboarding-shell.tsx: 10 step labels, totalSteps=10, overflow-x-auto for label bar
+- Updated step router ([step]/page.tsx): 10-step switch, new imports, step limit 10
+- Updated step-review.tsx: 6 summary sections with edit links per section, currentStep=10 on submit
+- Fixed step-achievement.tsx import: step2Schema -> step6Schema
+- Fixed step-impact.tsx import: step4Schema -> impactSchema
+- Updated 12 PRD items to passes:true
+
+### Notes for next dev
+- step-personal.tsx is now unused (split into step-basic-info + step-background) - can delete later
+- step-docs-timeline.tsx is now unused (upload in step-resume-upload, timeline in step-circumstances, evidence in step-criteria) - can delete later
+- step-impact.tsx is now unused (not in 10-step flow) - can delete later or re-add if needed
+- step-criteria.tsx NOT renamed to step-evidence.tsx (PRD item still false) - kept existing name
+- Resume parsing not implemented (3 PRD items still false) - requires lib/resume-parser.ts
+- Reset endpoint not implemented (3 PRD items still false) - requires API + cascade delete
+- Remaining false PRD items: step-criteria rename (1), resume parser (4), reset endpoint (3), lawyer portal (17), shared dropzone (2), role-based filtering (3), functional tests (2)
+- Prisma generate needed after setting DATABASE_URL
+
+### Files created
+- app/onboarding/_components/step-welcome.tsx
+- app/onboarding/_components/step-basic-info.tsx
+- app/onboarding/_components/step-resume-upload.tsx
+- app/onboarding/_components/step-background.tsx
+- app/onboarding/_components/step-immigration.tsx
+- app/onboarding/_components/step-circumstances.tsx
+- app/onboarding/_components/step-preferences.tsx
+
+### Files modified
+- prisma/schema.prisma - added 8 new fields to Client model
+- app/onboarding/_lib/onboarding-schema.ts - rewritten with 10-step schemas
+- app/onboarding/_lib/use-onboarding.ts - added new fields to ClientData
+- app/onboarding/_components/onboarding-shell.tsx - 10 steps
+- app/onboarding/steps/[step]/page.tsx - 10-step router
+- app/onboarding/_components/step-review.tsx - 6-section summary with edit links
+- app/onboarding/_components/step-achievement.tsx - fixed schema import
+- app/onboarding/_components/step-impact.tsx - fixed schema import

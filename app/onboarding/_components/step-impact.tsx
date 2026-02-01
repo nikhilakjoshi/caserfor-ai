@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { step4Schema, type Step4Data } from "@/app/onboarding/_lib/onboarding-schema"
+import { impactSchema, type ImpactData } from "@/app/onboarding/_lib/onboarding-schema"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -16,12 +16,12 @@ interface Props {
 }
 
 export function StepImpact({ data, onUpdate }: Props) {
-  const { register, watch, setValue } = useForm<Step4Data>({
-    resolver: zodResolver(step4Schema),
+  const { register, watch, setValue } = useForm<ImpactData>({
+    resolver: zodResolver(impactSchema),
     defaultValues: {
       socialFollowing: data.socialFollowing || "",
       keynotes: data.keynotes || "",
-      recommenders: (data.recommenders as Step4Data["recommenders"]) || [],
+      recommenders: (data.recommenders as ImpactData["recommenders"]) || [],
       selfAssessment: data.selfAssessment || "",
       standingLevel: data.standingLevel || "",
       recognitionScope: data.recognitionScope || "",
@@ -30,7 +30,7 @@ export function StepImpact({ data, onUpdate }: Props) {
 
   const recommenders = watch("recommenders") || []
 
-  function handleBlur(field: keyof Step4Data) {
+  function handleBlur(field: keyof ImpactData) {
     onUpdate({ [field]: watch(field) })
   }
 

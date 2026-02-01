@@ -392,6 +392,14 @@ model Client {
   idealTimeline            String?
   priorConsultations       String?           @db.Text
   altCategories            Json?
+  consentToProcess         Boolean?
+  currentImmigrationStatus String?
+  desiredStatus            String?
+  previousApplications     String?           @db.Text
+  urgencyReason            String?           @db.Text
+  specialCircumstances     String?           @db.Text
+  communicationPreference  String?
+  timezone                 String?
   currentStep              Int               @default(1)
   status                   IntakeStatus      @default(draft)
   vaultId                  String?           @unique

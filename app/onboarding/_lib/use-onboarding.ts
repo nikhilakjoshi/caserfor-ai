@@ -29,6 +29,14 @@ export interface ClientData {
   idealTimeline?: string | null
   priorConsultations?: string | null
   altCategories?: string[] | null
+  consentToProcess?: boolean | null
+  currentImmigrationStatus?: string | null
+  desiredStatus?: string | null
+  previousApplications?: string | null
+  urgencyReason?: string | null
+  specialCircumstances?: string | null
+  communicationPreference?: string | null
+  timezone?: string | null
   currentStep: number
   status: string
   vaultId?: string | null

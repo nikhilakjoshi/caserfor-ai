@@ -4,11 +4,15 @@ import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Loader2, Check, AlertCircle } from "lucide-react"
 
 const STEP_LABELS = [
-  "Personal",
+  "Welcome",
+  "Basic Info",
+  "Resume",
+  "Background",
+  "Evidence",
   "Achievement",
-  "Criteria",
-  "Impact",
-  "Documents",
+  "Immigration",
+  "Circumstances",
+  "Preferences",
   "Review",
 ]
 
@@ -24,7 +28,7 @@ interface OnboardingShellProps {
 
 export function OnboardingShell({
   currentStep,
-  totalSteps = 6,
+  totalSteps = 10,
   onBack,
   onNext,
   canGoNext = true,
@@ -67,7 +71,7 @@ export function OnboardingShell({
           />
         </div>
         {/* Step labels */}
-        <div className="flex justify-between">
+        <div className="flex justify-between overflow-x-auto gap-1">
           {STEP_LABELS.map((label, i) => (
             <span
               key={label}

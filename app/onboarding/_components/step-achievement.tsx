@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { step2Schema, type Step2Data } from "@/app/onboarding/_lib/onboarding-schema"
+import { step6Schema, type Step6Data } from "@/app/onboarding/_lib/onboarding-schema"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import type { ClientData } from "@/app/onboarding/_lib/use-onboarding"
@@ -13,8 +13,8 @@ interface Props {
 }
 
 export function StepAchievement({ data, onUpdate }: Props) {
-  const { register, watch } = useForm<Step2Data>({
-    resolver: zodResolver(step2Schema),
+  const { register, watch } = useForm<Step6Data>({
+    resolver: zodResolver(step6Schema),
     defaultValues: {
       hasMajorAchievement: data.hasMajorAchievement ?? false,
       majorAchievementDetails: data.majorAchievementDetails || "",
@@ -23,7 +23,7 @@ export function StepAchievement({ data, onUpdate }: Props) {
 
   const hasMajor = watch("hasMajorAchievement")
 
-  function handleBlur(field: keyof Step2Data) {
+  function handleBlur(field: keyof Step6Data) {
     onUpdate({ [field]: watch(field) })
   }
 

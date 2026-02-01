@@ -3,11 +3,15 @@
 import { useParams, useRouter } from "next/navigation"
 import { useOnboarding } from "@/app/onboarding/_lib/use-onboarding"
 import { OnboardingShell } from "@/app/onboarding/_components/onboarding-shell"
-import { StepPersonal } from "@/app/onboarding/_components/step-personal"
-import { StepAchievement } from "@/app/onboarding/_components/step-achievement"
+import { StepWelcome } from "@/app/onboarding/_components/step-welcome"
+import { StepBasicInfo } from "@/app/onboarding/_components/step-basic-info"
+import { StepResumeUpload } from "@/app/onboarding/_components/step-resume-upload"
+import { StepBackground } from "@/app/onboarding/_components/step-background"
 import { StepCriteria } from "@/app/onboarding/_components/step-criteria"
-import { StepImpact } from "@/app/onboarding/_components/step-impact"
-import { StepDocsTimeline } from "@/app/onboarding/_components/step-docs-timeline"
+import { StepAchievement } from "@/app/onboarding/_components/step-achievement"
+import { StepImmigration } from "@/app/onboarding/_components/step-immigration"
+import { StepCircumstances } from "@/app/onboarding/_components/step-circumstances"
+import { StepPreferences } from "@/app/onboarding/_components/step-preferences"
 import { StepReview } from "@/app/onboarding/_components/step-review"
 import { Loader2 } from "lucide-react"
 
@@ -27,7 +31,7 @@ export default function StepPage() {
     saveDraft,
   } = useOnboarding()
 
-  if (isNaN(step) || step < 1 || step > 6) {
+  if (isNaN(step) || step < 1 || step > 10) {
     router.replace("/onboarding")
     return null
   }
@@ -58,22 +62,24 @@ export default function StepPage() {
     if (!clientData) return null
     switch (step) {
       case 1:
-        return <StepPersonal data={clientData} onUpdate={updateFields} />
+        return <StepWelcome />
       case 2:
-        return <StepAchievement data={clientData} onUpdate={updateFields} />
+        return <StepBasicInfo data={clientData} onUpdate={updateFields} />
       case 3:
-        return <StepCriteria clientId={clientData.id} />
+        return <StepResumeUpload clientId={clientData.id} />
       case 4:
-        return <StepImpact data={clientData} onUpdate={updateFields} />
+        return <StepBackground data={clientData} onUpdate={updateFields} />
       case 5:
-        return (
-          <StepDocsTimeline
-            data={clientData}
-            onUpdate={updateFields}
-            clientId={clientData.id}
-          />
-        )
+        return <StepCriteria clientId={clientData.id} />
       case 6:
+        return <StepAchievement data={clientData} onUpdate={updateFields} />
+      case 7:
+        return <StepImmigration data={clientData} onUpdate={updateFields} />
+      case 8:
+        return <StepCircumstances data={clientData} onUpdate={updateFields} />
+      case 9:
+        return <StepPreferences data={clientData} onUpdate={updateFields} />
+      case 10:
         return (
           <StepReview
             data={clientData}

@@ -1740,7 +1740,7 @@
       "Add preferences fields (communicationPreference, timezone)",
       "Export updated schemas"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1750,7 +1750,7 @@
       "Add urgencyReason, specialCircumstances, communicationPreference, timezone",
       "Run prisma migrate dev"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1760,7 +1760,7 @@
       "Update progress bar calculation",
       "Update step labels array for 10 steps"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1770,7 +1770,7 @@
       "Add resume data merge into form fields on parse",
       "Update auto-save to cover new fields"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1781,7 +1781,7 @@
       "Explain what data will be collected",
       "Continue button to next step"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1792,7 +1792,7 @@
       "Consent checkbox for data processing",
       "Pre-populate from draft"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1804,7 +1804,7 @@
       "Display parsed fields preview",
       "Allow skip"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1815,7 +1815,7 @@
       "Education history (repeatable)",
       "Current employer"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1836,7 +1836,7 @@
       "US intent fields",
       "Pre-populate from draft"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1847,7 +1847,7 @@
       "Timeline preferences",
       "Pre-populate from draft"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1858,7 +1858,7 @@
       "Alternative category interest (EB1B, EB2-NIW)",
       "Pre-populate from draft"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1869,7 +1869,7 @@
       "Show edit links per section",
       "Update submit flow"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
