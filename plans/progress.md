@@ -2161,3 +2161,20 @@
 - Fields only auto-fill if confidence > 0.3; user can freely override
 - Parse is non-fatal: if it fails, file is still uploaded to vault
 - _resumeConfidence key in updateFields is intercepted and removed before PATCH to API
+
+## 2026-02-01: Onboarding Reset (Start Over)
+
+### Completed
+- Created POST /api/onboarding/[clientId]/reset endpoint
+- Cascade deletes: CriterionResponses, EligibilityReport, Documents (DB+S3), Pinecone namespace
+- Resets all Client fields to null/defaults, currentStep=1, status=draft
+- Resets vault name to "Intake - {date}"
+- Added Start Over button to onboarding-shell.tsx (visible from step 2+)
+- AlertDialog confirmation before reset
+- Loading state on button during reset
+- Redirects to /onboarding after reset
+
+### Notes for next dev
+- Reset uses Record<string, unknown> cast for data object because Prisma generated types may not include expanded fields
+- S3 and Pinecone deletions are best-effort with try/catch - DB cleanup proceeds even if external services fail
+- Start Over button only visible when currentStep > 1

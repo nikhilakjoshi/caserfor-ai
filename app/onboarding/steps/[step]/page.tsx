@@ -94,12 +94,20 @@ export default function StepPage() {
     }
   }
 
+  async function handleStartOver() {
+    if (!clientData) return
+    const res = await fetch(`/api/onboarding/${clientData.id}/reset`, { method: "POST" })
+    if (!res.ok) throw new Error("Reset failed")
+    router.replace("/onboarding")
+  }
+
   return (
     <OnboardingShell
       currentStep={step}
       onBack={() => goToStep(step - 1)}
       onNext={() => goToStep(step + 1)}
       saveStatus={saveStatus}
+      onStartOver={handleStartOver}
     >
       {renderStep()}
     </OnboardingShell>

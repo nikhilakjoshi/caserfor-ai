@@ -107,3 +107,9 @@
 - Evidence checklist and document upload from old step-docs-timeline moved to step-criteria (step 5)
 - Old step 5 timeline fields moved to step-circumstances (step 8)
 - Old step 5 alt categories moved to step-preferences (step 9)
+
+## Onboarding Reset
+- Reset endpoint deletes EligibilityReport in addition to CriterionResponses/Documents (PRD didn't mention it but necessary for clean slate)
+- S3/Pinecone failures during reset are non-fatal - DB cleanup always proceeds
+- Reset redirects to /onboarding (root) which re-fetches draft and redirects to step 1
+- Vault is preserved (not deleted) - only its contents and name are reset

@@ -1,7 +1,18 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, Loader2, Check, AlertCircle } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { ChevronLeft, ChevronRight, Loader2, Check, AlertCircle, RotateCcw } from "lucide-react"
 
 const STEP_LABELS = [
   "Welcome",
@@ -23,6 +34,7 @@ interface OnboardingShellProps {
   onNext: () => void
   canGoNext?: boolean
   saveStatus?: "saved" | "saving" | "error" | "idle"
+  onStartOver?: () => Promise<void>
   children: React.ReactNode
 }
 
@@ -33,9 +45,12 @@ export function OnboardingShell({
   onNext,
   canGoNext = true,
   saveStatus = "idle",
+  onStartOver,
   children,
 }: OnboardingShellProps) {
   const progress = (currentStep / totalSteps) * 100
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [resetting, setResetting] = useState(false)
 
   return (
     <div className="space-y-6">
@@ -94,14 +109,32 @@ export function OnboardingShell({
 
       {/* Navigation */}
       <div className="flex justify-between pt-4 border-t">
-        <Button
-          variant="outline"
-          onClick={onBack}
-          disabled={currentStep <= 1}
-        >
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          Back
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={onBack}
+            disabled={currentStep <= 1}
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Back
+          </Button>
+          {onStartOver && currentStep > 1 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground text-xs"
+              onClick={() => setConfirmOpen(true)}
+              disabled={resetting}
+            >
+              {resetting ? (
+                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+              ) : (
+                <RotateCcw className="h-3 w-3 mr-1" />
+              )}
+              Start Over
+            </Button>
+          )}
+        </div>
         {currentStep < totalSteps ? (
           <Button onClick={onNext} disabled={!canGoNext}>
             Next
@@ -109,6 +142,36 @@ export function OnboardingShell({
           </Button>
         ) : null}
       </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Start over?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will delete all your answers, uploaded documents, and evaluation results. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={resetting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={resetting}
+              onClick={async (e) => {
+                e.preventDefault()
+                setResetting(true)
+                try {
+                  await onStartOver?.()
+                } finally {
+                  setResetting(false)
+                  setConfirmOpen(false)
+                }
+              }}
+            >
+              {resetting && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+              Delete and start over
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
