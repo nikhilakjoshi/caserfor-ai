@@ -1,20 +1,24 @@
-"use client"
+"use client";
 
-import React from "react"
-import ReactMarkdown from "react-markdown"
-import { FileText } from "lucide-react"
-import { cn } from "@/lib/utils"
+import React from "react";
+import Markdown from "markdown-to-jsx";
+import { FileText } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Regex to match [docName, chunk N] citation format
-const CITATION_REGEX = /\[([^\]]+?),\s*chunk\s+(\d+)\]/g
+const CITATION_REGEX = /\[([^\]]+?),\s*chunk\s+(\d+)\]/g;
 
 interface CitationBadgeProps {
-  documentName: string
-  chunkIndex: number
-  onClick?: (documentName: string, chunkIndex: number) => void
+  documentName: string;
+  chunkIndex: number;
+  onClick?: (documentName: string, chunkIndex: number) => void;
 }
 
-function CitationBadge({ documentName, chunkIndex, onClick }: CitationBadgeProps) {
+function CitationBadge({
+  documentName,
+  chunkIndex,
+  onClick,
+}: CitationBadgeProps) {
   return (
     <button
       type="button"
@@ -26,7 +30,7 @@ function CitationBadge({ documentName, chunkIndex, onClick }: CitationBadgeProps
       <span className="truncate max-w-[150px]">{documentName}</span>
       <span className="text-primary/60">#{chunkIndex}</span>
     </button>
-  )
+  );
 }
 
 /**
@@ -34,16 +38,16 @@ function CitationBadge({ documentName, chunkIndex, onClick }: CitationBadgeProps
  */
 function parseCitations(
   text: string,
-  onCitationClick?: (documentName: string, chunkIndex: number) => void
+  onCitationClick?: (documentName: string, chunkIndex: number) => void,
 ): React.ReactNode[] {
-  const parts: React.ReactNode[] = []
-  let lastIndex = 0
-  let match: RegExpExecArray | null
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
 
-  const regex = new RegExp(CITATION_REGEX.source, "g")
+  const regex = new RegExp(CITATION_REGEX.source, "g");
   while ((match = regex.exec(text)) !== null) {
     if (match.index > lastIndex) {
-      parts.push(text.slice(lastIndex, match.index))
+      parts.push(text.slice(lastIndex, match.index));
     }
     parts.push(
       <CitationBadge
@@ -51,14 +55,14 @@ function parseCitations(
         documentName={match[1].trim()}
         chunkIndex={parseInt(match[2], 10)}
         onClick={onCitationClick}
-      />
-    )
-    lastIndex = regex.lastIndex
+      />,
+    );
+    lastIndex = regex.lastIndex;
   }
   if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex))
+    parts.push(text.slice(lastIndex));
   }
-  return parts
+  return parts;
 }
 
 /**
@@ -66,36 +70,48 @@ function parseCitations(
  */
 function processChildren(
   children: React.ReactNode,
-  onCitationClick?: (documentName: string, chunkIndex: number) => void
+  onCitationClick?: (documentName: string, chunkIndex: number) => void,
 ): React.ReactNode {
   return React.Children.map(children, (child) => {
     if (typeof child === "string") {
       if (CITATION_REGEX.test(child)) {
-        return <>{parseCitations(child, onCitationClick)}</>
+        return <>{parseCitations(child, onCitationClick)}</>;
       }
-      return child
+      return child;
     }
-    if (React.isValidElement<{ children?: React.ReactNode }>(child) && child.props.children) {
+    if (
+      React.isValidElement<{ children?: React.ReactNode }>(child) &&
+      child.props.children
+    ) {
       return React.cloneElement(
         child,
         {},
-        processChildren(child.props.children, onCitationClick)
-      )
+        processChildren(child.props.children, onCitationClick),
+      );
     }
-    return child
-  })
+    return child;
+  });
 }
 
 interface MarkdownRendererProps {
-  content: string
-  className?: string
-  onCitationClick?: (documentName: string, chunkIndex: number) => void
+  content: string;
+  className?: string;
+  onCitationClick?: (documentName: string, chunkIndex: number) => void;
 }
 
-export function MarkdownRenderer({ content, className, onCitationClick }: MarkdownRendererProps) {
+export function MarkdownRenderer({
+  content,
+  className,
+  onCitationClick,
+}: MarkdownRendererProps) {
   return (
-    <div className={cn("prose prose-sm dark:prose-invert max-w-none markdown-body", className)}>
-      <ReactMarkdown
+    <div
+      className={cn(
+        "prose prose-sm dark:prose-invert max-w-none markdown-body",
+        className,
+      )}
+    >
+      {/* <ReactMarkdown
         components={{
           // Code blocks with syntax highlighting style
           code: ({ className: codeClassName, children, ...props }) => {
@@ -196,37 +212,40 @@ export function MarkdownRenderer({ content, className, onCitationClick }: Markdo
         }}
       >
         {content}
-      </ReactMarkdown>
+      </ReactMarkdown> */}
+      <Markdown>{content}</Markdown>
     </div>
-  )
+  );
 }
 
 // Helper to strip markdown and get plain text
 export function stripMarkdown(markdown: string): string {
-  return markdown
-    // Remove headers
-    .replace(/^#{1,6}\s+/gm, "")
-    // Remove bold/italic
-    .replace(/\*\*(.+?)\*\*/g, "$1")
-    .replace(/\*(.+?)\*/g, "$1")
-    .replace(/__(.+?)__/g, "$1")
-    .replace(/_(.+?)_/g, "$1")
-    // Remove inline code
-    .replace(/`(.+?)`/g, "$1")
-    // Remove code blocks
-    .replace(/```[\s\S]*?```/g, "")
-    // Remove links, keep text
-    .replace(/\[(.+?)\]\(.+?\)/g, "$1")
-    // Remove images
-    .replace(/!\[.*?\]\(.+?\)/g, "")
-    // Remove blockquotes
-    .replace(/^>\s+/gm, "")
-    // Remove horizontal rules
-    .replace(/^[-*_]{3,}$/gm, "")
-    // Remove list markers
-    .replace(/^[\s]*[-*+]\s+/gm, "")
-    .replace(/^[\s]*\d+\.\s+/gm, "")
-    // Clean up extra whitespace
-    .replace(/\n{3,}/g, "\n\n")
-    .trim()
+  return (
+    markdown
+      // Remove headers
+      .replace(/^#{1,6}\s+/gm, "")
+      // Remove bold/italic
+      .replace(/\*\*(.+?)\*\*/g, "$1")
+      .replace(/\*(.+?)\*/g, "$1")
+      .replace(/__(.+?)__/g, "$1")
+      .replace(/_(.+?)_/g, "$1")
+      // Remove inline code
+      .replace(/`(.+?)`/g, "$1")
+      // Remove code blocks
+      .replace(/```[\s\S]*?```/g, "")
+      // Remove links, keep text
+      .replace(/\[(.+?)\]\(.+?\)/g, "$1")
+      // Remove images
+      .replace(/!\[.*?\]\(.+?\)/g, "")
+      // Remove blockquotes
+      .replace(/^>\s+/gm, "")
+      // Remove horizontal rules
+      .replace(/^[-*_]{3,}$/gm, "")
+      // Remove list markers
+      .replace(/^[\s]*[-*+]\s+/gm, "")
+      .replace(/^[\s]*\d+\.\s+/gm, "")
+      // Clean up extra whitespace
+      .replace(/\n{3,}/g, "\n\n")
+      .trim()
+  );
 }

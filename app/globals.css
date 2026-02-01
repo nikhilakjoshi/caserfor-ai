@@ -177,12 +177,12 @@
 }
 
 .dark .mention {
-  background-color: oklch(0.30 0.08 250);
+  background-color: oklch(0.3 0.08 250);
   color: oklch(0.75 0.12 250);
 }
 
 .dark .mention[data-type="agent"] {
-  background-color: oklch(0.30 0.08 300);
+  background-color: oklch(0.3 0.08 300);
   color: oklch(0.75 0.12 300);
 }
 
@@ -368,7 +368,7 @@
   color: var(--fgColor-default);
   background-color: var(--bgColor-default);
   font-family: var(--font-sans), sans-serif;
-  font-size: 16px;
+  /* font-size: 16px; */
   line-height: 1.5;
   word-wrap: break-word;
 }
