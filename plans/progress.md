@@ -1,5 +1,19 @@
 # Progress Log
 
+## 2026-02-01: Mark auto mode routing verification as complete
+
+### Completed
+- Verified auto mode Q&A->chat and draft->document routing implementation exists and is correct
+- System prompt instructs AI to prefix with [MODE:chat] or [MODE:document]
+- Frontend parses prefix via regex, auto-switches layout (full-width chat vs split-panel document)
+- Default outputType is 'chat' (no toggle pressed), AI decides mode autonomously
+- Marked both functional verification PRD items as passes:true
+
+### Notes for next dev
+- Only 1 PRD item remains false: "Refactor step-criteria -> step-evidence.tsx" - intentionally skipped per assumptions.md
+- All other PRD items (120+) are passes:true
+- PRD is effectively COMPLETE
+
 ## 2026-02-01: Scope vault/assistant to client context in lawyer view
 
 ### Completed
