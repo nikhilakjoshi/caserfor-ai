@@ -1,11 +1,11 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import { useDropzone } from "react-dropzone"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Upload, FileText, X, Loader2 } from "lucide-react"
+import { FileText, X } from "lucide-react"
+import { FileDropzone } from "@/components/ui/file-dropzone"
 import type { ClientData } from "@/app/onboarding/_lib/use-onboarding"
 
 const EVIDENCE_TYPES = [
@@ -87,15 +87,6 @@ export function StepDocsTimeline({ data, onUpdate, clientId }: Props) {
     [clientId]
   )
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      "application/pdf": [".pdf"],
-      "application/msword": [".doc"],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
-      "text/plain": [".txt"],
-    },
-  })
 
   function handleBlur(field: string) {
     const el = document.getElementById(field) as HTMLInputElement | HTMLTextAreaElement | null
@@ -132,24 +123,10 @@ export function StepDocsTimeline({ data, onUpdate, clientId }: Props) {
       {/* File upload */}
       <div className="space-y-2">
         <Label>Upload Documents</Label>
-        <div
-          {...getRootProps()}
-          className={`border-2 border-dashed rounded p-6 text-center cursor-pointer transition-colors ${
-            isDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-muted-foreground/50"
-          }`}
-        >
-          <input {...getInputProps()} />
-          {uploading ? (
-            <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
-          ) : (
-            <>
-              <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">
-                Drop files here or click to browse (PDF, DOC, DOCX, TXT - max 25MB)
-              </p>
-            </>
-          )}
-        </div>
+        <FileDropzone
+          onDrop={onDrop}
+          loading={uploading}
+        />
         {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
         {uploadedDocs.length > 0 && (
           <div className="space-y-1">

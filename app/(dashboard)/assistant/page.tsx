@@ -5,7 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
-import { useDropzone } from "react-dropzone";
+import { FileDropzone } from "@/components/ui/file-dropzone";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { MentionInput } from "@/components/assistant/mention-input";
@@ -954,20 +954,6 @@ export default function AssistantPage() {
     setNewVaultFiles((prev) => [...prev, ...newFiles]);
   }, []);
 
-  const {
-    getRootProps: getNewVaultRootProps,
-    getInputProps: getNewVaultInputProps,
-    isDragActive: isNewVaultDragActive,
-  } = useDropzone({
-    onDrop: onDropNewVaultFiles,
-    accept: {
-      "application/pdf": [".pdf"],
-      "application/msword": [".doc"],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-        [".docx"],
-      "text/plain": [".txt"],
-    },
-  });
 
   const removeNewVaultFile = (id: string) => {
     setNewVaultFiles((prev) => prev.filter((f) => f.id !== id));
@@ -1784,32 +1770,12 @@ export default function AssistantPage() {
             {/* Drag-and-Drop Upload Zone */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Upload Files</Label>
-              <div
-                {...getNewVaultRootProps()}
-                className={`
-                  border-2 border-dashed p-8 text-center cursor-pointer transition-colors bg-white dark:bg-background
-                  ${
-                    isNewVaultDragActive
-                      ? "border-primary bg-primary/5"
-                      : "border-neutral-300 dark:border-neutral-600 hover:border-primary/50"
-                  }
-                `}
-              >
-                <input {...getNewVaultInputProps()} />
-                <Upload className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
-                {isNewVaultDragActive ? (
-                  <p className="text-sm text-primary">Drop files here...</p>
-                ) : (
-                  <>
-                    <p className="text-sm text-muted-foreground">
-                      Drag and drop files here, or click to browse
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Supports PDF, DOC, DOCX, TXT
-                    </p>
-                  </>
-                )}
-              </div>
+              <FileDropzone
+                onDrop={onDropNewVaultFiles}
+                idleText="Drag and drop files here, or click to browse"
+                hint="Supports PDF, DOC, DOCX, TXT"
+                className="p-8 bg-white dark:bg-background"
+              />
             </div>
 
             {/* Uploaded Files List */}

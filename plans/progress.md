@@ -1,5 +1,21 @@
 # Progress Log
 
+## 2026-02-01: Shared FileDropzone Component
+
+### Completed
+- Created components/ui/file-dropzone.tsx reusable wrapper around react-dropzone
+- Props: onDrop, accept, maxSize, maxFiles, multiple, disabled, loading, className, hint, activeText, loadingText, idleText
+- Default accept: PDF, DOC, DOCX, TXT. Consistent drag/loading/idle visual states
+- Replaced dropzone in assistant page (create vault modal)
+- Replaced dropzone in step-resume-upload.tsx (onboarding resume upload)
+- Replaced dropzone in step-docs-timeline.tsx (onboarding docs upload)
+- Removed direct useDropzone imports from all 3 files
+
+### Notes for next dev
+- No vault detail page dropzone existed to replace (PRD step mentioned it but it wasn't built)
+- FileDropzone doesn't show selected files list - that's handled by parent components already
+- Each usage passes custom props (accept, maxFiles, hints) for their specific needs
+
 ## 2026-02-01: Lawyer Case Detail Page + Gap Analysis
 
 ### Completed

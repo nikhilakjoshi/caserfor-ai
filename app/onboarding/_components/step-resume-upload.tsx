@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import { useDropzone } from "react-dropzone"
-import { Upload, FileText, Loader2, CheckCircle2 } from "lucide-react"
+import { FileText, Loader2, CheckCircle2 } from "lucide-react"
+import { FileDropzone } from "@/components/ui/file-dropzone"
 import { Button } from "@/components/ui/button"
 import type { ResumeParseResult } from "@/lib/resume-parser"
 
@@ -113,17 +113,6 @@ export function StepResumeUpload({ clientId, onUpdate, onParsed }: Props) {
     }
   }, [clientId, onUpdate, onParsed])
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      "application/pdf": [".pdf"],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
-      "text/plain": [".txt"],
-    },
-    maxFiles: 1,
-    maxSize: 25 * 1024 * 1024,
-    disabled: uploading || parsing,
-  })
 
   return (
     <div className="space-y-6">
@@ -165,25 +154,22 @@ export function StepResumeUpload({ clientId, onUpdate, onParsed }: Props) {
           )}
         </div>
       ) : (
-        <div
-          {...getRootProps()}
-          className={`flex flex-col items-center gap-3 py-12 rounded border-2 border-dashed cursor-pointer transition-colors ${
-            isDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-muted-foreground/50"
-          }`}
-        >
-          <input {...getInputProps()} />
-          {uploading ? (
-            <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
-          ) : (
-            <Upload className="h-10 w-10 text-muted-foreground" />
-          )}
-          <div className="text-center">
-            <p className="text-sm font-medium">
-              {uploading ? "Uploading..." : "Drop your resume here or click to browse"}
-            </p>
-            <p className="text-xs text-muted-foreground">PDF, DOCX, or TXT (max 25MB)</p>
-          </div>
-        </div>
+        <FileDropzone
+          onDrop={onDrop}
+          accept={{
+            "application/pdf": [".pdf"],
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+            "text/plain": [".txt"],
+          }}
+          maxFiles={1}
+          maxSize={25 * 1024 * 1024}
+          multiple={false}
+          disabled={uploading || parsing}
+          loading={uploading}
+          idleText="Drop your resume here or click to browse"
+          hint="PDF, DOCX, or TXT (max 25MB)"
+          className="py-12"
+        />
       )}
 
       {error && <p className="text-sm text-red-500">{error}</p>}

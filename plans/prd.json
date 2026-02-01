@@ -2158,7 +2158,7 @@
       "File type and size validation",
       "Show selected files list"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -2169,6 +2169,6 @@
       "Replace dropzone in assistant file attachment",
       "Verify all upload flows still work"
     ],
-    "passes": false
+    "passes": true
   }
 ]
