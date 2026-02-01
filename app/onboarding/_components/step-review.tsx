@@ -1,17 +1,11 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, Send } from "lucide-react"
 import type { ClientData } from "@/app/onboarding/_lib/use-onboarding"
-import { ReviewSummary } from "./review-summary"
-
-interface EligibilityReport {
-  verdict: string
-  summary: string
-  criteria: Record<string, { score: number; analysis: string; evidence: string[] }>
-}
 
 interface Props {
   data: ClientData
@@ -21,42 +15,20 @@ interface Props {
 }
 
 export function StepReview({ data, clientId, onFlush, onSave }: Props) {
+  const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(data.status !== "draft")
-  const [report, setReport] = useState<EligibilityReport | null>(null)
-  const [polling, setPolling] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const pollReport = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/onboarding/${clientId}/report`)
-      if (!res.ok) return
-      const body = await res.json()
-      if (body.report) {
-        setReport(body.report)
-        setPolling(false)
-      } else if (body.status === "reviewed") {
-        setReport(body.report)
-        setPolling(false)
-      }
-    } catch {
-      // Keep polling
-    }
-  }, [clientId])
-
-  useEffect(() => {
-    if (!polling) return
-    const interval = setInterval(pollReport, 4000)
-    pollReport() // immediate first check
-    return () => clearInterval(interval)
-  }, [polling, pollReport])
-
-  // Check for existing report on mount if already submitted
-  useEffect(() => {
-    if (submitted && !report) {
-      setPolling(true)
-    }
-  }, [submitted, report])
+  // If already submitted, redirect to evaluation page
+  if (data.status !== "draft") {
+    router.push(`/evaluation/${clientId}`)
+    return (
+      <div className="flex flex-col items-center justify-center py-16 gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Redirecting to evaluation...</p>
+      </div>
+    )
+  }
 
   async function handleSubmit() {
     setSubmitting(true)
@@ -71,27 +43,13 @@ export function StepReview({ data, clientId, onFlush, onSave }: Props) {
         const body = await res.json()
         throw new Error(body.error || "Submission failed")
       }
-      setSubmitted(true)
-      setPolling(true)
+      // Redirect to evaluation page
+      router.push(`/evaluation/${clientId}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Submission failed")
     } finally {
       setSubmitting(false)
     }
-  }
-
-  if (report) {
-    return <ReviewSummary report={report} />
-  }
-
-  if (submitted && polling) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Evaluating eligibility...</p>
-        <p className="text-xs text-muted-foreground">This may take a few moments</p>
-      </div>
-    )
   }
 
   return (

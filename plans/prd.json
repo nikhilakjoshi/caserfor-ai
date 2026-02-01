@@ -1526,7 +1526,7 @@
       "Loading/polling state while report not ready",
       "Payment CTA button at bottom"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1598,7 +1598,7 @@
       "After submit + evaluate trigger, redirect to /evaluation/[clientId] instead of inline report",
       "Remove ReviewSummary rendering from step-review (moved to evaluation page)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -1608,7 +1608,7 @@
       "Show error state if report fetch fails",
       "Include retry button and contact support link"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -1617,7 +1617,7 @@
       "In Stripe Checkout cancel_url, redirect to /evaluation/[clientId]?payment=cancelled",
       "In eval page, read payment query param and show cancellation/failure message"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

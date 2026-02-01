@@ -1965,3 +1965,31 @@
 ### Files modified
 - app/page.tsx - replaced redirect with full landing page
 - app/layout.tsx - updated metadata for Casefor.ai branding
+
+## 2026-02-01: Evaluation Results Page + Step-Review Redirect
+
+### Completed
+- Created app/evaluation/[clientId]/page.tsx with full evaluation results display
+- Polls GET /api/onboarding/[clientId]/report every 4s while awaiting results
+- Shows approval probability badge (strong=85%, moderate=60%, weak=30%, insufficient=10%)
+- Verdict messaging per tier, full ReviewSummary component reused from onboarding
+- Loading/polling state while report generating (spinner + message)
+- Error state with Retry button and Contact Support link
+- Reads ?payment=cancelled query param and shows cancellation message
+- Payment CTA button at bottom of report
+- Modified step-review.tsx to redirect to /evaluation/[clientId] after submit
+- Removed inline report polling/display from step-review (moved to evaluation page)
+- Already-submitted clients auto-redirect to evaluation page on step 6 load
+- Updated 4 PRD items to passes:true
+
+### Notes for next dev
+- Payment CTA currently navigates to /api/payments/checkout?clientId=X - endpoint doesn't exist yet
+- "Eval page after paying: redirect to /assistant" item needs GET /api/payments/status endpoint first
+- Functional test items (auto mode routing) still false - require live AI key
+- Remaining false PRD items: Stripe payment flow (schema + 6 endpoints/pages), payment redirect, functional tests (2)
+
+### Files created
+- app/evaluation/[clientId]/page.tsx - evaluation results page
+
+### Files modified
+- app/onboarding/_components/step-review.tsx - redirect to /evaluation/[clientId] instead of inline report
