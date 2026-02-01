@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-
-const MOCK_USER_ID = "mock-user-id"
+import { getUser } from "@/lib/get-user"
 
 function slugify(name: string): string {
   return name
@@ -13,8 +12,11 @@ function slugify(name: string): string {
 
 export async function GET() {
   try {
+    const user = await getUser()
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
     const agents = await prisma.agent.findMany({
-      where: { userId: MOCK_USER_ID },
+      where: { userId: user.id },
       orderBy: { updatedAt: "desc" },
     })
 
@@ -30,6 +32,9 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await getUser()
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
     const body = await request.json()
     const { name, description, instruction } = body
 
@@ -51,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     // Check slug uniqueness, append suffix if needed
     const existing = await prisma.agent.findUnique({
-      where: { userId_slug: { userId: MOCK_USER_ID, slug } },
+      where: { userId_slug: { userId: user.id, slug } },
     })
     if (existing) {
       slug = `${slug}-${Date.now()}`
@@ -59,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     const agent = await prisma.agent.create({
       data: {
-        userId: MOCK_USER_ID,
+        userId: user.id,
         name: name.trim(),
         slug,
         description: description?.trim() || null,

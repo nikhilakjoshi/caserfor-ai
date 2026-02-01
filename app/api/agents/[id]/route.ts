@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-
-const MOCK_USER_ID = "mock-user-id"
+import { getUser } from "@/lib/get-user"
 
 function slugify(name: string): string {
   return name
@@ -16,9 +15,12 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getUser()
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
     const { id } = await params
     const agent = await prisma.agent.findFirst({
-      where: { id, userId: MOCK_USER_ID },
+      where: { id, userId: user.id },
     })
 
     if (!agent) {
@@ -40,12 +42,15 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getUser()
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
     const { id } = await params
     const body = await request.json()
     const { name, description, instruction } = body
 
     const existing = await prisma.agent.findFirst({
-      where: { id, userId: MOCK_USER_ID },
+      where: { id, userId: user.id },
     })
     if (!existing) {
       return NextResponse.json({ error: "Agent not found" }, { status: 404 })
@@ -67,7 +72,7 @@ export async function PUT(
       // Check slug uniqueness excluding self
       const slugConflict = await prisma.agent.findFirst({
         where: {
-          userId: MOCK_USER_ID,
+          userId: user.id,
           slug: newSlug,
           id: { not: id },
         },
@@ -103,9 +108,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getUser()
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
     const { id } = await params
     const existing = await prisma.agent.findFirst({
-      where: { id, userId: MOCK_USER_ID },
+      where: { id, userId: user.id },
     })
     if (!existing) {
       return NextResponse.json({ error: "Agent not found" }, { status: 404 })

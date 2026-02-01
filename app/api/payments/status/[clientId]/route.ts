@@ -1,17 +1,19 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-
-const MOCK_USER_ID = "mock-user-id"
+import { getUser } from "@/lib/get-user"
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ clientId: string }> }
 ) {
   try {
+    const user = await getUser()
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
     const { clientId } = await params
 
     const client = await prisma.client.findFirst({
-      where: { id: clientId, userId: MOCK_USER_ID },
+      where: { id: clientId, userId: user.id },
       select: { paidAt: true },
     })
 

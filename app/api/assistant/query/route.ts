@@ -14,8 +14,7 @@ import type {
   SourceType,
 } from "@prisma/client";
 
-// TODO: Replace with actual auth when implemented
-const MOCK_USER_ID = "mock-user-id";
+import { getUser } from "@/lib/get-user";
 
 interface AttachedFileInput {
   id: string;
@@ -44,6 +43,14 @@ export async function POST(req: Request) {
     agentIds?: string[];
   };
 
+  const user = await getUser();
+  if (!user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   if (!inputText?.trim()) {
     return new Response(JSON.stringify({ error: "inputText is required" }), {
       status: 400,
@@ -68,7 +75,7 @@ export async function POST(req: Request) {
   try {
     query = await prisma.assistantQuery.create({
       data: {
-        userId: MOCK_USER_ID,
+        userId: user.id,
         conversationId: conversationId || undefined,
         inputText,
         outputType: queryOutputType,
@@ -123,7 +130,7 @@ export async function POST(req: Request) {
       selectedAgents = await prisma.agent.findMany({
         where: {
           id: { in: agentIds },
-          userId: MOCK_USER_ID,
+          userId: user.id,
         },
       });
     } catch (error) {
@@ -361,7 +368,7 @@ Call the appropriate agent tool when their expertise is relevant to the user's q
 
           await prisma.historyEntry.create({
             data: {
-              userId: MOCK_USER_ID,
+              userId: user.id,
               queryId: query.id,
               title,
               type: queryOutputType,

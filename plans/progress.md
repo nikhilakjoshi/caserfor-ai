@@ -2041,3 +2041,54 @@
 - Categorization prompt now includes explicit guidance for distinguishing new categories
 - Cannot test with sample documents without live AI key
 - Next high-priority items: auth/roles system (UserRole, NextAuth, middleware) - blocks lawyer portal and role-based filtering
+
+## 2026-02-01: Auth System (NextAuth v5 + Role-Based Access)
+
+### Completed
+- Added UserRole enum (applicant, lawyer, admin) to Prisma schema
+- Added passwordHash and role fields to User model
+- Added CaseAssignment model (lawyerId + clientId unique, cascade delete, indexes)
+- Added caseAssignments relation to both User and Client models
+- Installed next-auth@beta, @auth/prisma-adapter, bcryptjs
+- Created lib/auth.ts with NextAuth v5 credentials provider, JWT strategy, role in session
+- Created app/api/auth/[...nextauth]/route.ts handler
+- Created middleware.ts with role-based route protection (applicant: /onboarding + /evaluation, lawyer: /lawyer routes, admin: all)
+- Created lib/get-user.ts with getUser() and requireUser() helpers
+- Replaced MOCK_USER_ID in all 12 API route files with session-based auth via getUser()
+- Each API handler returns 401 if no session
+- Created /login page with email/password form
+- Added AUTH_SECRET to .env.example
+- Updated 8 PRD items to passes:true
+
+### Notes for next dev
+- NextAuth v5 (beta.30) used, compatible with Next.js 16
+- Credentials provider with bcryptjs password hashing
+- JWT session strategy (no server-side sessions in DB)
+- Layout-level auth handled by middleware (not per-layout checks) since dashboard layout is "use client"
+- No user registration endpoint yet - need seed script or signup page
+- Migration not run (no DB) - run prisma migrate dev when DB available
+- Remaining false PRD items: expanded onboarding (13), lawyer portal (17), shared dropzone (2), role-based vault filtering (3), functional tests (2)
+- Next highest priority: expanded onboarding (10-step flow) or lawyer portal
+
+### Files created
+- lib/auth.ts - NextAuth v5 configuration
+- lib/get-user.ts - session user helpers
+- middleware.ts - role-based route protection
+- app/api/auth/[...nextauth]/route.ts - NextAuth handler
+- app/login/page.tsx - login page
+
+### Files modified
+- prisma/schema.prisma - UserRole enum, User fields, CaseAssignment model, Client relation
+- .env.example - added AUTH_SECRET
+- app/api/agents/route.ts - replaced MOCK_USER_ID
+- app/api/agents/[id]/route.ts - replaced MOCK_USER_ID
+- app/api/assistant/query/route.ts - replaced MOCK_USER_ID
+- app/api/assistant/query/[id]/route.ts - replaced MOCK_USER_ID
+- app/api/documents/route.ts - replaced MOCK_USER_ID
+- app/api/onboarding/draft/route.ts - replaced MOCK_USER_ID
+- app/api/onboarding/[clientId]/criteria/route.ts - replaced MOCK_USER_ID
+- app/api/onboarding/[clientId]/upload/route.ts - replaced MOCK_USER_ID
+- app/api/onboarding/[clientId]/submit/route.ts - replaced MOCK_USER_ID
+- app/api/onboarding/[clientId]/report/route.ts - replaced MOCK_USER_ID
+- app/api/payments/checkout/route.ts - replaced MOCK_USER_ID
+- app/api/payments/status/[clientId]/route.ts - replaced MOCK_USER_ID

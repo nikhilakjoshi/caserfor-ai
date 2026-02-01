@@ -1655,7 +1655,7 @@
       "Add UserRole enum to schema.prisma",
       "Run prisma generate to verify syntax"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1664,7 +1664,7 @@
       "Add role UserRole @default(applicant) to User model",
       "Run prisma migrate dev"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1675,7 +1675,7 @@
       "Add @@unique([lawyerId, clientId])",
       "Run prisma migrate dev"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1686,7 +1686,7 @@
       "Include session callback with user role",
       "Export authOptions"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1696,7 +1696,7 @@
       "Import authOptions from lib/auth.ts",
       "Export GET and POST handlers"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1707,7 +1707,7 @@
       "Protect /lawyer routes for lawyer role",
       "Redirect unauthenticated users to login"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1717,7 +1717,7 @@
       "Replace each with getServerSession().user.id",
       "Remove MOCK_USER_ID constant"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1728,7 +1728,7 @@
       "Add session check to (lawyer)/layout.tsx",
       "Redirect to login if no session"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",

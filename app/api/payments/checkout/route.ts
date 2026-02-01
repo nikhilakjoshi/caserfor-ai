@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import Stripe from "stripe"
-
-const MOCK_USER_ID = "mock-user-id"
+import { getUser } from "@/lib/get-user"
 
 function getBaseUrl(req: NextRequest): string {
   const host = req.headers.get("host") || "localhost:3000"
@@ -12,6 +11,9 @@ function getBaseUrl(req: NextRequest): string {
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await getUser()
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
     const { clientId } = await req.json()
 
     if (!clientId) {
@@ -19,7 +21,7 @@ export async function POST(req: NextRequest) {
     }
 
     const client = await prisma.client.findFirst({
-      where: { id: clientId, userId: MOCK_USER_ID },
+      where: { id: clientId, userId: user.id },
     })
 
     if (!client) {

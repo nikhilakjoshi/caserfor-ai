@@ -86,3 +86,12 @@
 - Base URL derived from request Host header (localhost = http, otherwise https)
 - Webhook uses req.text() for raw body (Stripe signature verification needs raw string, not parsed JSON)
 - Migration not run as part of implementation - dev runs prisma migrate when DB available
+
+## Authentication
+- NextAuth v5 (beta.30) with credentials provider and JWT session strategy
+- Passwords hashed via bcryptjs
+- Layout-level auth enforced via middleware.ts (not per-layout server checks) because dashboard layout is "use client"
+- No @auth/prisma-adapter used - JWT tokens carry id + role, no DB session table
+- Module augmentation for JWT type uses `as` casts since nested @auth/core/jwt module path doesn't resolve reliably
+- Public routes: /, /login, /api/auth/*, /api/payments/webhook, /_next/*, /favicon*
+- Admin role has access to all protected routes

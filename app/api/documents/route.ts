@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import prisma from "@/lib/db"
-
-const MOCK_USER_ID = "mock-user-id"
+import { getUser } from "@/lib/get-user"
 
 // GET /api/documents - List documents with optional pagination
 export async function GET(request: NextRequest) {
   try {
+    const user = await getUser()
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
     const searchParams = request.nextUrl.searchParams
     const page = parseInt(searchParams.get("page") || "1")
     const limit = parseInt(searchParams.get("limit") || "20")
@@ -50,6 +52,9 @@ export async function GET(request: NextRequest) {
 // POST /api/documents - Create a new document
 export async function POST(request: NextRequest) {
   try {
+    const user = await getUser()
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
     const body = await request.json()
     const { title, content, queryId } = body
 
@@ -64,7 +69,7 @@ export async function POST(request: NextRequest) {
     const query = await prisma.assistantQuery.findFirst({
       where: {
         id: queryId,
-        userId: MOCK_USER_ID,
+        userId: user.id,
       },
     })
 

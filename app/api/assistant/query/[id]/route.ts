@@ -1,17 +1,19 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-
-const MOCK_USER_ID = "mock-user-id"
+import { getUser } from "@/lib/get-user"
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getUser()
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
     const { id } = await params
 
     const query = await prisma.assistantQuery.findFirst({
-      where: { id, userId: MOCK_USER_ID },
+      where: { id, userId: user.id },
       include: {
         sources: {
           select: {

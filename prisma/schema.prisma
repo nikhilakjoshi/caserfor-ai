@@ -71,6 +71,12 @@ enum StarredItemType {
   example
 }
 
+enum UserRole {
+  applicant
+  lawyer
+  admin
+}
+
 enum IntakeStatus {
   draft
   submitted
@@ -91,21 +97,40 @@ enum EligibilityVerdict {
 // ============================================
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
-  avatarUrl String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String?
+  role         UserRole @default(applicant)
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relations
-  queries        AssistantQuery[]
-  prompts        Prompt[]
-  starredItems   StarredItem[]
-  historyEntries HistoryEntry[]
-  agents         Agent[]
+  queries         AssistantQuery[]
+  prompts         Prompt[]
+  starredItems    StarredItem[]
+  historyEntries  HistoryEntry[]
+  agents          Agent[]
+  caseAssignments CaseAssignment[]
 
   @@map("users")
+}
+
+model CaseAssignment {
+  id         String   @id @default(cuid())
+  lawyerId   String
+  clientId   String
+  assignedAt DateTime @default(now())
+
+  // Relations
+  lawyer User   @relation(fields: [lawyerId], references: [id], onDelete: Cascade)
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([lawyerId, clientId])
+  @@index([lawyerId])
+  @@index([clientId])
+  @@map("case_assignments")
 }
 
 model Vault {
@@ -380,6 +405,7 @@ model Client {
   vault              Vault?              @relation(fields: [vaultId], references: [id])
   criterionResponses CriterionResponse[]
   eligibilityReport  EligibilityReport?
+  caseAssignments    CaseAssignment[]
 
   @@index([userId])
   @@index([status])

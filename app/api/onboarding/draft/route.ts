@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-
-const MOCK_USER_ID = "mock-user-id"
+import { getUser } from "@/lib/get-user"
 
 export async function GET() {
   try {
+    const user = await getUser()
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
     // Find existing draft client
     let client = await prisma.client.findFirst({
-      where: { userId: MOCK_USER_ID, status: "draft" },
+      where: { userId: user.id, status: "draft" },
       include: { vault: true },
     })
 
@@ -29,7 +31,7 @@ export async function GET() {
 
     client = await prisma.client.create({
       data: {
-        userId: MOCK_USER_ID,
+        userId: user.id,
         vaultId: vault.id,
         currentStep: 1,
         status: "draft",
@@ -49,10 +51,13 @@ export async function GET() {
 
 export async function PATCH(request: NextRequest) {
   try {
+    const user = await getUser()
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
     const body = await request.json()
 
     const client = await prisma.client.findFirst({
-      where: { userId: MOCK_USER_ID, status: "draft" },
+      where: { userId: user.id, status: "draft" },
     })
 
     if (!client) {

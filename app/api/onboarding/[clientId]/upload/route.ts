@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import { uploadFile } from "@/lib/s3"
 import { randomUUID } from "crypto"
-
-const MOCK_USER_ID = "mock-user-id"
+import { getUser } from "@/lib/get-user"
 const MAX_FILE_SIZE = 25 * 1024 * 1024
 
 export async function POST(
@@ -13,8 +12,11 @@ export async function POST(
   const { clientId } = await params
 
   try {
+    const user = await getUser()
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
     const client = await prisma.client.findFirst({
-      where: { id: clientId, userId: MOCK_USER_ID },
+      where: { id: clientId, userId: user.id },
       select: { id: true, vaultId: true },
     })
 
