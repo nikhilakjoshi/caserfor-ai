@@ -207,9 +207,7 @@
   {
     "category": "backend",
     "description": "Add Pinecone env vars to .env.example",
-    "steps": [
-      "Add PINECONE_API_KEY and PINECONE_INDEX to .env.example"
-    ],
+    "steps": ["Add PINECONE_API_KEY and PINECONE_INDEX to .env.example"],
     "passes": true
   },
   {
@@ -510,10 +508,7 @@
   {
     "category": "backend",
     "description": "Create GET /api/agents/[id] (get agent)",
-    "steps": [
-      "Fetch by id + userId",
-      "Return 404 if not found"
-    ],
+    "steps": ["Fetch by id + userId", "Return 404 if not found"],
     "passes": true
   },
   {
@@ -530,10 +525,7 @@
   {
     "category": "backend",
     "description": "Create DELETE /api/agents/[id] (delete agent)",
-    "steps": [
-      "Delete by id + userId",
-      "Return 204"
-    ],
+    "steps": ["Delete by id + userId", "Return 204"],
     "passes": true
   },
   {
@@ -561,10 +553,7 @@
   {
     "category": "ui",
     "description": "Add /agents to app sidebar navigation",
-    "steps": [
-      "Add nav item to app-sidebar.tsx",
-      "Match existing nav style"
-    ],
+    "steps": ["Add nav item to app-sidebar.tsx", "Match existing nav style"],
     "passes": true
   },
   {
@@ -1485,57 +1474,167 @@
     "passes": true
   },
   {
-    "category": "functional",
-    "description": "Verify onboarding draft create and resume flow",
+    "category": "data",
+    "description": "Add 'paid' to IntakeStatus enum in Prisma schema",
     "steps": [
-      "Visit /onboarding, verify Client + Vault created in DB",
-      "Fill steps 1-2, navigate away",
-      "Return to /onboarding, verify redirects to correct step",
-      "Verify previously entered data persists"
+      "Open prisma/schema.prisma",
+      "Add 'paid' value to IntakeStatus enum",
+      "Run prisma generate to verify syntax"
+    ],
+    "passes": false
+  },
+  {
+    "category": "data",
+    "description": "Add Stripe payment fields to Client model",
+    "steps": [
+      "Add stripeSessionId String? to Client model",
+      "Add stripeCustomerId String? to Client model",
+      "Add paidAt DateTime? to Client model"
+    ],
+    "passes": false
+  },
+  {
+    "category": "data",
+    "description": "Run prisma migrate for payment fields",
+    "steps": [
+      "Run npx prisma migrate dev --name add-payment-fields",
+      "Verify migration succeeds",
+      "Run npx prisma generate"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Replace app/page.tsx redirect with full landing page",
+    "steps": [
+      "Replace redirect logic in app/page.tsx with landing page content",
+      "Include hero section, how-it-works, criteria overview, value prop, trust signals, footer CTA",
+      "Use frontend-design skill for polished output",
+      "Responsive, static, no API calls",
+      "Placeholder copy is acceptable"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create evaluation results page at /evaluation/[clientId]",
+    "steps": [
+      "Create app/evaluation/[clientId]/page.tsx",
+      "Fetch report from GET /api/onboarding/[clientId]/report",
+      "Show approval probability (strong=85%, moderate=60%, weak=30%, insufficient=10%)",
+      "Show verdict badge, summary paragraph, improvement messaging",
+      "Loading/polling state while report not ready",
+      "Payment CTA button at bottom"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Install stripe npm package",
+    "steps": [
+      "Run npm install stripe",
+      "Verify package in package.json"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Add Stripe env vars to .env.example",
+    "steps": [
+      "Add STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ID, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, ENABLE_STRIPE to .env.example"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create POST /api/payments/checkout route",
+    "steps": [
+      "Create app/api/payments/checkout/route.ts",
+      "Accept clientId in body",
+      "If ENABLE_STRIPE=false: immediately mark client as paid, return redirect URL to success page",
+      "If ENABLE_STRIPE=true: create Stripe Checkout session with STRIPE_PRICE_ID, return session URL",
+      "Include success_url and cancel_url"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create POST /api/payments/webhook route",
+    "steps": [
+      "Create app/api/payments/webhook/route.ts",
+      "Verify Stripe webhook signature using STRIPE_WEBHOOK_SECRET",
+      "Handle checkout.session.completed event",
+      "Update Client: stripeSessionId, stripeCustomerId, paidAt, status=paid",
+      "Return 200"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create GET /api/payments/status/[clientId] route",
+    "steps": [
+      "Create app/api/payments/status/[clientId]/route.ts",
+      "Fetch Client by clientId",
+      "Return { paid: boolean, paidAt } based on Client.paidAt presence"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create post-payment success interstitial page",
+    "steps": [
+      "Create app/payment/success/page.tsx",
+      "Read clientId from search params",
+      "Show confirmation message, checkmark/success visual",
+      "CTA button linking to /assistant"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Modify step-review.tsx to redirect to /evaluation/[clientId] after submit",
+    "steps": [
+      "Open app/onboarding/_components/step-review.tsx",
+      "After submit + evaluate trigger, redirect to /evaluation/[clientId] instead of inline report",
+      "Remove ReviewSummary rendering from step-review (moved to evaluation page)"
     ],
     "passes": false
   },
   {
     "category": "functional",
-    "description": "Verify step 3 criteria form saves per-criterion responses",
+    "description": "Eval page: error state with retry/contact support",
     "steps": [
-      "Navigate to step 3",
-      "Fill sub-questions for 2+ criteria",
-      "Switch between criteria tabs, verify data persists",
-      "Refresh page, verify CriterionResponses loaded from DB"
+      "In app/evaluation/[clientId]/page.tsx",
+      "Show error state if report fetch fails",
+      "Include retry button and contact support link"
     ],
     "passes": false
   },
   {
     "category": "functional",
-    "description": "Verify step 5 document upload triggers S3 + embedding",
+    "description": "Payment fail/cancel returns to eval page with message",
     "steps": [
-      "Navigate to step 5",
-      "Upload 2+ documents via dropzone",
-      "Verify files stored in S3 under client vault",
-      "Verify embedding pipeline triggered"
+      "In Stripe Checkout cancel_url, redirect to /evaluation/[clientId]?payment=cancelled",
+      "In eval page, read payment query param and show cancellation/failure message"
     ],
     "passes": false
   },
   {
     "category": "functional",
-    "description": "Verify submit triggers EB1A agent and produces report",
+    "description": "Eval page after paying: check payment status, redirect to /assistant",
     "steps": [
-      "Fill all required fields, submit in step 6",
-      "Verify Client status changes: submitted -> under_review -> reviewed",
-      "Verify EligibilityReport created with per-criterion scores + verdict",
-      "Verify review-summary renders report correctly"
+      "In eval page, check GET /api/payments/status/[clientId] on mount",
+      "If already paid, redirect to /assistant"
     ],
     "passes": false
   },
   {
-    "category": "functional",
-    "description": "Verify required field validation prevents incomplete submission",
+    "category": "ui",
+    "description": "Update app/layout.tsx metadata for Casefor-ai",
     "steps": [
-      "Attempt submit without firstName/lastName/email/fieldOfExpertise",
-      "Verify 400 error returned with validation message",
-      "Verify UI shows validation errors on step 1 fields"
+      "Open app/layout.tsx",
+      "Update title and description metadata for Casefor-ai branding"
     ],
-    "passes": false
+    "passes": true
   }
 ]

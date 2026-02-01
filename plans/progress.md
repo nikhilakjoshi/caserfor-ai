@@ -1944,3 +1944,24 @@
 
 ### Files modified
 - app/api/onboarding/[clientId]/submit/route.ts - wired evaluator trigger
+
+## 2026-02-01: Landing Page and Layout Metadata
+
+### Completed
+- Replaced app/page.tsx redirect with full landing page
+- Sections: nav, hero, how-it-works (3 steps), all 10 EB-1A criteria grid, value props (4), trust signals, footer CTA, footer
+- Static page, no API calls, responsive (sm/md breakpoints)
+- Links to /onboarding (primary CTA) and /assistant (secondary)
+- Updated app/layout.tsx metadata: title "Casefor.ai - EB-1A Eligibility Evaluation", description for SEO
+- Styling: flat design (no shadows), uses global CSS vars, bg-gray-50 alternating sections
+- Updated 2 PRD items to passes:true
+
+### Notes for next dev
+- Landing page is pure static - no auth gating
+- Dashboard redirect lives in app/(dashboard)/page.tsx (unchanged)
+- Remaining false PRD items: evaluation results page (1), Stripe payment flow (6), step-review redirect (1), error/cancel states (2), post-payment success (1), functional tests (2)
+- Next highest priority: evaluation results page at /evaluation/[clientId]
+
+### Files modified
+- app/page.tsx - replaced redirect with full landing page
+- app/layout.tsx - updated metadata for Casefor.ai branding
