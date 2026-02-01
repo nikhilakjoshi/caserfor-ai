@@ -2027,3 +2027,17 @@
 - prisma/schema.prisma - added paid enum value + 3 stripe fields
 - .env.example - added 5 stripe env vars
 - app/evaluation/[clientId]/page.tsx - payment status check + POST checkout
+
+## 2026-02-01: Add 5 new document categories + update categorization prompt
+
+### Completed
+- Added 5 new categories to lib/document-categories.ts: immigration-form, financial-record, personal-statement, business-plan, identity-document
+- Updated categorization prompt in lib/categorize-document.ts with guidance for new categories
+- Schema enum auto-derives from CATEGORY_SLUGS so no schema change needed
+- Updated 2 PRD items to passes:true
+
+### Notes for next dev
+- CATEGORY_SLUGS is derived from DOCUMENT_CATEGORIES array, so adding to the array is sufficient
+- Categorization prompt now includes explicit guidance for distinguishing new categories
+- Cannot test with sample documents without live AI key
+- Next high-priority items: auth/roles system (UserRole, NextAuth, middleware) - blocks lawyer portal and role-based filtering

@@ -28,6 +28,15 @@ export async function categorizeDocument(
     schema: categorizationSchema,
     prompt: `Classify this document into one of these categories: ${categoryList}
 
+Category guidance:
+- immigration-form: USCIS forms (I-140, I-485, etc.), visa applications, immigration petitions
+- financial-record: Tax returns, pay stubs, bank statements, W-2s, financial evidence
+- personal-statement: Personal narratives, cover letters, self-authored statements of purpose
+- business-plan: Business plans, market analyses, entrepreneurial proposals
+- identity-document: Passports, birth certificates, driver licenses, identity verification
+- awards through commercial-success: EB1A evidence categories
+- contract through other: General legal document categories
+
 Filename: ${filename}
 
 Document text (first ~3000 tokens):

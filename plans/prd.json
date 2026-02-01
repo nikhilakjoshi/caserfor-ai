@@ -207,7 +207,9 @@
   {
     "category": "backend",
     "description": "Add Pinecone env vars to .env.example",
-    "steps": ["Add PINECONE_API_KEY and PINECONE_INDEX to .env.example"],
+    "steps": [
+      "Add PINECONE_API_KEY and PINECONE_INDEX to .env.example"
+    ],
     "passes": true
   },
   {
@@ -508,7 +510,10 @@
   {
     "category": "backend",
     "description": "Create GET /api/agents/[id] (get agent)",
-    "steps": ["Fetch by id + userId", "Return 404 if not found"],
+    "steps": [
+      "Fetch by id + userId",
+      "Return 404 if not found"
+    ],
     "passes": true
   },
   {
@@ -525,7 +530,10 @@
   {
     "category": "backend",
     "description": "Create DELETE /api/agents/[id] (delete agent)",
-    "steps": ["Delete by id + userId", "Return 204"],
+    "steps": [
+      "Delete by id + userId",
+      "Return 204"
+    ],
     "passes": true
   },
   {
@@ -553,7 +561,10 @@
   {
     "category": "ui",
     "description": "Add /agents to app sidebar navigation",
-    "steps": ["Add nav item to app-sidebar.tsx", "Match existing nav style"],
+    "steps": [
+      "Add nav item to app-sidebar.tsx",
+      "Match existing nav style"
+    ],
     "passes": true
   },
   {
@@ -1636,5 +1647,528 @@
       "Update title and description metadata for Casefor-ai branding"
     ],
     "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Add UserRole enum (applicant, lawyer, admin) to Prisma schema",
+    "steps": [
+      "Add UserRole enum to schema.prisma",
+      "Run prisma generate to verify syntax"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Add role field to User model in Prisma schema",
+    "steps": [
+      "Add role UserRole @default(applicant) to User model",
+      "Run prisma migrate dev"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Add CaseAssignment model to Prisma schema",
+    "steps": [
+      "Add CaseAssignment model (id, lawyerId, clientId, assignedAt)",
+      "Add relations to User and Client",
+      "Add @@unique([lawyerId, clientId])",
+      "Run prisma migrate dev"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create lib/auth.ts with NextAuth configuration",
+    "steps": [
+      "Create lib/auth.ts",
+      "Configure NextAuth with credentials or OAuth provider",
+      "Include session callback with user role",
+      "Export authOptions"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create app/api/auth/[...nextauth]/route.ts",
+    "steps": [
+      "Create route file",
+      "Import authOptions from lib/auth.ts",
+      "Export GET and POST handlers"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create middleware.ts for role-based route protection",
+    "steps": [
+      "Create middleware.ts at project root",
+      "Protect /onboarding routes for applicant role",
+      "Protect /lawyer routes for lawyer role",
+      "Redirect unauthenticated users to login"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Replace all MOCK_USER_ID references with session user ID",
+    "steps": [
+      "Search codebase for MOCK_USER_ID",
+      "Replace each with getServerSession().user.id",
+      "Remove MOCK_USER_ID constant"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add layout-level auth checks per role",
+    "steps": [
+      "Add session check to (dashboard)/layout.tsx",
+      "Add session check to onboarding/layout.tsx",
+      "Add session check to (lawyer)/layout.tsx",
+      "Redirect to login if no session"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Update onboarding-schema.ts with new fields (consent, immigration, circumstances, preferences)",
+    "steps": [
+      "Add consentToProcess boolean field",
+      "Add immigration section fields (currentStatus, desiredStatus, previousApplications)",
+      "Add circumstances fields (urgencyReason, specialCircumstances)",
+      "Add preferences fields (communicationPreference, timezone)",
+      "Export updated schemas"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Add new Client model fields for expanded onboarding + migrate",
+    "steps": [
+      "Add consentToProcess, currentImmigrationStatus, desiredStatus, previousApplications to Client",
+      "Add urgencyReason, specialCircumstances, communicationPreference, timezone",
+      "Run prisma migrate dev"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Update onboarding page.tsx step count from 6 to 10 screens",
+    "steps": [
+      "Update total step count constant",
+      "Update progress bar calculation",
+      "Update step labels array for 10 steps"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Update use-onboarding.ts step management + resume merge logic",
+    "steps": [
+      "Update step validation to handle 10 steps",
+      "Add resume data merge into form fields on parse",
+      "Update auto-save to cover new fields"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create step-welcome.tsx (onboarding welcome screen)",
+    "steps": [
+      "Create app/onboarding/_components/step-welcome.tsx",
+      "Show welcome message and process overview",
+      "Explain what data will be collected",
+      "Continue button to next step"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create step-basic-info.tsx (name, email, consent)",
+    "steps": [
+      "Create app/onboarding/_components/step-basic-info.tsx",
+      "Fields: firstName, lastName, email, phone",
+      "Consent checkbox for data processing",
+      "Pre-populate from draft"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create step-resume-upload.tsx (dropzone + processing indicator)",
+    "steps": [
+      "Create app/onboarding/_components/step-resume-upload.tsx",
+      "File dropzone for resume upload",
+      "Show processing/parsing indicator",
+      "Display parsed fields preview",
+      "Allow skip"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create step-background.tsx (citizenship, applicant type, criteria)",
+    "steps": [
+      "Create app/onboarding/_components/step-background.tsx",
+      "Fields: citizenship, applicantType, fieldOfExpertise",
+      "Education history (repeatable)",
+      "Current employer"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Refactor step-criteria -> step-evidence.tsx",
+    "steps": [
+      "Rename step-criteria.tsx to step-evidence.tsx",
+      "Update imports and references",
+      "Focus UI on evidence collection per criterion"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create step-immigration.tsx",
+    "steps": [
+      "Create app/onboarding/_components/step-immigration.tsx",
+      "Fields: currentImmigrationStatus, desiredStatus, previousApplications",
+      "US intent fields",
+      "Pre-populate from draft"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create step-circumstances.tsx",
+    "steps": [
+      "Create app/onboarding/_components/step-circumstances.tsx",
+      "Fields: urgencyReason, specialCircumstances",
+      "Timeline preferences",
+      "Pre-populate from draft"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create step-preferences.tsx",
+    "steps": [
+      "Create app/onboarding/_components/step-preferences.tsx",
+      "Fields: communicationPreference, timezone",
+      "Alternative category interest (EB1B, EB2-NIW)",
+      "Pre-populate from draft"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Update step-review.tsx for 9-section summary",
+    "steps": [
+      "Update review to show all 9 sections",
+      "Add section headers for each step",
+      "Show edit links per section",
+      "Update submit flow"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create lib/resume-parser.ts (Gemini flash, structured output)",
+    "steps": [
+      "Create lib/resume-parser.ts",
+      "Use generateObject with gemini-2.0-flash",
+      "Define output schema matching Client fields",
+      "Extract name, email, education, employer, field, achievements",
+      "Return parsed data with confidence scores"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create POST /api/onboarding/[clientId]/parse-resume endpoint",
+    "steps": [
+      "Create route file",
+      "Accept uploaded resume file",
+      "Call lib/resume-parser.ts",
+      "Return parsed fields with confidence"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add confidence display UI to onboarding fields after resume parse",
+    "steps": [
+      "Show confidence badge next to auto-filled fields",
+      "Color code: green >0.8, yellow >0.5, red <0.5",
+      "Allow user to override any field"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Wire resume upload to parse + pre-populate flow",
+    "steps": [
+      "On resume upload in step-resume-upload.tsx, call parse-resume API",
+      "Merge parsed data into onboarding form state",
+      "Show pre-populated fields in subsequent steps",
+      "Preserve any user-edited fields over parsed data"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create POST /api/onboarding/[clientId]/reset endpoint",
+    "steps": [
+      "Create route file",
+      "Delete all CriterionResponses for client",
+      "Delete all Documents from S3 and DB",
+      "Delete Pinecone vectors for client vault",
+      "Reset Client fields to defaults, currentStep=1"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add start over button + confirmation dialog to onboarding shell",
+    "steps": [
+      "Add 'Start Over' button to onboarding-shell.tsx",
+      "Show confirmation dialog warning data will be deleted",
+      "On confirm, call reset endpoint",
+      "Redirect to step 1"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Implement cascade delete in reset endpoint (CriterionResponse, Documents, S3, Pinecone)",
+    "steps": [
+      "Delete CriterionResponses by clientId",
+      "Fetch Documents by vaultId, delete each from S3",
+      "Delete Pinecone namespace for vault",
+      "Delete Document records from DB",
+      "Reset client fields"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Add 5 new document categories to lib/document-categories.ts",
+    "steps": [
+      "Add 'immigration-form' category",
+      "Add 'financial-record' category",
+      "Add 'personal-statement' category",
+      "Add 'business-plan' category",
+      "Add 'identity-document' category",
+      "Update DOCUMENT_CATEGORIES array"
+    ],
+    "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Update categorization prompt in lib/categorize-document.ts for new categories",
+    "steps": [
+      "Update generateObject schema enum with new categories",
+      "Update prompt to describe new category definitions",
+      "Test categorization with sample documents"
+    ],
+    "passes": true
+  },
+  {
+    "category": "backend",
+    "description": "Add role-based filtering to GET /api/vaults",
+    "steps": [
+      "Check user role from session",
+      "Applicant: return only their own vault",
+      "Lawyer: return vaults for assigned cases",
+      "Admin: return all vaults"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Auto-select applicant vault in assistant page, hide multi-vault UI",
+    "steps": [
+      "Check user role in assistant page",
+      "If applicant, auto-select their vault",
+      "Hide vault selection modal for applicants",
+      "Show vault name as static text instead"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Scope vault/[id] page access by role",
+    "steps": [
+      "In vault detail page, verify user has access",
+      "Applicant: only own vault",
+      "Lawyer: only assigned client vaults",
+      "Return 403 if unauthorized"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create app/(lawyer)/layout.tsx",
+    "steps": [
+      "Create layout with lawyer-specific sidebar",
+      "Include navigation: Dashboard, Cases",
+      "Add session check for lawyer role"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create lawyer dashboard page (case list with tabs)",
+    "steps": [
+      "Create app/(lawyer)/dashboard/page.tsx",
+      "Tabs: All Cases, My Cases, Unassigned",
+      "Fetch cases from GET /api/lawyer/cases",
+      "Show case cards in grid"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create GET /api/lawyer/cases endpoint",
+    "steps": [
+      "Create route file",
+      "Accept query params: tab (all/mine/unassigned), search, page",
+      "Return cases with client info, status, assignment",
+      "Paginate results"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create POST /api/lawyer/cases/[clientId]/assign endpoint",
+    "steps": [
+      "Create route file",
+      "Create CaseAssignment record",
+      "Set lawyerId from session",
+      "Return assignment record"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create lawyer case detail page with 3 tabs (vault, gap analysis, assistant)",
+    "steps": [
+      "Create app/(lawyer)/cases/[clientId]/page.tsx",
+      "Tab 1: Vault - reuse vault detail component scoped to client",
+      "Tab 2: Gap Analysis - show analysis results",
+      "Tab 3: Assistant - reuse assistant scoped to client vault"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create GET /api/lawyer/cases/[clientId]/gap-analysis endpoint",
+    "steps": [
+      "Create route file",
+      "Fetch latest gap analysis for client",
+      "Return analysis with per-criterion breakdown",
+      "Return 404 if no analysis exists"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create POST /api/lawyer/cases/[clientId]/gap-analysis/refresh endpoint",
+    "steps": [
+      "Create route file",
+      "Trigger new gap analysis run",
+      "Return 202 accepted",
+      "Non-blocking execution"
+    ],
+    "passes": false
+  },
+  {
+    "category": "backend",
+    "description": "Create lib/gap-analysis.ts (extends eb1a-evaluator)",
+    "steps": [
+      "Create lib/gap-analysis.ts",
+      "Reuse eb1a-evaluator patterns with gemini-2.5-flash",
+      "Focus on gaps: missing evidence, weak criteria, recommendations",
+      "Save results to GapAnalysis model or reuse EligibilityReport"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create gap analysis UI (per-criterion strength, docs, recommendations)",
+    "steps": [
+      "Create components/lawyer/gap-analysis-view.tsx",
+      "Per-criterion card: strength score, supporting docs, gaps",
+      "Recommendations section per criterion",
+      "Overall strength summary"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add case card component (name, date, verdict, criteria count, status)",
+    "steps": [
+      "Create components/lawyer/case-card.tsx",
+      "Show client name, submission date",
+      "Show verdict badge if evaluated",
+      "Show criteria count, case status"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add self-assign button with optimistic UI to case cards",
+    "steps": [
+      "Add Assign to Me button on unassigned case cards",
+      "Optimistic UI: immediately update card state",
+      "Call POST /api/lawyer/cases/[clientId]/assign",
+      "Revert on error"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Scope vault/assistant reuse to client context in lawyer view",
+    "steps": [
+      "Pass clientId to vault and assistant components",
+      "Filter vault data by client's vaultId",
+      "Scope assistant context to client vault",
+      "Ensure lawyer cannot access other client data"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Add loading/empty/error states to lawyer pages",
+    "steps": [
+      "Add loading skeletons to dashboard and case detail",
+      "Add empty state for no cases",
+      "Add error state with retry",
+      "Add empty state for no gap analysis"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create components/ui/file-dropzone.tsx (react-dropzone wrapper)",
+    "steps": [
+      "Create reusable file-dropzone component",
+      "Props: onDrop, accept, maxSize, multiple, disabled",
+      "Drag-and-drop visual states",
+      "File type and size validation",
+      "Show selected files list"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Replace existing dropzone usages with shared file-dropzone component",
+    "steps": [
+      "Replace dropzone in vault detail page",
+      "Replace dropzone in onboarding upload step",
+      "Replace dropzone in assistant file attachment",
+      "Verify all upload flows still work"
+    ],
+    "passes": false
   }
 ]

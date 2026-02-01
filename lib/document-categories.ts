@@ -26,6 +26,12 @@ export const DOCUMENT_CATEGORIES = [
   { slug: "financial", label: "Financial", description: "Financial statements, reports, and records" },
   { slug: "correspondence", label: "Correspondence", description: "Letters, emails, and formal communications" },
   { slug: "other", label: "Other", description: "Documents not fitting other categories" },
+  // Immigration & personal categories
+  { slug: "immigration-form", label: "Immigration Form", description: "USCIS forms, visa applications, and immigration petitions" },
+  { slug: "financial-record", label: "Financial Record", description: "Tax returns, pay stubs, bank statements, and financial evidence" },
+  { slug: "personal-statement", label: "Personal Statement", description: "Personal narratives, cover letters, and self-authored statements" },
+  { slug: "business-plan", label: "Business Plan", description: "Business plans, market analyses, and entrepreneurial proposals" },
+  { slug: "identity-document", label: "Identity Document", description: "Passports, birth certificates, IDs, and identity verification documents" },
 ] as const satisfies readonly DocumentCategory[]
 
 export type DocumentCategorySlug = (typeof DOCUMENT_CATEGORIES)[number]["slug"]
