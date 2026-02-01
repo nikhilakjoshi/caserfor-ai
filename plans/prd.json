@@ -2014,7 +2014,7 @@
       "Include navigation: Dashboard, Cases",
       "Add session check for lawyer role"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -2025,7 +2025,7 @@
       "Fetch cases from GET /api/lawyer/cases",
       "Show case cards in grid"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -2036,7 +2036,7 @@
       "Return cases with client info, status, assignment",
       "Paginate results"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -2047,7 +2047,7 @@
       "Set lawyerId from session",
       "Return assignment record"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -2113,7 +2113,7 @@
       "Show verdict badge if evaluated",
       "Show criteria count, case status"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -2124,7 +2124,7 @@
       "Call POST /api/lawyer/cases/[clientId]/assign",
       "Revert on error"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -2146,7 +2146,7 @@
       "Add error state with retry",
       "Add empty state for no gap analysis"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

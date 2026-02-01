@@ -1,5 +1,26 @@
 # Progress Log
 
+## 2026-02-01: Lawyer Dashboard (Layout, Cases API, Dashboard Page)
+
+### Completed
+- Created components/lawyer-sidebar.tsx with Dashboard + Cases nav items
+- Created app/(lawyer)/layout.tsx mirroring dashboard layout pattern with LawyerSidebar
+- Created GET /api/lawyer/cases with tab filtering (all/mine/unassigned), search, pagination
+- Created POST /api/lawyer/cases/[clientId]/assign for self-assignment
+- Created components/lawyer/case-card.tsx with verdict badge, status, criteria count, assign button
+- Created app/(lawyer)/dashboard/page.tsx with tabs, search, pagination, loading/empty/error states
+- Self-assign uses optimistic UI with revert on error
+- Installed shadcn tabs component
+
+### Notes for next dev
+- Lawyer layout uses same SidebarProvider/SidebarInset pattern as dashboard layout
+- /lawyer/* routes protected by middleware.ts (lawyer + admin roles only)
+- Cases API only returns non-draft clients (status != draft)
+- Dashboard fetches current user ID from /api/auth/session for assign button logic
+- Case detail page (/lawyer/cases/[clientId]) not yet created - just links from cards
+- Gap analysis endpoints and UI not yet built
+- Scoping vault/assistant reuse to client context in lawyer view not yet done
+
 ## 2026-02-01: Role-Based Vault Access Control
 
 ### Completed

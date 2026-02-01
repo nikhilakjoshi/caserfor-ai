@@ -119,3 +119,9 @@
 - Vault modal not fully hidden for applicants - still accessible for file browsing, just auto-selected
 - canAccessVault checks Vault->Client->userId path for applicants, Vault->Client->CaseAssignment for lawyers
 - Other vault sub-routes (presign, process, retry, doc PATCH) not yet protected - should add canAccessVault
+
+## Lawyer Dashboard
+- Session check for lawyer role handled by middleware.ts (not in layout) since layout is "use client"
+- Cases API filters out draft clients - lawyers only see submitted+ intakes
+- Dashboard fetches user ID from /api/auth/session endpoint client-side for assign button
+- Lawyer sidebar is separate component from AppSidebar (not a mode/prop toggle) for simplicity
