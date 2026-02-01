@@ -2058,7 +2058,7 @@
       "Tab 2: Gap Analysis - show analysis results",
       "Tab 3: Assistant - reuse assistant scoped to client vault"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -2069,7 +2069,7 @@
       "Return analysis with per-criterion breakdown",
       "Return 404 if no analysis exists"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -2080,7 +2080,7 @@
       "Return 202 accepted",
       "Non-blocking execution"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -2091,7 +2091,7 @@
       "Focus on gaps: missing evidence, weak criteria, recommendations",
       "Save results to GapAnalysis model or reuse EligibilityReport"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -2102,7 +2102,7 @@
       "Recommendations section per criterion",
       "Overall strength summary"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

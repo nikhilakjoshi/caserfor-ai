@@ -413,6 +413,7 @@ model Client {
   vault              Vault?              @relation(fields: [vaultId], references: [id])
   criterionResponses CriterionResponse[]
   eligibilityReport  EligibilityReport?
+  gapAnalyses        GapAnalysis[]
   caseAssignments    CaseAssignment[]
 
   @@index([userId])
@@ -449,4 +450,20 @@ model EligibilityReport {
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@map("eligibility_reports")
+}
+
+model GapAnalysis {
+  id              String   @id @default(cuid())
+  clientId        String
+  overallStrength String
+  summary         String   @db.Text
+  criteria        Json
+  priorityActions Json
+  rawOutput       String?  @db.Text
+  createdAt       DateTime @default(now())
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@map("gap_analyses")
 }

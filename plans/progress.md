@@ -1,5 +1,27 @@
 # Progress Log
 
+## 2026-02-01: Lawyer Case Detail Page + Gap Analysis
+
+### Completed
+- Created GET /api/lawyer/cases/[clientId] endpoint (single case fetch with auth)
+- Created lib/gap-analysis.ts using defaultModel (gemini-2.5-flash), reuses eb1a-evaluator tool patterns
+- Added GapAnalysis model to Prisma schema (clientId, overallStrength, summary, criteria Json, priorityActions Json)
+- Created GET /api/lawyer/cases/[clientId]/gap-analysis (fetch latest analysis)
+- Created POST /api/lawyer/cases/[clientId]/gap-analysis/refresh (non-blocking trigger, 202 response)
+- Created components/lawyer/gap-analysis-view.tsx (per-criterion cards with strength/evidence/gaps/recommendations)
+- Created app/(lawyer)/cases/[clientId]/page.tsx with 3 tabs: Vault, Gap Analysis, Assistant
+- Gap Analysis tab: run/re-analyze button, polls for results, full gap view
+- Vault tab: links to /vault/[id] for full vault detail
+- Assistant tab: links to /assistant scoped to client vault
+
+### Notes for next dev
+- Case detail page requires lawyer assignment (403 if not assigned, except admin)
+- Gap analysis stores multiple runs (not upsert) - GET returns latest by createdAt
+- Refresh endpoint fires gap analysis async, page polls every 5s until new result appears
+- Vault and Assistant tabs link out to existing pages rather than embedding - "Scope vault/assistant reuse to client context in lawyer view" PRD item still false
+- GapAnalysis model needs `prisma migrate` when DB available
+- Gap analysis uses defaultModel (flash) for speed, not analysisModel (pro)
+
 ## 2026-02-01: Lawyer Dashboard (Layout, Cases API, Dashboard Page)
 
 ### Completed

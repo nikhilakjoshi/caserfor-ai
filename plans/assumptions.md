@@ -125,3 +125,10 @@
 - Cases API filters out draft clients - lawyers only see submitted+ intakes
 - Dashboard fetches user ID from /api/auth/session endpoint client-side for assign button
 - Lawyer sidebar is separate component from AppSidebar (not a mode/prop toggle) for simplicity
+
+## Gap Analysis
+- GapAnalysis is a separate model (not reusing EligibilityReport) - stores multiple runs per client
+- Uses defaultModel (gemini-2.5-flash) not analysisModel for speed
+- Refresh endpoint runs async, client polls for results
+- Case detail page vault/assistant tabs link out to existing pages (not embedded) pending "scope to client context" work
+- Case detail requires CaseAssignment for lawyer access (admin bypasses)
