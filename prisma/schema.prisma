@@ -76,6 +76,7 @@ enum IntakeStatus {
   submitted
   under_review
   reviewed
+  paid
 }
 
 enum EligibilityVerdict {
@@ -369,6 +370,9 @@ model Client {
   currentStep              Int               @default(1)
   status                   IntakeStatus      @default(draft)
   vaultId                  String?           @unique
+  stripeSessionId          String?
+  stripeCustomerId         String?
+  paidAt                   DateTime?
   createdAt                DateTime          @default(now())
   updatedAt                DateTime          @updatedAt
 

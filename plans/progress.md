@@ -1993,3 +1993,37 @@
 
 ### Files modified
 - app/onboarding/_components/step-review.tsx - redirect to /evaluation/[clientId] instead of inline report
+
+## 2026-02-01: Stripe Payment Integration
+
+### Completed
+- Added 'paid' to IntakeStatus enum in schema.prisma
+- Added stripeSessionId, stripeCustomerId, paidAt fields to Client model
+- Ran prisma generate
+- Installed stripe npm package
+- Added STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ID, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, ENABLE_STRIPE to .env.example
+- Created POST /api/payments/checkout - dual mode (ENABLE_STRIPE=false bypasses Stripe, marks paid immediately)
+- Created POST /api/payments/webhook - verifies Stripe signature, handles checkout.session.completed
+- Created GET /api/payments/status/[clientId] - returns { paid, paidAt }
+- Created /payment/success page with confirmation + CTA to /assistant
+- Wired eval page: checks payment status on mount, redirects to /assistant if paid
+- Wired eval page: handlePayment now POSTs to /api/payments/checkout and redirects to returned URL
+- Updated 10 PRD items to passes:true
+
+### Notes for next dev
+- ENABLE_STRIPE=false (default) skips Stripe entirely - marks client as paid and redirects to success page
+- Webhook route reads raw body via req.text() for Stripe signature verification
+- Checkout route derives base URL from request Host header
+- Migration not run (no DB instance) - run prisma migrate dev when DB available
+- Remaining false PRD items: 2 functional test items (auto mode routing) - require live AI key to verify
+
+### Files created
+- app/api/payments/checkout/route.ts
+- app/api/payments/webhook/route.ts
+- app/api/payments/status/[clientId]/route.ts
+- app/payment/success/page.tsx
+
+### Files modified
+- prisma/schema.prisma - added paid enum value + 3 stripe fields
+- .env.example - added 5 stripe env vars
+- app/evaluation/[clientId]/page.tsx - payment status check + POST checkout

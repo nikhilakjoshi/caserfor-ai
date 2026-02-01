@@ -84,9 +84,38 @@ export default function EvaluationPage() {
     setPolling(true)
   }
 
-  function handlePayment() {
-    // Payment flow - will be wired to POST /api/payments/checkout
-    router.push(`/api/payments/checkout?clientId=${clientId}`)
+  // Check payment status on mount - redirect if already paid
+  useEffect(() => {
+    async function checkPayment() {
+      try {
+        const res = await fetch(`/api/payments/status/${clientId}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data.paid) {
+            router.push("/assistant")
+          }
+        }
+      } catch {
+        // Ignore - non-critical check
+      }
+    }
+    checkPayment()
+  }, [clientId, router])
+
+  async function handlePayment() {
+    try {
+      const res = await fetch("/api/payments/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientId }),
+      })
+      const data = await res.json()
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl
+      }
+    } catch {
+      setError("Failed to initiate payment")
+    }
   }
 
   if (loading) {

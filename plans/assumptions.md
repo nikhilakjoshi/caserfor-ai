@@ -79,3 +79,10 @@
 - `stepCountIs` imported from `ai` package
 - Default stopWhen is stepCountIs(1) - must set explicitly for multi-step tool use
 - generateText with tools + stopWhen is equivalent to ToolLoopAgent for non-streaming use cases
+
+## Stripe Payment
+- ENABLE_STRIPE env var controls whether real Stripe is used (default "false" = bypass)
+- Checkout route returns { redirectUrl } - client-side handles redirect via window.location.href
+- Base URL derived from request Host header (localhost = http, otherwise https)
+- Webhook uses req.text() for raw body (Stripe signature verification needs raw string, not parsed JSON)
+- Migration not run as part of implementation - dev runs prisma migrate when DB available

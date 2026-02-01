@@ -1481,7 +1481,7 @@
       "Add 'paid' value to IntakeStatus enum",
       "Run prisma generate to verify syntax"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data",
@@ -1491,7 +1491,7 @@
       "Add stripeCustomerId String? to Client model",
       "Add paidAt DateTime? to Client model"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data",
@@ -1501,7 +1501,7 @@
       "Verify migration succeeds",
       "Run npx prisma generate"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1535,7 +1535,7 @@
       "Run npm install stripe",
       "Verify package in package.json"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1543,7 +1543,7 @@
     "steps": [
       "Add STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ID, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, ENABLE_STRIPE to .env.example"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1555,7 +1555,7 @@
       "If ENABLE_STRIPE=true: create Stripe Checkout session with STRIPE_PRICE_ID, return session URL",
       "Include success_url and cancel_url"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1567,7 +1567,7 @@
       "Update Client: stripeSessionId, stripeCustomerId, paidAt, status=paid",
       "Return 200"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "backend",
@@ -1577,7 +1577,7 @@
       "Fetch Client by clientId",
       "Return { paid: boolean, paidAt } based on Client.paidAt presence"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1588,7 +1588,7 @@
       "Show confirmation message, checkmark/success visual",
       "CTA button linking to /assistant"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -1626,7 +1626,7 @@
       "In eval page, check GET /api/payments/status/[clientId] on mount",
       "If already paid, redirect to /assistant"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
