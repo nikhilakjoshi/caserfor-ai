@@ -38,6 +38,7 @@ export default function EvaluationPage() {
   const [polling, setPolling] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [pollCount, setPollCount] = useState(0)
 
   const paymentParam = searchParams.get("payment")
 
@@ -55,12 +56,16 @@ export default function EvaluationPage() {
       }
       const body = await res.json()
       setClientStatus(body.status)
+      setPollCount(prev => prev + 1)
 
       if (body.report) {
         setReport(body.report)
         setPolling(false)
       } else if (body.status === "reviewed" || body.status === "paid") {
-        // Report should exist but didn't come back - stop polling
+        setPolling(false)
+      } else if (body.status === "draft" || (body.status === "submitted" && pollCount > 5)) {
+        // Evaluation likely failed and reset status
+        setError("Evaluation failed. Please try resubmitting or contact support.")
         setPolling(false)
       }
       setLoading(false)
@@ -69,7 +74,7 @@ export default function EvaluationPage() {
       setPolling(false)
       setLoading(false)
     }
-  }, [clientId])
+  }, [clientId, pollCount])
 
   useEffect(() => {
     if (!polling) return
@@ -78,9 +83,16 @@ export default function EvaluationPage() {
     return () => clearInterval(interval)
   }, [polling, fetchReport])
 
-  function handleRetry() {
+  async function handleRetry() {
     setError(null)
     setLoading(true)
+    setPollCount(0)
+    // Re-trigger evaluation
+    try {
+      await fetch(`/api/onboarding/${clientId}/evaluate`, { method: "POST" })
+    } catch {
+      // Will be picked up by polling
+    }
     setPolling(true)
   }
 

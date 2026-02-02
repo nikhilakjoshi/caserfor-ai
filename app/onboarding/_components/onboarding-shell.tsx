@@ -17,7 +17,7 @@ import { ChevronLeft, ChevronRight, Loader2, Check, AlertCircle, RotateCcw } fro
 const STEP_LABELS = [
   "Welcome",
   "Basic Info",
-  "Resume",
+  "Documents",
   "Background",
   "Evidence",
   "Achievement",

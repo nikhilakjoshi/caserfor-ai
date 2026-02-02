@@ -1,5 +1,8 @@
-import { auth } from "@/lib/auth"
+import NextAuth from "next-auth"
+import { authConfig } from "@/lib/auth.config"
 import { NextResponse } from "next/server"
+
+const { auth } = NextAuth(authConfig)
 
 export default auth((req) => {
   const { pathname } = req.nextUrl
@@ -9,6 +12,7 @@ export default auth((req) => {
   if (
     pathname === "/" ||
     pathname === "/login" ||
+    pathname === "/register" ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/payments/webhook") ||
     pathname.startsWith("/_next") ||

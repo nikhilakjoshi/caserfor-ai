@@ -51,6 +51,13 @@ export interface CriterionResponseData {
 
 export type ResumeConfidence = Record<string, number>
 
+export interface Attachment {
+  id: string
+  name: string
+  fileType: string
+  createdAt: string
+}
+
 export function useOnboarding() {
   const router = useRouter()
   const [clientData, setClientData] = useState<ClientData | null>(null)
@@ -58,9 +65,17 @@ export function useOnboarding() {
   const [error, setError] = useState<string | null>(null)
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [resumeConfidence, setResumeConfidence] = useState<ResumeConfidence>({})
+  const [attachments, setAttachments] = useState<Attachment[]>([])
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingUpdatesRef = useRef<Record<string, unknown>>({})
+
+  const addAttachment = useCallback((att: Attachment) => {
+    setAttachments(prev => {
+      if (prev.some(a => a.id === att.id)) return prev
+      return [...prev, att]
+    })
+  }, [])
 
   // Load draft on mount
   useEffect(() => {
@@ -70,6 +85,20 @@ export function useOnboarding() {
         if (!res.ok) throw new Error("Failed to load draft")
         const data = await res.json()
         setClientData(data)
+
+        // Load existing vault documents as attachments
+        if (data.vaultId) {
+          const docsRes = await fetch(`/api/vaults/${data.vaultId}/documents`)
+          if (docsRes.ok) {
+            const docs = await docsRes.json()
+            setAttachments(docs.map((d: { id: string; name: string; fileType: string; createdAt: string }) => ({
+              id: d.id,
+              name: d.name,
+              fileType: d.fileType,
+              createdAt: d.createdAt,
+            })))
+          }
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load")
       } finally {
@@ -160,5 +189,7 @@ export function useOnboarding() {
     flushAndSave,
     saveDraft,
     resumeConfidence,
+    attachments,
+    addAttachment,
   }
 }

@@ -13,6 +13,7 @@ import { StepImmigration } from "@/app/onboarding/_components/step-immigration"
 import { StepCircumstances } from "@/app/onboarding/_components/step-circumstances"
 import { StepPreferences } from "@/app/onboarding/_components/step-preferences"
 import { StepReview } from "@/app/onboarding/_components/step-review"
+import { StepDropzone } from "@/app/onboarding/_components/step-dropzone"
 import { Loader2 } from "lucide-react"
 
 export default function StepPage() {
@@ -30,6 +31,8 @@ export default function StepPage() {
     flushAndSave,
     saveDraft,
     resumeConfidence,
+    attachments,
+    addAttachment,
   } = useOnboarding()
 
   if (isNaN(step) || step < 1 || step > 10) {
@@ -59,6 +62,8 @@ export default function StepPage() {
     )
   }
 
+  const showDropzone = step >= 2 && step <= 9 && step !== 3
+
   function renderStep() {
     if (!clientData) return null
     switch (step) {
@@ -67,7 +72,14 @@ export default function StepPage() {
       case 2:
         return <StepBasicInfo data={clientData} onUpdate={updateFields} resumeConfidence={resumeConfidence} />
       case 3:
-        return <StepResumeUpload clientId={clientData.id} onUpdate={updateFields} />
+        return (
+          <StepResumeUpload
+            clientId={clientData.id}
+            onUpdate={updateFields}
+            onAttachmentAdded={addAttachment}
+            attachments={attachments}
+          />
+        )
       case 4:
         return <StepBackground data={clientData} onUpdate={updateFields} resumeConfidence={resumeConfidence} />
       case 5:
@@ -110,6 +122,14 @@ export default function StepPage() {
       onStartOver={handleStartOver}
     >
       {renderStep()}
+      {showDropzone && (
+        <StepDropzone
+          clientId={clientData.id}
+          onUpdate={updateFields}
+          onAttachmentAdded={addAttachment}
+          attachments={attachments}
+        />
+      )}
     </OnboardingShell>
   )
 }

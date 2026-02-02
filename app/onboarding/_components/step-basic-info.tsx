@@ -15,7 +15,7 @@ interface Props {
 }
 
 export function StepBasicInfo({ data, onUpdate, resumeConfidence = {} }: Props) {
-  const { register, watch, formState: { errors } } = useForm<Step2Data>({
+  const { register, watch, setValue, formState: { errors } } = useForm<Step2Data>({
     resolver: zodResolver(step2Schema),
     defaultValues: {
       firstName: data.firstName || "",
@@ -33,6 +33,7 @@ export function StepBasicInfo({ data, onUpdate, resumeConfidence = {} }: Props) 
   }
 
   function handleConsent(checked: boolean) {
+    setValue("consentToProcess", checked)
     onUpdate({ consentToProcess: checked })
   }
 

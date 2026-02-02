@@ -13,7 +13,7 @@ interface Props {
 }
 
 export function StepAchievement({ data, onUpdate }: Props) {
-  const { register, watch } = useForm<Step6Data>({
+  const { register, watch, setValue } = useForm<Step6Data>({
     resolver: zodResolver(step6Schema),
     defaultValues: {
       hasMajorAchievement: data.hasMajorAchievement ?? false,
@@ -29,6 +29,7 @@ export function StepAchievement({ data, onUpdate }: Props) {
 
   function toggleMajor() {
     const next = !hasMajor
+    setValue("hasMajorAchievement", next)
     onUpdate({ hasMajorAchievement: next })
   }
 

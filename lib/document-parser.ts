@@ -1,4 +1,5 @@
-import { PDFParse } from "pdf-parse"
+// @ts-expect-error -- pdf-parse v1 lacks types for direct import, bypasses test file loading
+import pdf from "pdf-parse/lib/pdf-parse.js"
 import mammoth from "mammoth"
 
 export async function extractText(
@@ -8,9 +9,7 @@ export async function extractText(
   const type = fileType.toLowerCase()
 
   if (type === "pdf" || type === "application/pdf") {
-    const parser = new PDFParse({ data: new Uint8Array(buffer) })
-    const result = await parser.getText()
-    await parser.destroy()
+    const result = await pdf(buffer)
     return result.text
   }
 

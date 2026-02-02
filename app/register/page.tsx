@@ -2,15 +2,13 @@
 
 import { useState } from "react"
 import { signIn } from "next-auth/react"
-import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Scale } from "lucide-react"
 import Link from "next/link"
 
-export default function LoginPage() {
-  const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") || "/assistant"
+export default function RegisterPage() {
+  const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -21,6 +19,19 @@ export default function LoginPage() {
     setError("")
     setLoading(true)
 
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
+    })
+
+    if (!res.ok) {
+      const data = await res.json()
+      setError(data.error || "Registration failed")
+      setLoading(false)
+      return
+    }
+
     const result = await signIn("credentials", {
       email,
       password,
@@ -28,10 +39,10 @@ export default function LoginPage() {
     })
 
     if (result?.error) {
-      setError("Invalid email or password")
+      setError("Account created but sign-in failed. Please log in manually.")
       setLoading(false)
     } else {
-      window.location.href = callbackUrl
+      window.location.href = "/onboarding"
     }
   }
 
@@ -40,10 +51,23 @@ export default function LoginPage() {
       <div className="w-full max-w-sm space-y-6 p-8">
         <div className="flex flex-col items-center gap-2">
           <Scale className="h-8 w-8" />
-          <h1 className="text-xl font-semibold">Sign in to Casefor.ai</h1>
+          <h1 className="text-xl font-semibold">Create an account</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label htmlFor="name" className="text-sm font-medium">
+              Full name
+            </label>
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Jane Doe"
+              required
+            />
+          </div>
+
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
               Email
@@ -67,7 +91,9 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="Min. 8 characters"
               required
+              minLength={8}
             />
           </div>
 
@@ -76,14 +102,14 @@ export default function LoginPage() {
           )}
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Signing in..." : "Sign in"}
+            {loading ? "Creating account..." : "Create account"}
           </Button>
         </form>
 
         <p className="text-center text-sm text-gray-600">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-medium text-gray-900 hover:underline">
-            Create one
+          Already have an account?{" "}
+          <Link href="/login" className="font-medium text-gray-900 hover:underline">
+            Sign in
           </Link>
         </p>
       </div>
