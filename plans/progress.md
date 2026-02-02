@@ -1,5 +1,20 @@
 # Progress Log
 
+## 2026-02-02: Exhibit list drafting agent
+
+### Completed
+- Created `lib/drafting-agents/exhibit-list.ts` following established two-phase pattern (research loop + structured output)
+- Uses `defaultModel` (gemini-2.5-flash), stepCountIs(20) for research (heavier than cover letter since it needs to catalog all vault docs)
+- System prompt specialized for numbered exhibit list organized by EB-1A criterion
+- Research phase uses multiple vault search queries to find all uploaded documents
+- Registered in generate route agentMap (`exhibit_list` key)
+- markdownToTiptapParagraphs still duplicated (now 5 files) - extraction to shared util deferred
+
+### Notes for next dev
+- TOC agent and RFE response agent are next functional items
+- TOC agent should use `get_existing_drafts` heavily since it references all other drafts
+- 5 agents now duplicate markdownToTiptapParagraphs - strongly consider extracting to shared util before adding more
+
 ## 2026-02-02: Cover letter drafting agent
 
 ### Completed

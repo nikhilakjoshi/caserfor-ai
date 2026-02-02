@@ -177,3 +177,8 @@
 - Uses stepCountIs(15) like personal-statement - cover letter is a summary doc, less research needed than petition letter
 - markdownToTiptapParagraphs duplicated (now in 4 files) - acceptable until extracted to shared util
 - PRD says "System prompt for petition package cover letter" - implemented with full legal correspondence structure including INA/CFR citations
+
+## Exhibit List Drafting Agent
+- Uses stepCountIs(20) - more research than cover letter (15) since it needs to exhaustively catalog all vault documents
+- PRD says "Should reference vault documents" - research phase uses multiple targeted vault searches (evidence, awards, publications, etc.)
+- markdownToTiptapParagraphs duplicated (now in 5 files) - should extract before next agent
