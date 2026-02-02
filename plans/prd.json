@@ -1,2174 +1,539 @@
 [
   {
-    "category": "backend",
-    "description": "Replace mockVaults in assistant page with GET /api/vaults call",
-    "steps": [
-      "Open app/(dashboard)/assistant/page.tsx",
-      "Remove mockVaults array",
-      "Fetch vaults from GET /api/vaults on modal open",
-      "Map API response to vault list UI"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Replace mockVaultsWithFiles with GET /api/vaults/[id]/documents call",
-    "steps": [
-      "Open app/(dashboard)/assistant/page.tsx",
-      "Remove mockVaultsWithFiles array",
-      "Fetch documents from GET /api/vaults/[id]/documents on vault click",
-      "Map API response to file list UI"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add loading and error states to vault selection modal",
-    "steps": [
-      "Show spinner while fetching vaults",
-      "Show spinner while fetching vault documents",
-      "Display error message on fetch failure",
-      "Allow retry on error"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Resize vault selection modal to 90vw x 90vh",
-    "steps": [
-      "Update modal container dimensions to 90vw x 90vh",
-      "Center modal on screen",
-      "Verify modal is responsive"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Update vault selection modal grid to 3 columns with two-state view",
-    "steps": [
-      "Create vault list state with 3-column grid of vault cards",
-      "Each card shows name, type badge, file count, description",
-      "Create vault detail state with file table and checkboxes",
-      "Add back navigation from detail to list",
-      "Add selected files summary bar with Add to Chat CTA",
-      "Add smooth transitions between states"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add search/filter in vault selection modal (both states)",
-    "steps": [
-      "Add search input to vault list view",
-      "Filter vault cards by name/description on input",
-      "Add search input to vault detail file table",
-      "Filter files by name on input"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Replace mock data in /vault page with GET /api/vaults",
-    "steps": [
-      "Open app/(dashboard)/vault/page.tsx",
-      "Remove mock vault data",
-      "Fetch from GET /api/vaults",
-      "Render vault list from API response"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Replace mock data in /vault/[id] page with GET /api/vaults/[id]/documents",
-    "steps": [
-      "Open app/(dashboard)/vault/[id]/page.tsx",
-      "Remove mock document data",
-      "Fetch from GET /api/vaults/[id]/documents",
-      "Render document list from API response"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add loading, empty, and error states to vault pages",
-    "steps": [
-      "Add loading skeleton to /vault page",
-      "Add loading skeleton to /vault/[id] page",
-      "Add empty state when no vaults/documents exist",
-      "Add error state with retry on fetch failure"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Install AWS SDK v3 packages",
-    "steps": [
-      "Run npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner",
-      "Verify packages in package.json"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create lib/s3.ts with S3 client singleton and helpers",
-    "steps": [
-      "Create lib/s3.ts",
-      "Initialize S3Client singleton with env vars",
-      "Export uploadFile helper (key format: vaults/{vaultId}/{uuid}.{ext})",
-      "Export getPresignedUrl helper",
-      "Export deleteFile helper"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Add AWS env vars to .env.example",
-    "steps": [
-      "Add AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AWS_S3_BUCKET to .env.example"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Update upload API to store files in S3 instead of base64",
-    "steps": [
-      "Modify document upload API endpoint",
-      "Upload file buffer to S3 via lib/s3.ts",
-      "Store S3 key in Document.storageKey",
-      "Remove base64 storage from metadata",
-      "Return document record with storageKey"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Add server-side 25MB file size validation to upload API",
-    "steps": [
-      "Check request body/file size in upload endpoint",
-      "Return 413 if file exceeds 25MB",
-      "Include descriptive error message"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add client-side 25MB file size validation on assistant page",
-    "steps": [
-      "Check file size before upload in assistant page file input",
-      "Show error toast/message if file exceeds 25MB",
-      "Prevent upload from proceeding"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add client-side 25MB file size validation on vault detail page",
-    "steps": [
-      "Check file size before upload in vault detail page file input",
-      "Show error toast/message if file exceeds 25MB",
-      "Prevent upload from proceeding"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create presigned URL endpoint for S3 download/preview",
-    "steps": [
-      "Create app/api/vaults/[id]/documents/[docId]/presign/route.ts",
-      "Accept GET request with document ID",
-      "Look up Document.storageKey from DB",
-      "Generate presigned URL via lib/s3.ts",
-      "Return presigned URL in response"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Install embedding pipeline dependencies",
-    "steps": [
-      "Run npm install @pinecone-database/pinecone pdf-parse mammoth",
-      "Verify packages in package.json"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create lib/pinecone.ts with Pinecone client and helpers",
-    "steps": [
-      "Create lib/pinecone.ts",
-      "Initialize Pinecone client singleton with PINECONE_API_KEY",
-      "Export upsertVectors helper (batch 100 per upsert)",
-      "Export queryVectors helper with namespace and filter support",
-      "Export deleteVectors helper",
-      "Use namespace format: vault-{vaultId}"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Add Pinecone env vars to .env.example",
-    "steps": [
-      "Add PINECONE_API_KEY and PINECONE_INDEX to .env.example"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create lib/document-parser.ts for text extraction",
-    "steps": [
-      "Create lib/document-parser.ts",
-      "Export extractText function",
-      "Handle PDF via pdf-parse",
-      "Handle DOCX via mammoth",
-      "Handle TXT via direct read",
-      "Return extracted text string"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create lib/chunker.ts for text chunking with overlap",
-    "steps": [
-      "Create lib/chunker.ts",
-      "Export chunkText function",
-      "Split text into ~1000 token chunks with 200 token overlap",
-      "Return array of { text, chunkIndex } objects"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create lib/embeddings.ts and add embeddingModel to lib/ai.ts",
-    "steps": [
-      "Add embeddingModel export to lib/ai.ts using google.textEmbeddingModel('text-embedding-004')",
-      "Create lib/embeddings.ts",
-      "Export embedChunks function using AI SDK embedMany()",
-      "Return array of vectors (768 dims)"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Add chunkCount and embeddedAt fields to Document schema + migrate",
-    "steps": [
-      "Add chunkCount Int? to Document model in schema.prisma",
-      "Add embeddedAt DateTime? to Document model in schema.prisma",
-      "Run prisma migrate to apply changes",
-      "Verify migration succeeds"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create embed API endpoint triggered after upload",
-    "steps": [
-      "Create app/api/vaults/[id]/documents/process/route.ts",
-      "Accept POST with documentId",
-      "Set embeddingStatus to PROCESSING",
-      "Download file from S3, extract text via document-parser",
-      "Chunk text via chunker.ts",
-      "Embed chunks via embeddings.ts",
-      "Upsert vectors to Pinecone with metadata (documentId, chunkIndex, text, documentName, documentType)",
-      "Update Document: embeddingStatus=COMPLETED, chunkCount, embeddedAt",
-      "On error: set embeddingStatus=FAILED",
-      "Trigger non-blocking from upload endpoint"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Define EB1A categories constant with all 18 categories",
-    "steps": [
-      "Create lib/document-categories.ts",
-      "Define DOCUMENT_CATEGORIES array with 10 EB1A + 8 general categories",
-      "Include slug, label, and description for each",
-      "Export as const"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create AI categorization endpoint using generateObject()",
-    "steps": [
-      "Create categorize function or endpoint",
-      "Use Vercel AI SDK generateObject() with structured output",
-      "Input: first ~3000 tokens of document text + filename",
-      "Output schema: { category: enum, confidence: number, reasoning: string }",
-      "Return categorization result"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Trigger AI categorization after document upload (non-blocking)",
-    "steps": [
-      "Call categorization from process endpoint alongside embedding",
-      "Store category in Document.documentType",
-      "Store confidence + reasoning in Document.metadata",
-      "Preserve original AI category in metadata.aiCategory on override"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create PATCH endpoint for document updates (category override)",
-    "steps": [
-      "Create app/api/vaults/[id]/documents/[docId]/route.ts",
-      "Accept PATCH with updated fields (documentType, etc.)",
-      "Preserve original AI category in metadata.aiCategory",
-      "Update Document record",
-      "Return updated document"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add category override UI and category select in create vault modal",
-    "steps": [
-      "Add category dropdown to document row in vault detail page",
-      "Populate dropdown from DOCUMENT_CATEGORIES constant",
-      "On change, PATCH /api/vaults/[id]/documents/[docId]",
-      "Show current category badge on each document row",
-      "Add category select option in create vault modal if applicable"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create lib/rag.ts query helper for RAG retrieval",
-    "steps": [
-      "Create lib/rag.ts",
-      "Export queryRelevantChunks function",
-      "Embed user query via embeddings.ts",
-      "Query Pinecone filtered by document IDs",
-      "Return top-K chunks (K=10) with metadata"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Inject RAG context into /api/assistant/query endpoint",
-    "steps": [
-      "Modify /api/assistant/query to accept attachedFiles with source type",
-      "For vault files: call lib/rag.ts to get relevant chunks",
-      "For uploaded files: extract text inline, chunk as ephemeral context",
-      "Inject retrieved chunks into system prompt"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Add citation instruction to system prompt for RAG responses",
-    "steps": [
-      "Append citation format instructions to system prompt when RAG context present",
-      "Instruct AI to use [docName, p.X] citation format",
-      "Each citation must reference document ID + chunk index"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Return source document references in query response",
-    "steps": [
-      "Include source documents array in API response",
-      "Each source: documentId, documentName, chunkIndex, text snippet",
-      "Store references in SourceReference table"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Parse and display citations in chat UI as clickable links",
-    "steps": [
-      "Parse [docName, p.X] citations from AI response text",
-      "Render citations as clickable badges/links",
-      "On click, open document viewer at cited location",
-      "Style citations distinctly from regular text"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Install react-pdf for document preview",
-    "steps": [
-      "Run npm install react-pdf",
-      "Verify package in package.json",
-      "Configure Next.js for react-pdf if needed (webpack config for pdf.worker)"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create DocumentViewer component for PDF and text preview",
-    "steps": [
-      "Create components/vault/document-viewer.tsx",
-      "Render PDFs via react-pdf with page navigation",
-      "Render DOCX/TXT as formatted text",
-      "Add zoom controls and download button",
-      "Support jumping to specific page via props",
-      "Support text highlight/scroll for citation navigation"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add document preview to vault detail page",
-    "steps": [
-      "Add click handler on document rows in vault detail page",
-      "Open DocumentViewer in side panel or modal on click",
-      "Pass presigned URL to viewer",
-      "Close viewer on dismiss"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Make chat citation badges open DocumentViewer at cited location",
-    "steps": [
-      "On citation click in chat, fetch presigned URL for document",
-      "Open DocumentViewer with target page/passage",
-      "Highlight cited text passage in viewer"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create status polling API for document processing status",
-    "steps": [
-      "Ensure GET /api/vaults/[id]/documents returns embeddingStatus per document",
-      "Include status field: PENDING, PROCESSING, COMPLETED, FAILED",
-      "Optionally create per-document status endpoint"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add status polling in vault detail page for processing documents",
-    "steps": [
-      "Poll GET /api/vaults/[id]/documents every 3-5 seconds",
-      "Only poll while any document is PENDING or PROCESSING",
-      "Stop polling when all documents COMPLETED or FAILED",
-      "Update document list on each poll response"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Style processing status badges on document rows",
-    "steps": [
-      "Show PENDING badge (neutral/gray)",
-      "Show PROCESSING badge (blue/animated)",
-      "Show COMPLETED badge (green)",
-      "Show FAILED badge (red)"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create retry endpoint and retry button for failed documents",
-    "steps": [
-      "Create POST /api/vaults/[id]/documents/[docId]/retry endpoint",
-      "Reset embeddingStatus to PENDING",
-      "Re-trigger processing pipeline",
-      "Add retry button on FAILED document rows in UI",
-      "On click, call retry endpoint and resume polling"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Add Agent model to Prisma schema",
-    "steps": [
-      "Add Agent model (id, userId, name, slug, description, instruction, createdAt, updatedAt)",
-      "Add unique constraint on (userId, slug)",
-      "Run prisma migrate"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create POST /api/agents (create agent)",
-    "steps": [
-      "Accept name/description/instruction",
-      "Auto-generate slug from name (lowercase, hyphens)",
-      "Validate slug uniqueness per user",
-      "Validate non-empty fields",
-      "Save to DB, return agent"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create GET /api/agents (list agents)",
-    "steps": [
-      "Filter by userId",
-      "Order by updatedAt desc",
-      "Return agent array"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create GET /api/agents/[id] (get agent)",
-    "steps": [
-      "Fetch by id + userId",
-      "Return 404 if not found"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create PUT /api/agents/[id] (update agent)",
-    "steps": [
-      "Validate fields",
-      "Re-generate slug if name changed",
-      "Check slug uniqueness excluding self",
-      "Update record"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create DELETE /api/agents/[id] (delete agent)",
-    "steps": [
-      "Delete by id + userId",
-      "Return 204"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create POST /api/agents/test (test console backend)",
-    "steps": [
-      "Accept instruction + messages array",
-      "Use instruction as system prompt",
-      "Stream LLM response via Vercel AI SDK",
-      "No DB persistence"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create /agents route with agent list page",
-    "steps": [
-      "Card layout showing name/description/updatedAt",
-      "Create New Agent button",
-      "Edit and delete actions",
-      "Loading/empty/error states"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add /agents to app sidebar navigation",
-    "steps": [
-      "Add nav item to app-sidebar.tsx",
-      "Match existing nav style"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create /agents/new route with creation form",
-    "steps": [
-      "Name input (free-form)",
-      "Description textarea",
-      "Instruction textarea (multiline)",
-      "Inline validation",
-      "Save button disabled until valid",
-      "Success toast, redirect to list"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create /agents/[id]/edit route with edit form",
-    "steps": [
-      "Pre-populate from GET /api/agents/[id]",
-      "Same validation as create",
-      "Save via PUT",
-      "Unsaved changes warning on navigate away"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add delete confirmation dialog",
-    "steps": [
-      "Confirm dialog before DELETE",
-      "Remove from list on success",
-      "Error toast on failure"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Build agent test console component",
-    "steps": [
-      "Chat-style interface with input + message list",
-      "Send to POST /api/agents/test with current instruction + full message history",
-      "Stream response",
-      "Multi-turn conversation support"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Integrate test console into create/edit pages",
-    "steps": [
-      "Side-by-side layout (config left, console right)",
-      "Console activates when all fields filled",
-      "Reset conversation when instruction changes"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Style agent pages per global design",
-    "steps": [
-      "0 shadows",
-      "0-4px border radius",
-      "bg-gray-50 cards/panels",
-      "White text fields",
-      "Minimal buttons"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Add 'agent' to SourceType enum in Prisma schema",
-    "steps": [
-      "Open prisma/schema.prisma",
-      "Add 'agent' value to SourceType enum after 'document'",
-      "Run npx prisma migrate dev --name add-agent-source-type",
-      "Run npx prisma generate"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create lib/agent-tools.ts with agent-to-tool converter",
-    "steps": [
-      "Create lib/agent-tools.ts",
-      "Import tool, ToolLoopAgent, z from 'ai'",
-      "Import defaultModel, analysisModel from '@/lib/ai'",
-      "Import Agent type from '@prisma/client'",
-      "Export createAgentTool(agent: Agent, useAnalysisModel: boolean) function",
-      "Tool description: '{agent.name}: {agent.description}'",
-      "Tool parameters: z.object({ query: z.string(), context: z.string().optional() })",
-      "Tool execute: create sub-ToolLoopAgent with agent.instruction, empty tools, generate response",
-      "Export buildAgentTools(agents: Agent[], deepAnalysis: boolean) returning Record<string, Tool>",
-      "Use agent slug as tool name: `agent_${agent.slug}`"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Update /api/assistant/query to accept agentIds parameter",
-    "steps": [
-      "Open app/api/assistant/query/route.ts",
-      "Add agentIds to destructured request body: const { ..., agentIds } = await req.json()",
-      "Type agentIds as string[] | undefined"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Fetch selected agents from database in query route",
-    "steps": [
-      "In app/api/assistant/query/route.ts",
-      "Import Agent from '@prisma/client'",
-      "After request parsing, check if agentIds?.length > 0",
-      "Query prisma.agent.findMany({ where: { id: { in: agentIds }, userId: MOCK_USER_ID } })",
-      "Store result in selectedAgents variable"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Build agent tools and update system prompt with agent availability",
-    "steps": [
-      "Import buildAgentTools from '@/lib/agent-tools'",
-      "Call buildAgentTools(selectedAgents, deepAnalysis) to get agentTools object",
-      "If selectedAgents.length > 0, append to systemPrompt:",
-      "Add text: 'You have access to these specialized agents:\\n' + agent names/descriptions",
-      "Add instruction: 'Call the appropriate agent tool when their expertise is relevant'"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Replace streamText with ToolLoopAgent in query route",
-    "steps": [
-      "Import ToolLoopAgent, createAgentUIStreamResponse, UIMessage from 'ai'",
-      "Remove existing streamText() call",
-      "Create ToolLoopAgent instance with: model, instructions: systemPrompt, tools: agentTools",
-      "Build uiMessages array from userPrompt (single user message with id)",
-      "Return createAgentUIStreamResponse({ agent, uiMessages })"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Preserve onFinish callback logic with ToolLoopAgent",
-    "steps": [
-      "Pass onFinish callback to createAgentUIStreamResponse",
-      "Migrate existing onFinish logic (query update, source references, history entry)",
-      "Add agent tool call tracking to SourceReference table with sourceType: 'agent'"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Install shadcn command and popover components",
-    "steps": [
-      "Run: npx shadcn@latest add command",
-      "Run: npx shadcn@latest add popover",
-      "Verify components/ui/command.tsx created",
-      "Verify components/ui/popover.tsx created"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create hooks/use-mentions.ts for fetching vaults and agents",
-    "steps": [
-      "Create hooks/use-mentions.ts",
-      "Define MentionableVault interface: { id, name, type, description, fileCount }",
-      "Define MentionableAgent interface: { id, name, slug, description }",
-      "Create useMentions(searchQuery: string) hook",
-      "Fetch GET /api/vaults on mount, store in state",
-      "Fetch GET /api/agents on mount, store in state",
-      "Filter vaults and agents by searchQuery (case-insensitive name match)",
-      "Return { vaults: filtered, agents: filtered, loading }"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create components/assistant/mention-dropdown.tsx",
-    "steps": [
-      "Create components/assistant/mention-dropdown.tsx",
-      "Import Command, CommandList, CommandGroup, CommandItem, CommandEmpty from '@/components/ui/command'",
-      "Import Popover, PopoverContent from '@/components/ui/popover'",
-      "Import useMentions hook",
-      "Props: open, onOpenChange, position: {x,y}, searchQuery, onSelect(mention)",
-      "Render Popover with absolute positioning at position coords",
-      "Render CommandList with two CommandGroups: 'Vaults' and 'Agents'",
-      "Vaults group: Database icon, name, file count",
-      "Agents group: Bot icon, name",
-      "On CommandItem select, call onSelect with mention object"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create components/assistant/mention-badge.tsx",
-    "steps": [
-      "Create components/assistant/mention-badge.tsx",
-      "Import Badge from '@/components/ui/badge'",
-      "Import Database, Bot, X icons from lucide-react",
-      "Props: mention: { id, type, name }, onRemove?: () => void",
-      "Render Badge with icon (Database for vault, Bot for agent) + name",
-      "Style: blue tones for vault, purple for agent",
-      "If onRemove provided, render X button that calls onRemove"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create components/assistant/mention-input.tsx with @ detection",
-    "steps": [
-      "Create components/assistant/mention-input.tsx",
-      "Import Textarea from '@/components/ui/textarea'",
-      "Import MentionDropdown, MentionBadge components",
-      "Props: value, onChange, mentions, onMentionsChange, placeholder, disabled, onKeyDown",
-      "State: dropdownOpen, dropdownPosition, mentionQuery, mentionStartIndex",
-      "On input change: detect @word pattern before cursor using regex /@(\\w*)$/",
-      "If @ detected: set mentionStartIndex, mentionQuery, open dropdown",
-      "Calculate dropdown position from cursor (use getBoundingClientRect or estimate)",
-      "On mention select: replace @query with inline styled text @[type:id:name], add to mentions array, close dropdown",
-      "Close dropdown on Escape key"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Style inline mentions in MentionInput textarea",
-    "steps": [
-      "In mention-input.tsx, after mention selection",
-      "Insert mention as colored text: @AgentName or @VaultName",
-      "Use CSS class or inline style for mention text (blue for vault, purple for agent)",
-      "Store mention tokens in format parseable for extraction: @[vault:id:name] or @[agent:id:name]",
-      "On backspace over mention token, remove entire token and from mentions array"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Integrate MentionInput into assistant page",
-    "steps": [
-      "Open app/(dashboard)/assistant/page.tsx",
-      "Add state: const [mentions, setMentions] = useState<Mention[]>([])",
-      "Replace Textarea in chat input area with MentionInput component",
-      "Pass value={query}, onChange={setQuery}, mentions, onMentionsChange={setMentions}",
-      "Pass other props: placeholder, disabled, onKeyDown for submit"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Extract and pass agentIds in assistant submit handler",
-    "steps": [
-      "In handleSubmit function in assistant page",
-      "Extract agent mentions: const agentMentions = mentions.filter(m => m.type === 'agent')",
-      "Map to IDs: const agentIds = agentMentions.map(m => m.id)",
-      "Add agentIds to request body in complete() call",
-      "Optionally also add vault mentions to sources array"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Migrate assistant page from useCompletion to useChat",
-    "steps": [
-      "Import useChat from '@ai-sdk/react'",
-      "Import DefaultChatTransport from 'ai'",
-      "Replace useCompletion hook with useChat",
-      "Create DefaultChatTransport with api: '/api/assistant/query', body function returning request params",
-      "Use sendMessage() instead of complete()",
-      "Access messages from useChat instead of completion string",
-      "Access status for streaming state"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Update message rendering for UIMessage parts format",
-    "steps": [
-      "In assistant page message display",
-      "UIMessage has .parts array instead of .content string",
-      "Extract text: msg.parts.filter(p => p.type === 'text').map(p => p.text).join('')",
-      "Handle tool parts: msg.parts.filter(p => p.type === 'tool-invocation')",
-      "Render text parts in message bubble"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create collapsible tool call display component",
-    "steps": [
-      "Create components/assistant/tool-call-display.tsx",
-      "Props: toolCalls: array of tool invocation parts",
-      "Render as collapsible accordion (collapsed by default)",
-      "Header shows: 'Agent consulted: {agentName}'",
-      "Expanded content shows: query passed, response received",
-      "Style with muted colors, border, small text"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Integrate tool call display into assistant message rendering",
-    "steps": [
-      "In assistant page, when rendering assistant messages",
-      "Check if message.parts contains tool-invocation parts",
-      "If yes, render ToolCallDisplay component below/above text content",
-      "Pass tool invocation data to component",
-      "Ensure collapsible works (click to expand/collapse)"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Reset mentions on conversation clear/new thread",
-    "steps": [
-      "In assistant page onNewThread or clear handler",
-      "Call setMentions([]) to clear selected mentions",
-      "Ensure MentionInput reflects cleared state"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add keyboard navigation to mention dropdown",
-    "steps": [
-      "In mention-dropdown.tsx, Command component handles arrow keys by default",
-      "Ensure Enter key selects highlighted item",
-      "Ensure Escape closes dropdown",
-      "Test up/down navigation through vault and agent groups"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Change default outputType from 'draft' to 'chat'",
-    "steps": [
-      "Open app/(dashboard)/assistant/page.tsx",
-      "Find useState<OutputType>('draft') around line 237",
-      "Change initial value from 'draft' to 'chat'",
-      "Verify page loads with no toggle pressed"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Make Draft Document toggle deselectable",
-    "steps": [
-      "Open app/(dashboard)/assistant/page.tsx",
-      "Find Draft document Toggle around line 1925",
-      "Change onPressedChange={() => setOutputType('draft')}",
-      "To onPressedChange={(pressed) => setOutputType(pressed ? 'draft' : 'chat')}",
-      "Verify clicking pressed toggle deselects it"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Make Review Table toggle deselectable",
-    "steps": [
-      "Open app/(dashboard)/assistant/page.tsx",
-      "Find Review table Toggle around line 1935",
-      "Change onPressedChange={() => setOutputType('review_table')}",
-      "To onPressedChange((pressed) => setOutputType(pressed ? 'review_table' : 'chat'))",
-      "Verify clicking pressed toggle deselects it"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add ScrollArea to ChatPanel content in document mode",
-    "steps": [
-      "Open components/assistant/chat-panel.tsx",
-      "Import ScrollArea from '@/components/ui/scroll-area'",
-      "Find the content area containing query display and completion (around lines 135-245)",
-      "Wrap the content div in <ScrollArea className='flex-1'>",
-      "Verify long responses scroll within panel instead of overflowing page"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add max-height and scroll to MentionInput wrapper",
-    "steps": [
-      "Open app/(dashboard)/assistant/page.tsx",
-      "Find the MentionInput wrapper div around line 1898",
-      "Add 'max-h-[40vh] overflow-y-auto' to the wrapper className",
-      "Verify typing/pasting long text scrolls within input instead of expanding page"
-    ],
-    "passes": true
-  },
-  {
-    "category": "functional",
-    "description": "Verify auto mode routes Q&A to chat layout",
-    "steps": [
-      "Load assistant page (no toggle selected)",
-      "Ask a question like 'What is consideration in contract law?'",
-      "Verify response renders in full-width chat mode layout",
-      "Verify AI uses [MODE:chat] prefix"
-    ],
-    "passes": true
-  },
-  {
-    "category": "functional",
-    "description": "Verify auto mode routes drafts to document layout",
-    "steps": [
-      "Load assistant page (no toggle selected)",
-      "Request 'Draft a cease and desist letter'",
-      "Verify response renders in split-panel document mode layout",
-      "Verify AI uses [MODE:document] prefix"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Ask button shows loader immediately on click (not after server responds)",
-    "steps": [
-      "Open app/(dashboard)/assistant/page.tsx",
-      "Add useState<boolean>(false) for isSubmitting state",
-      "Change isLoading derivation to: status === 'streaming' || isSubmitting",
-      "In handleSubmit, call setIsSubmitting(true) before sendMessage()",
-      "Add useEffect: when status becomes 'streaming' or 'error', set isSubmitting(false)",
-      "Verify clicking Ask shows spinner immediately"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add markdown-body class to MarkdownRenderer wrapper div",
-    "steps": [
-      "Open components/ui/markdown-renderer.tsx",
-      "Find wrapper div className with 'prose prose-sm dark:prose-invert max-w-none'",
-      "Append 'markdown-body' to the className string",
-      "Verify rendered markdown picks up global .markdown-body CSS styles"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Change .markdown-body font-family to use app's Geist font",
-    "steps": [
-      "Open app/globals.css",
-      "Find .markdown-body font-family declaration (~line 364)",
-      "Replace default system font stack with var(--font-sans), sans-serif",
-      "Leave all monospace/code font rules unchanged",
-      "Verify markdown text renders in Geist font"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Remove mock data from history page",
-    "steps": [
-      "Open app/(dashboard)/history/page.tsx",
-      "Delete hardcoded mock history entries (lines 64-134)",
-      "Replace with empty initial state"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Fetch real history entries from GET /api/history",
-    "steps": [
-      "Open app/(dashboard)/history/page.tsx",
-      "Add fetch call to GET /api/history on mount",
-      "Parse response: { entries, pagination }",
-      "Store entries and pagination info in state"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Wire history page search input to API filter",
-    "steps": [
-      "Open app/(dashboard)/history/page.tsx",
-      "Connect search input onChange to search state",
-      "Debounce search input ~300ms",
-      "Re-fetch /api/history?search={query} on search change",
-      "Verify typing filters results"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Wire history page date range filter to API",
-    "steps": [
-      "Open app/(dashboard)/history/page.tsx",
-      "Connect date range picker to dateFrom/dateTo state",
-      "Re-fetch /api/history?dateFrom=X&dateTo=Y on change",
-      "Verify selecting date range filters results"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Wire history page pagination to API",
-    "steps": [
-      "Open app/(dashboard)/history/page.tsx",
-      "Connect pagination controls to page state",
-      "Re-fetch /api/history?page=N on page change",
-      "Display total pages from API response",
-      "Verify navigating pages loads correct entries"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add loading, empty, and error states to history page",
-    "steps": [
-      "Open app/(dashboard)/history/page.tsx",
-      "Show loading skeleton/spinner during fetch",
-      "Show empty state message when no entries returned",
-      "Show error state with retry button on fetch failure"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "History entry click navigates to assistant with conversation restored",
-    "steps": [
-      "Open app/(dashboard)/history/page.tsx",
-      "On entry click, navigate to /assistant?queryId={queryId}",
-      "Open app/(dashboard)/assistant/page.tsx",
-      "Read queryId from URL search params on mount",
-      "Fetch query data (inputText, outputText, outputType, sources) from API",
-      "Hydrate chat state: set messages, outputType, submittedQuery, sources",
-      "Clear queryId param from URL after loading",
-      "Verify clicking history entry restores full conversation in assistant"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create POST /api/agents/generate-instruction route",
-    "steps": [
-      "Create app/api/agents/generate-instruction/route.ts",
-      "Accept POST with { mode: 'generate' | 'improve', text: string }",
-      "For generate mode: prompt LLM to produce structured system instruction from rough idea",
-      "For improve mode: prompt LLM to refine existing instruction",
-      "Use streamText from AI SDK, return toTextStreamResponse()",
-      "Verify streaming response works for both modes"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create InstructionActions component with Generate and Improve buttons",
-    "steps": [
-      "Create components/agents/instruction-actions.tsx",
-      "Props: currentValue, onChange, disabled",
-      "Render Generate button (Wand2 icon) and Improve button (Sparkles icon)",
-      "Generate button opens Dialog with textarea for rough idea + submit button",
-      "On generate submit: POST /api/agents/generate-instruction with mode 'generate', stream result into onChange",
-      "Improve button: POST with mode 'improve' and currentValue, stream result into onChange",
-      "Disable Improve when currentValue is empty",
-      "Show Loader2 spinner on both buttons while streaming"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add InstructionActions to agent create page",
-    "steps": [
-      "Open app/(dashboard)/agents/new/page.tsx",
-      "Import InstructionActions from components/agents/instruction-actions",
-      "Add InstructionActions next to System Instruction label",
-      "Pass instruction state and setInstruction as props",
-      "Verify Generate and Improve buttons work on create page"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add InstructionActions to agent edit page",
-    "steps": [
-      "Open app/(dashboard)/agents/[id]/edit/page.tsx",
-      "Import InstructionActions from components/agents/instruction-actions",
-      "Add InstructionActions next to System Instruction label",
-      "Pass instruction state and setInstruction as props",
-      "Verify Generate and Improve buttons work on edit page"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Add IntakeStatus and EligibilityVerdict enums to Prisma schema",
-    "steps": [
-      "Add IntakeStatus enum (draft, submitted, under_review, reviewed)",
-      "Add EligibilityVerdict enum (strong, moderate, weak, insufficient)",
-      "Run prisma generate to verify syntax"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Add Client model to Prisma schema",
-    "steps": [
-      "Add Client model with all fields from PRD (personal, US intent, achievement, impact, recommenders, standing, timeline, alt categories)",
-      "Add currentStep Int @default(1), status IntakeStatus @default(draft)",
-      "Add vaultId String? @unique, vault relation",
-      "Add criterionResponses and eligibilityReport relations",
-      "@@map(\"clients\")"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Add CriterionResponse model to Prisma schema",
-    "steps": [
-      "Add CriterionResponse model (id, clientId, criterion String, responses Json)",
-      "Add @@unique([clientId, criterion]), @@index([clientId])",
-      "Add client relation with onDelete: Cascade",
-      "@@map(\"criterion_responses\")"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Add EligibilityReport model to Prisma schema",
-    "steps": [
-      "Add EligibilityReport model (id, clientId @unique, verdict EligibilityVerdict, summary @db.Text, criteria Json, rawOutput @db.Text?)",
-      "Add client relation with onDelete: Cascade",
-      "@@map(\"eligibility_reports\")"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Add client back-relation to Vault model",
-    "steps": [
-      "Add 'client Client?' optional relation to existing Vault model",
-      "Run prisma migrate dev",
-      "Run prisma generate"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Install react-hook-form and @hookform/resolvers",
-    "steps": [
-      "Run npm install react-hook-form @hookform/resolvers",
-      "Verify packages in package.json"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create GET /api/onboarding/draft route (fetch or create draft)",
-    "steps": [
-      "Create app/api/onboarding/draft/route.ts",
-      "GET: find Client with status=draft for MOCK_USER_ID, or create new",
-      "On create: auto-create vault named 'Intake - {firstName} {lastName} - {date}'",
-      "Return Client with vault info"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create PATCH /api/onboarding/draft route (update draft fields)",
-    "steps": [
-      "Add PATCH handler to app/api/onboarding/draft/route.ts",
-      "Accept partial Client fields + currentStep",
-      "Update Client record",
-      "Return updated Client"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create GET/PUT /api/onboarding/[clientId]/criteria route",
-    "steps": [
-      "Create app/api/onboarding/[clientId]/criteria/route.ts",
-      "GET: return all CriterionResponses for clientId",
-      "PUT: upsert single CriterionResponse by clientId + criterion slug",
-      "Accept { criterion, responses } in body"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create POST /api/onboarding/[clientId]/upload route",
-    "steps": [
-      "Create app/api/onboarding/[clientId]/upload/route.ts",
-      "Look up Client to get vaultId",
-      "Reuse existing vault upload pattern (S3 + embedding pipeline)",
-      "Return uploaded document record"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create POST /api/onboarding/[clientId]/submit route",
-    "steps": [
-      "Create app/api/onboarding/[clientId]/submit/route.ts",
-      "Validate required fields (firstName, lastName, email, fieldOfExpertise)",
-      "Set Client status to submitted then under_review",
-      "Trigger EB1A evaluator agent (non-blocking)",
-      "Return 202 accepted"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create GET /api/onboarding/[clientId]/report route",
-    "steps": [
-      "Create app/api/onboarding/[clientId]/report/route.ts",
-      "Fetch EligibilityReport for clientId",
-      "Return report if exists, 404 if not yet generated",
-      "Include Client status for polling"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create onboarding layout with minimal chrome (no sidebar)",
-    "steps": [
-      "Create app/onboarding/layout.tsx",
-      "Render logo + minimal header, no dashboard sidebar",
-      "Centered content area",
-      "Children slot"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create onboarding shell component with progress bar and step nav",
-    "steps": [
-      "Create app/onboarding/_components/onboarding-shell.tsx",
-      "Progress bar showing step X of 6",
-      "Step labels: Personal, Achievement, Criteria, Impact, Documents, Review",
-      "Back/Next navigation buttons",
-      "Auto-save indicator (saved/saving/error)"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create onboarding root page that loads draft and redirects to current step",
-    "steps": [
-      "Create app/onboarding/page.tsx",
-      "Fetch GET /api/onboarding/draft on mount",
-      "Redirect to /onboarding/steps/{currentStep}",
-      "Show loading spinner during fetch"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create step router page at /onboarding/steps/[step]",
-    "steps": [
-      "Create app/onboarding/steps/[step]/page.tsx",
-      "Parse step param (1-6)",
-      "Render OnboardingShell wrapping correct step component",
-      "Redirect to /onboarding if invalid step"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create zod schemas per onboarding step",
-    "steps": [
-      "Create app/onboarding/_lib/onboarding-schema.ts",
-      "Step 1 schema: firstName*, lastName*, email*, phone?, DOB?, citizenship?, field*, education?, employer?, US intent fields",
-      "Step 2 schema: hasMajorAchievement?, majorAchievementDetails?",
-      "Step 4 schema: social?, keynotes?, recommenders?, selfAssessment?",
-      "Step 5 schema: evidence checklist, urgency?, timeline?, alt categories",
-      "Export all schemas"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create use-onboarding hook for draft loading, saving, step transitions",
-    "steps": [
-      "Create app/onboarding/_lib/use-onboarding.ts",
-      "Fetch draft on mount via GET /api/onboarding/draft",
-      "Expose clientData, updateFields (PATCH), goToStep, currentStep",
-      "Debounced auto-save every 30s",
-      "PATCH on step transition (next/back)",
-      "Track save status (saved/saving/error)"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create step-personal.tsx (Step 1: Personal Background)",
-    "steps": [
-      "Create app/onboarding/_components/step-personal.tsx",
-      "Use react-hook-form with step 1 zod schema",
-      "Fields: name, email, phone, DOB, citizenship, field, education (repeatable), employer, US intent section",
-      "Pre-populate from draft data",
-      "Call updateFields on blur/change"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create step-achievement.tsx (Step 2: Major Achievement)",
-    "steps": [
-      "Create app/onboarding/_components/step-achievement.tsx",
-      "Use react-hook-form with step 2 zod schema",
-      "Fields: hasMajorAchievement toggle, conditionally show majorAchievementDetails textarea",
-      "Pre-populate from draft data"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create criteria-questions.ts with sub-question definitions per EB1A criterion",
-    "steps": [
-      "Create app/onboarding/_lib/criteria-questions.ts",
-      "Define sub-questions for each of 10 EB1A criteria slugs",
-      "Each criterion has label, description, and array of { key, label, type, placeholder }",
-      "Types: text, textarea, number, boolean",
-      "Export CRITERIA_QUESTIONS map"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create criteria-tab.tsx for single criterion sub-form",
-    "steps": [
-      "Create app/onboarding/_components/criteria-tab.tsx",
-      "Props: criterion slug, sub-questions config, initial responses",
-      "Render sub-question fields dynamically from config",
-      "On change, PUT /api/onboarding/[clientId]/criteria with criterion + responses",
-      "Show saved indicator per criterion"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create step-criteria.tsx (Step 3: EB1A Criteria with vertical tabs)",
-    "steps": [
-      "Create app/onboarding/_components/step-criteria.tsx",
-      "Vertical tabs (desktop) / accordion (mobile) for 10 criteria",
-      "Each tab renders criteria-tab.tsx for that criterion",
-      "Load existing CriterionResponses via GET /api/onboarding/[clientId]/criteria",
-      "Show completion indicator per criterion tab"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create step-impact.tsx (Step 4: Impact & Standing)",
-    "steps": [
-      "Create app/onboarding/_components/step-impact.tsx",
-      "Use react-hook-form with step 4 zod schema",
-      "Fields: social following, keynotes, collaborations, recommenders (repeatable), self-assessment, standing level, recognition scope",
-      "Pre-populate from draft data"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create step-docs-timeline.tsx (Step 5: Documents & Timeline)",
-    "steps": [
-      "Create app/onboarding/_components/step-docs-timeline.tsx",
-      "Evidence checklist (checkboxes of available doc types)",
-      "File upload dropzone (reuse existing react-dropzone + S3 pattern)",
-      "Upload via POST /api/onboarding/[clientId]/upload",
-      "Timeline fields: urgency, ideal date, willingness, prior consultations",
-      "Alternative categories: EB1B, EB2-NIW toggles"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create step-review.tsx (Step 6: Review & Submit)",
-    "steps": [
-      "Create app/onboarding/_components/step-review.tsx",
-      "Display summary of all entered data across steps",
-      "Show uploaded documents list",
-      "Submit button calls POST /api/onboarding/[clientId]/submit",
-      "On submit success, show loading/polling state",
-      "Poll GET /api/onboarding/[clientId]/report until available",
-      "Render eligibility report when ready"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Create review-summary.tsx for post-submit eligibility report display",
-    "steps": [
-      "Create app/onboarding/_components/review-summary.tsx",
-      "Display overall verdict badge (strong/moderate/weak/insufficient)",
-      "Per-criterion breakdown: name, score 1-5, analysis text, evidence refs",
-      "Summary paragraph",
-      "Alternative category suggestions if applicable"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create lib/eb1a-evaluator.ts with system prompt and tool definitions",
-    "steps": [
-      "Create lib/eb1a-evaluator.ts",
-      "Define system prompt: review 10 EB1A criteria against USCIS standards, score 1-5, verdict logic",
-      "Define search_evidence tool wrapping RAG over client vault",
-      "Define get_intake_data tool fetching Client + CriterionResponses",
-      "Export runEvaluation(clientId) function"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Implement EB1A evaluation runner in lib/eb1a-evaluator.ts",
-    "steps": [
-      "Use ToolLoopAgent with gemini-2.5-pro (analysisModel)",
-      "Pass search_evidence and get_intake_data tools",
-      "Parse structured JSON output into EligibilityReport fields",
-      "Save EligibilityReport to DB",
-      "Update Client status to reviewed",
-      "Handle errors: set status back to submitted"
-    ],
-    "passes": true
+    "category": "data",
+    "description": "Add RecommenderStatus and RecommenderSourceType enums to prisma/schema.prisma. Values: suggested/identified/contacted/confirmed/letter_drafted/letter_finalized and manual/ai_suggested/linkedin_extract.",
+    "acceptanceCriteria": [
+      "Both enums exist in prisma/schema.prisma",
+      "prisma db push succeeds without errors"
+    ],
+    "passes": false
   },
   {
     "category": "data",
-    "description": "Add 'paid' to IntakeStatus enum in Prisma schema",
-    "steps": [
-      "Open prisma/schema.prisma",
-      "Add 'paid' value to IntakeStatus enum",
-      "Run prisma generate to verify syntax"
+    "description": "Add Recommender model to prisma/schema.prisma with fields: id, clientId (relation to Client), name, title, organization, relationship, linkedinUrl, email, phone, notes (@db.Text), status (RecommenderStatus default suggested), sourceType (RecommenderSourceType default manual), aiReasoning (@db.Text), criteriaRelevance (String[]), timestamps. Index on clientId.",
+    "acceptanceCriteria": [
+      "Recommender model exists in schema with all specified fields",
+      "@@index([clientId]) present",
+      "Relation to Client defined"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "data",
-    "description": "Add Stripe payment fields to Client model",
-    "steps": [
-      "Add stripeSessionId String? to Client model",
-      "Add stripeCustomerId String? to Client model",
-      "Add paidAt DateTime? to Client model"
+    "description": "Add RecommenderAttachment model to prisma/schema.prisma with fields: id, recommenderId (relation to Recommender with onDelete Cascade), name, fileType, storageKey, createdAt.",
+    "acceptanceCriteria": [
+      "RecommenderAttachment model exists in schema",
+      "Cascade delete configured on recommender relation"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "data",
-    "description": "Run prisma migrate for payment fields",
-    "steps": [
-      "Run npx prisma migrate dev --name add-payment-fields",
-      "Verify migration succeeds",
-      "Run npx prisma generate"
+    "description": "Add DraftDocumentType and DraftStatus enums to prisma/schema.prisma. DraftDocumentType: petition_letter/personal_statement/recommendation_letter/cover_letter/exhibit_list/table_of_contents/rfe_response. DraftStatus: not_started/generating/draft/in_review/final.",
+    "acceptanceCriteria": [
+      "Both enums exist in prisma/schema.prisma"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "ui",
-    "description": "Replace app/page.tsx redirect with full landing page",
-    "steps": [
-      "Replace redirect logic in app/page.tsx with landing page content",
-      "Include hero section, how-it-works, criteria overview, value prop, trust signals, footer CTA",
-      "Use frontend-design skill for polished output",
-      "Responsive, static, no API calls",
-      "Placeholder copy is acceptable"
+    "category": "data",
+    "description": "Add CaseDraft model to prisma/schema.prisma with fields: id, clientId (relation to Client), documentType (DraftDocumentType), title, content (Json?), plainText (@db.Text?), sections (Json?), status (DraftStatus default not_started), recommenderId (optional relation to Recommender), timestamps. Indexes on [clientId] and [clientId, documentType]. Unique constraint on [clientId, documentType, recommenderId].",
+    "acceptanceCriteria": [
+      "CaseDraft model exists with all fields, indexes, and unique constraint",
+      "Relations to Client and Recommender defined"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "ui",
-    "description": "Create evaluation results page at /evaluation/[clientId]",
-    "steps": [
-      "Create app/evaluation/[clientId]/page.tsx",
-      "Fetch report from GET /api/onboarding/[clientId]/report",
-      "Show approval probability (strong=85%, moderate=60%, weak=30%, insufficient=10%)",
-      "Show verdict badge, summary paragraph, improvement messaging",
-      "Loading/polling state while report not ready",
-      "Payment CTA button at bottom"
+    "category": "data",
+    "description": "Add CaseDraftVersion model to prisma/schema.prisma with fields: id, draftId (relation to CaseDraft with onDelete Cascade), content (Json), plainText (@db.Text?), sections (Json?), versionNote, createdBy, createdAt. Index on [draftId].",
+    "acceptanceCriteria": [
+      "CaseDraftVersion model exists in schema",
+      "Cascade delete on draft relation"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "backend",
-    "description": "Install stripe npm package",
-    "steps": [
-      "Run npm install stripe",
-      "Verify package in package.json"
+    "category": "data",
+    "description": "Add recommenders and caseDrafts relations to existing Client model in prisma/schema.prisma. Rename existing Client.recommenders Json field to recommenderNotes to avoid conflict.",
+    "acceptanceCriteria": [
+      "Client model has recommenders Recommender[] and caseDrafts CaseDraft[] relations",
+      "Old Json field renamed to recommenderNotes",
+      "Existing onboarding code referencing Client.recommenders updated to use recommenderNotes"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "backend",
-    "description": "Add Stripe env vars to .env.example",
-    "steps": [
-      "Add STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ID, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, ENABLE_STRIPE to .env.example"
+    "category": "data",
+    "description": "Add caseDrafts relation (CaseDraft[]) to Recommender model in prisma/schema.prisma.",
+    "acceptanceCriteria": [
+      "Recommender model has caseDrafts CaseDraft[] relation"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "backend",
-    "description": "Create POST /api/payments/checkout route",
-    "steps": [
-      "Create app/api/payments/checkout/route.ts",
-      "Accept clientId in body",
-      "If ENABLE_STRIPE=false: immediately mark client as paid, return redirect URL to success page",
-      "If ENABLE_STRIPE=true: create Stripe Checkout session with STRIPE_PRICE_ID, return session URL",
-      "Include success_url and cancel_url"
+    "category": "data",
+    "description": "Run prisma db push or prisma migrate dev to apply all new models and enums to the database.",
+    "acceptanceCriteria": [
+      "Migration applies cleanly",
+      "prisma generate succeeds",
+      "All new tables exist in database"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "backend",
-    "description": "Create POST /api/payments/webhook route",
-    "steps": [
-      "Create app/api/payments/webhook/route.ts",
-      "Verify Stripe webhook signature using STRIPE_WEBHOOK_SECRET",
-      "Handle checkout.session.completed event",
-      "Update Client: stripeSessionId, stripeCustomerId, paidAt, status=paid",
-      "Return 200"
+    "category": "api",
+    "description": "Create GET /api/cases/[clientId]/recommenders route. Returns all Recommender records for clientId. Auth: require logged-in user. Lawyer must have CaseAssignment. Applicant must own the client record. Include RecommenderAttachment count.",
+    "acceptanceCriteria": [
+      "Route file exists at app/api/cases/[clientId]/recommenders/route.ts",
+      "Returns JSON array of recommenders with attachment counts",
+      "401 if unauthenticated, 403 if unauthorized"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "backend",
-    "description": "Create GET /api/payments/status/[clientId] route",
-    "steps": [
-      "Create app/api/payments/status/[clientId]/route.ts",
-      "Fetch Client by clientId",
-      "Return { paid: boolean, paidAt } based on Client.paidAt presence"
+    "category": "api",
+    "description": "Create POST /api/cases/[clientId]/recommenders route. Creates a new Recommender record. Body: name (required), title, organization, relationship, linkedinUrl, email, phone, notes. Validate with zod. Same auth as GET.",
+    "acceptanceCriteria": [
+      "POST handler in app/api/cases/[clientId]/recommenders/route.ts",
+      "Zod validation on request body",
+      "Returns created recommender with 201 status"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "ui",
-    "description": "Create post-payment success interstitial page",
-    "steps": [
-      "Create app/payment/success/page.tsx",
-      "Read clientId from search params",
-      "Show confirmation message, checkmark/success visual",
-      "CTA button linking to /assistant"
+    "category": "api",
+    "description": "Create PATCH /api/cases/[clientId]/recommenders/[id]/route.ts. Updates Recommender fields including status transitions. Validate with zod partial schema. Same auth pattern.",
+    "acceptanceCriteria": [
+      "Route file exists at app/api/cases/[clientId]/recommenders/[id]/route.ts",
+      "Partial update works for any Recommender field",
+      "Returns updated recommender"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "ui",
-    "description": "Modify step-review.tsx to redirect to /evaluation/[clientId] after submit",
-    "steps": [
-      "Open app/onboarding/_components/step-review.tsx",
-      "After submit + evaluate trigger, redirect to /evaluation/[clientId] instead of inline report",
-      "Remove ReviewSummary rendering from step-review (moved to evaluation page)"
+    "category": "api",
+    "description": "Create DELETE /api/cases/[clientId]/recommenders/[id]/route.ts. Deletes Recommender and cascades to attachments. Same auth pattern.",
+    "acceptanceCriteria": [
+      "DELETE handler returns 204 on success",
+      "Attachments cascade-deleted"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "functional",
-    "description": "Eval page: error state with retry/contact support",
-    "steps": [
-      "In app/evaluation/[clientId]/page.tsx",
-      "Show error state if report fetch fails",
-      "Include retry button and contact support link"
+    "category": "api",
+    "description": "Create POST /api/cases/[clientId]/recommenders/[id]/attachments/route.ts. Uploads CV/bio file to S3 and creates RecommenderAttachment record. Accept multipart form data. Same auth.",
+    "acceptanceCriteria": [
+      "File uploaded to S3 with unique storageKey",
+      "RecommenderAttachment record created",
+      "Returns attachment metadata with 201"
     ],
-    "passes": true
+    "passes": false
+  },
+  {
+    "category": "api",
+    "description": "Create DELETE /api/cases/[clientId]/recommenders/[id]/attachments/[attachmentId]/route.ts. Deletes attachment record and S3 object.",
+    "acceptanceCriteria": [
+      "Attachment record deleted from database",
+      "S3 object deleted",
+      "Returns 204"
+    ],
+    "passes": false
   },
   {
     "category": "functional",
-    "description": "Payment fail/cancel returns to eval page with message",
-    "steps": [
-      "In Stripe Checkout cancel_url, redirect to /evaluation/[clientId]?payment=cancelled",
-      "In eval page, read payment query param and show cancellation/failure message"
+    "description": "Create AI recommender suggestion agent in lib/recommender-suggester.ts. Model: gemini-2.5-pro. Agentic tool-use loop (same pattern as lib/eb1a-evaluator.ts). Tools: get_client_profile (intake data), search_vault (RAG via lib/rag.ts), get_gap_analysis (from GapAnalysis model), get_eligibility_report (from EligibilityReport model). Output: 5-8 role type suggestions each with roleType, reasoning, criteriaRelevance, idealQualifications, sampleTalkingPoints.",
+    "acceptanceCriteria": [
+      "lib/recommender-suggester.ts exports a function that runs the agent",
+      "Uses generateText with tool-use loop, stopWhen stepCount limit",
+      "Produces structured output matching the specified schema",
+      "Creates Recommender records with status=suggested, sourceType=ai_suggested"
     ],
-    "passes": true
+    "passes": false
+  },
+  {
+    "category": "api",
+    "description": "Create POST /api/cases/[clientId]/recommenders/suggest/route.ts. Triggers recommender suggestion agent. Returns 202 with immediate response, runs agent async. Lawyer-only auth.",
+    "acceptanceCriteria": [
+      "Route calls recommender-suggester agent async (fire-and-forget pattern from gap-analysis)",
+      "Returns 202 status immediately",
+      "Agent results saved as Recommender records"
+    ],
+    "passes": false
   },
   {
     "category": "functional",
-    "description": "Eval page after paying: check payment status, redirect to /assistant",
-    "steps": [
-      "In eval page, check GET /api/payments/status/[clientId] on mount",
-      "If already paid, redirect to /assistant"
+    "description": "Add 'linkedin-profile' category to DOCUMENT_CATEGORIES in lib/document-categories.ts. Slug: linkedin-profile, label: LinkedIn Profile, description: LinkedIn profile exports and professional network data.",
+    "acceptanceCriteria": [
+      "New category object present in DOCUMENT_CATEGORIES array",
+      "Slug is 'linkedin-profile'"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "ui",
-    "description": "Update app/layout.tsx metadata for Casefor-ai",
-    "steps": [
-      "Open app/layout.tsx",
-      "Update title and description metadata for Casefor-ai branding"
+    "category": "functional",
+    "description": "Create LinkedIn extraction agent function in lib/linkedin-parser.ts (enhance existing file). Model: gemini-2.5-flash. Input: full text of LinkedIn PDF. Output: { profileData: { headline, currentRole, company, skills[], recommendations[] }, potentialRecommenders: [{ name, title, organization, relationship, reasoning }] }. Use structured output with zod schema.",
+    "acceptanceCriteria": [
+      "Function exported from lib/linkedin-parser.ts",
+      "Uses gemini-2.5-flash via ai-sdk",
+      "Returns typed object matching the specified schema"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "backend",
-    "description": "Add UserRole enum (applicant, lawyer, admin) to Prisma schema",
-    "steps": [
-      "Add UserRole enum to schema.prisma",
-      "Run prisma generate to verify syntax"
+    "category": "functional",
+    "description": "Add client lookup from vault in document processing route (app/api/vaults/[id]/documents/process). After categorization, if category is 'linkedin-profile', resolve clientId from Vault->Client relation and run LinkedIn extraction agent. Auto-create Recommender records with status=suggested, sourceType=linkedin_extract from potentialRecommenders output.",
+    "acceptanceCriteria": [
+      "Processing route checks category after categorization step",
+      "If linkedin-profile: looks up client via vault.client relation",
+      "Calls LinkedIn extraction agent",
+      "Creates Recommender records from extraction results",
+      "Non-blocking: extraction runs in parallel with embedding, doesn't block the response"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "backend",
-    "description": "Add role field to User model in Prisma schema",
-    "steps": [
-      "Add role UserRole @default(applicant) to User model",
-      "Run prisma migrate dev"
+    "category": "api",
+    "description": "Create GET /api/cases/[clientId]/drafts route. Returns all CaseDraft records for clientId with status, documentType, title, updatedAt, recommender name (if recommendation_letter). Auth: same pattern as recommenders.",
+    "acceptanceCriteria": [
+      "Route file at app/api/cases/[clientId]/drafts/route.ts",
+      "Returns JSON array of drafts with recommender info included",
+      "Proper auth checks"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "backend",
-    "description": "Add CaseAssignment model to Prisma schema",
-    "steps": [
-      "Add CaseAssignment model (id, lawyerId, clientId, assignedAt)",
-      "Add relations to User and Client",
-      "Add @@unique([lawyerId, clientId])",
-      "Run prisma migrate dev"
+    "category": "api",
+    "description": "Create POST /api/cases/[clientId]/drafts route. Creates a new CaseDraft. Body: documentType (required), title, recommenderId (required if recommendation_letter). Enforce unique constraint [clientId, documentType, recommenderId]. Return 409 if duplicate.",
+    "acceptanceCriteria": [
+      "POST handler with zod validation",
+      "Enforces unique constraint, returns 409 on duplicate",
+      "Returns created draft with 201"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "backend",
-    "description": "Create lib/auth.ts with NextAuth configuration",
-    "steps": [
-      "Create lib/auth.ts",
-      "Configure NextAuth with credentials or OAuth provider",
-      "Include session callback with user role",
-      "Export authOptions"
+    "category": "api",
+    "description": "Create GET /api/cases/[clientId]/drafts/[id]/route.ts. Returns full CaseDraft including content (TipTap JSON), sections, and recommender info.",
+    "acceptanceCriteria": [
+      "Returns complete draft object with content field",
+      "404 if not found"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "backend",
-    "description": "Create app/api/auth/[...nextauth]/route.ts",
-    "steps": [
-      "Create route file",
-      "Import authOptions from lib/auth.ts",
-      "Export GET and POST handlers"
+    "category": "api",
+    "description": "Create PATCH /api/cases/[clientId]/drafts/[id]/route.ts. Updates CaseDraft content, plainText, sections, status, title. Partial update with zod.",
+    "acceptanceCriteria": [
+      "Partial update works for content, plainText, sections, status, title",
+      "Returns updated draft"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "backend",
-    "description": "Create middleware.ts for role-based route protection",
-    "steps": [
-      "Create middleware.ts at project root",
-      "Protect /onboarding routes for applicant role",
-      "Protect /lawyer routes for lawyer role",
-      "Redirect unauthenticated users to login"
+    "category": "api",
+    "description": "Create DELETE /api/cases/[clientId]/drafts/[id]/route.ts. Deletes CaseDraft and cascades to versions.",
+    "acceptanceCriteria": [
+      "Returns 204 on success",
+      "Versions cascade-deleted"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "backend",
-    "description": "Replace all MOCK_USER_ID references with session user ID",
-    "steps": [
-      "Search codebase for MOCK_USER_ID",
-      "Replace each with getServerSession().user.id",
-      "Remove MOCK_USER_ID constant"
+    "category": "api",
+    "description": "Create POST /api/cases/[clientId]/drafts/[id]/versions/route.ts. Saves a CaseDraftVersion snapshot from current draft content. Body: optional versionNote. Also create GET handler to list versions (id, versionNote, createdBy, createdAt) ordered by createdAt desc.",
+    "acceptanceCriteria": [
+      "POST creates version snapshot with content copied from current draft",
+      "GET returns version list ordered by createdAt desc",
+      "Route file at app/api/cases/[clientId]/drafts/[id]/versions/route.ts"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "ui",
-    "description": "Add layout-level auth checks per role",
-    "steps": [
-      "Add session check to (dashboard)/layout.tsx",
-      "Add session check to onboarding/layout.tsx",
-      "Add session check to (lawyer)/layout.tsx",
-      "Redirect to login if no session"
+    "category": "functional",
+    "description": "Create shared drafting agent tools module in lib/drafting-tools.ts. Export tool definitions for: get_client_profile (intake data from Client), search_vault (RAG via lib/rag.ts), get_gap_analysis (from GapAnalysis), get_eligibility_report (from EligibilityReport), get_existing_drafts (other CaseDrafts for same client), get_recommender (Recommender details by id). Follow same tool pattern as lib/eb1a-evaluator.ts.",
+    "acceptanceCriteria": [
+      "lib/drafting-tools.ts exports all 6 tool definitions",
+      "Each tool returns appropriate data from Prisma queries",
+      "Tools compatible with ai-sdk generateText tool format"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "backend",
-    "description": "Update onboarding-schema.ts with new fields (consent, immigration, circumstances, preferences)",
-    "steps": [
-      "Add consentToProcess boolean field",
-      "Add immigration section fields (currentStatus, desiredStatus, previousApplications)",
-      "Add circumstances fields (urgencyReason, specialCircumstances)",
-      "Add preferences fields (communicationPreference, timezone)",
-      "Export updated schemas"
+    "category": "functional",
+    "description": "Create petition letter drafting agent in lib/drafting-agents/petition-letter.ts. Model: gemini-2.5-pro. System prompt specialized for I-140 petition letters. Uses shared drafting tools. Generates section-by-section sequentially (token strategy for long docs). Output: TipTap-compatible JSON with section markers. Supports full generation mode.",
+    "acceptanceCriteria": [
+      "Agent function exported",
+      "Uses gemini-2.5-pro",
+      "Generates document with labeled sections",
+      "Returns TipTap-compatible JSON structure"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "backend",
-    "description": "Add new Client model fields for expanded onboarding + migrate",
-    "steps": [
-      "Add consentToProcess, currentImmigrationStatus, desiredStatus, previousApplications to Client",
-      "Add urgencyReason, specialCircumstances, communicationPreference, timezone",
-      "Run prisma migrate dev"
+    "category": "functional",
+    "description": "Create personal statement drafting agent in lib/drafting-agents/personal-statement.ts. Model: gemini-2.5-flash. Specialized system prompt for applicant narrative. Uses shared drafting tools. Single generation call.",
+    "acceptanceCriteria": [
+      "Agent function exported",
+      "Uses gemini-2.5-flash",
+      "Returns TipTap-compatible JSON"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "ui",
-    "description": "Update onboarding page.tsx step count from 6 to 10 screens",
-    "steps": [
-      "Update total step count constant",
-      "Update progress bar calculation",
-      "Update step labels array for 10 steps"
+    "category": "functional",
+    "description": "Create recommendation letter drafting agent in lib/drafting-agents/recommendation-letter.ts. Model: gemini-2.5-flash. Requires recommenderId. Uses get_recommender tool for recommender context. System prompt specialized for EB1A recommendation letters.",
+    "acceptanceCriteria": [
+      "Agent function exported",
+      "Accepts recommenderId parameter",
+      "Uses recommender details in generation context"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "ui",
-    "description": "Update use-onboarding.ts step management + resume merge logic",
-    "steps": [
-      "Update step validation to handle 10 steps",
-      "Add resume data merge into form fields on parse",
-      "Update auto-save to cover new fields"
+    "category": "functional",
+    "description": "Create cover letter drafting agent in lib/drafting-agents/cover-letter.ts. Model: gemini-2.5-flash. System prompt for petition package cover letter.",
+    "acceptanceCriteria": [
+      "Agent function exported, uses gemini-2.5-flash, returns TipTap JSON"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "ui",
-    "description": "Create step-welcome.tsx (onboarding welcome screen)",
-    "steps": [
-      "Create app/onboarding/_components/step-welcome.tsx",
-      "Show welcome message and process overview",
-      "Explain what data will be collected",
-      "Continue button to next step"
+    "category": "functional",
+    "description": "Create exhibit list drafting agent in lib/drafting-agents/exhibit-list.ts. Model: gemini-2.5-flash. System prompt for numbered exhibit list with descriptions. Should reference vault documents.",
+    "acceptanceCriteria": [
+      "Agent function exported, uses gemini-2.5-flash, returns TipTap JSON"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "ui",
-    "description": "Create step-basic-info.tsx (name, email, consent)",
-    "steps": [
-      "Create app/onboarding/_components/step-basic-info.tsx",
-      "Fields: firstName, lastName, email, phone",
-      "Consent checkbox for data processing",
-      "Pre-populate from draft"
+    "category": "functional",
+    "description": "Create table of contents drafting agent in lib/drafting-agents/table-of-contents.ts. Model: gemini-2.5-flash. Uses get_existing_drafts to reference all other drafts for TOC generation.",
+    "acceptanceCriteria": [
+      "Agent function exported, references existing drafts for structure"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "ui",
-    "description": "Create step-resume-upload.tsx (dropzone + processing indicator)",
-    "steps": [
-      "Create app/onboarding/_components/step-resume-upload.tsx",
-      "File dropzone for resume upload",
-      "Show processing/parsing indicator",
-      "Display parsed fields preview",
-      "Allow skip"
+    "category": "functional",
+    "description": "Create RFE response drafting agent in lib/drafting-agents/rfe-response.ts. Model: gemini-2.5-pro (complex, long). System prompt specialized for responding to USCIS Requests for Evidence.",
+    "acceptanceCriteria": [
+      "Agent function exported, uses gemini-2.5-pro, returns TipTap JSON"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "ui",
-    "description": "Create step-background.tsx (citizenship, applicant type, criteria)",
-    "steps": [
-      "Create app/onboarding/_components/step-background.tsx",
-      "Fields: citizenship, applicantType, fieldOfExpertise",
-      "Education history (repeatable)",
-      "Current employer"
+    "category": "functional",
+    "description": "Create per-section regeneration function in lib/drafting-agents/regenerate-section.ts. Accepts: draftId, sectionId, optional instruction. Loads full document as context, regenerates only the specified section. Returns updated section content.",
+    "acceptanceCriteria": [
+      "Function accepts draftId, sectionId, instruction",
+      "Loads full document content for context",
+      "Returns only the regenerated section content"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "ui",
-    "description": "Refactor step-criteria -> step-evidence.tsx",
-    "steps": [
-      "Rename step-criteria.tsx to step-evidence.tsx",
-      "Update imports and references",
-      "Focus UI on evidence collection per criterion"
+    "category": "api",
+    "description": "Create POST /api/cases/[clientId]/drafts/[id]/generate/route.ts. Triggers full AI generation for a draft. Looks up documentType to select correct agent. Streams response (use ai-sdk streaming). Updates draft status to 'generating' then 'draft' on completion. Saves content to CaseDraft.",
+    "acceptanceCriteria": [
+      "Route dispatches to correct agent based on documentType",
+      "Streams response back to client",
+      "Updates draft status lifecycle: generating -> draft",
+      "Saves final content to CaseDraft record"
+    ],
+    "passes": false
+  },
+  {
+    "category": "api",
+    "description": "Create POST /api/cases/[clientId]/drafts/[id]/regenerate/route.ts. Regenerates a specific section. Body: sectionId, instruction (optional). Streams regenerated section content. Updates section in draft content.",
+    "acceptanceCriteria": [
+      "Route accepts sectionId and optional instruction",
+      "Calls regenerate-section function",
+      "Streams response",
+      "Updates only the specified section in draft content"
     ],
     "passes": false
   },
   {
     "category": "ui",
-    "description": "Create step-immigration.tsx",
-    "steps": [
-      "Create app/onboarding/_components/step-immigration.tsx",
-      "Fields: currentImmigrationStatus, desiredStatus, previousApplications",
-      "US intent fields",
-      "Pre-populate from draft"
+    "description": "Create RecommenderList component in components/recommender/recommender-list.tsx. Table/card layout showing: name, title, org, status badge (color-coded per RecommenderStatus), criteria tags, action buttons (edit/delete). Accept recommenders array and callbacks as props. Use shadcn Table + Badge components.",
+    "acceptanceCriteria": [
+      "Component renders list of recommenders with all specified fields",
+      "Status shown as color-coded Badge",
+      "Criteria shown as tag badges",
+      "Edit and delete action buttons present"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Create step-circumstances.tsx",
-    "steps": [
-      "Create app/onboarding/_components/step-circumstances.tsx",
-      "Fields: urgencyReason, specialCircumstances",
-      "Timeline preferences",
-      "Pre-populate from draft"
+    "description": "Create RecommenderForm component in components/recommender/recommender-form.tsx. Sheet/dialog form with fields: name, title, organization, relationship, LinkedIn URL, email, phone, notes. Use react-hook-form + zod. Support create and edit modes.",
+    "acceptanceCriteria": [
+      "Form renders in Sheet with all specified fields",
+      "Zod validation on required fields (name)",
+      "Works in create mode (empty) and edit mode (pre-filled)",
+      "Calls onSubmit callback with form data"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Create step-preferences.tsx",
-    "steps": [
-      "Create app/onboarding/_components/step-preferences.tsx",
-      "Fields: communicationPreference, timezone",
-      "Alternative category interest (EB1B, EB2-NIW)",
-      "Pre-populate from draft"
+    "description": "Create RecommenderDetail component in components/recommender/recommender-detail.tsx. Slide-over Sheet showing full recommender info, list of attachments with download links, linked draft status (if recommendation letter exists), status change dropdown.",
+    "acceptanceCriteria": [
+      "Sheet displays all recommender fields",
+      "Shows attachments with download action",
+      "Shows linked draft status if applicable",
+      "Status dropdown allows status transitions"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Update step-review.tsx for 9-section summary",
-    "steps": [
-      "Update review to show all 9 sections",
-      "Add section headers for each step",
-      "Show edit links per section",
-      "Update submit flow"
+    "description": "Create AISuggestionsPanel component in components/recommender/ai-suggestions-panel.tsx. 'Suggest Recommenders' button triggers POST to /suggest endpoint. Shows loading state while agent runs. Displays returned suggestions with roleType, reasoning, criteriaRelevance, idealQualifications, sampleTalkingPoints. Accept/dismiss buttons per suggestion.",
+    "acceptanceCriteria": [
+      "Button triggers API call to suggest endpoint",
+      "Loading/polling state while agent processes",
+      "Each suggestion card shows all specified fields",
+      "Accept creates recommender (status=identified), dismiss removes"
     ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create lib/resume-parser.ts (Gemini flash, structured output)",
-    "steps": [
-      "Create lib/resume-parser.ts",
-      "Use generateObject with gemini-2.0-flash",
-      "Define output schema matching Client fields",
-      "Extract name, email, education, employer, field, achievements",
-      "Return parsed data with confidence scores"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create POST /api/onboarding/[clientId]/parse-resume endpoint",
-    "steps": [
-      "Create route file",
-      "Accept uploaded resume file",
-      "Call lib/resume-parser.ts",
-      "Return parsed fields with confidence"
-    ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Add confidence display UI to onboarding fields after resume parse",
-    "steps": [
-      "Show confidence badge next to auto-filled fields",
-      "Color code: green >0.8, yellow >0.5, red <0.5",
-      "Allow user to override any field"
+    "description": "Create StatusPipeline component in components/recommender/status-pipeline.tsx. Visual horizontal pipeline showing count at each RecommenderStatus stage (suggested -> identified -> contacted -> confirmed -> letter_drafted -> letter_finalized).",
+    "acceptanceCriteria": [
+      "Renders horizontal pipeline with 6 stages",
+      "Each stage shows count of recommenders at that status",
+      "Visual indicators (colors/progress) show pipeline flow"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Wire resume upload to parse + pre-populate flow",
-    "steps": [
-      "On resume upload in step-resume-upload.tsx, call parse-resume API",
-      "Merge parsed data into onboarding form state",
-      "Show pre-populated fields in subsequent steps",
-      "Preserve any user-edited fields over parsed data"
+    "description": "Add Recommenders tab to lawyer case detail page at app/(lawyer)/cases/[clientId]/page.tsx. New tab alongside existing Vault/Gap Analysis/Assistant tabs. Tab content: StatusPipeline at top, AISuggestionsPanel, RecommenderList. Fetch recommenders via GET /api/cases/[clientId]/recommenders.",
+    "acceptanceCriteria": [
+      "Recommenders tab visible on case detail page",
+      "Tab loads and displays StatusPipeline, AISuggestionsPanel, RecommenderList",
+      "Data fetched from recommenders API endpoint"
     ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create POST /api/onboarding/[clientId]/reset endpoint",
-    "steps": [
-      "Create route file",
-      "Delete all CriterionResponses for client",
-      "Delete all Documents from S3 and DB",
-      "Delete Pinecone vectors for client vault",
-      "Reset Client fields to defaults, currentStep=1"
-    ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Add start over button + confirmation dialog to onboarding shell",
-    "steps": [
-      "Add 'Start Over' button to onboarding-shell.tsx",
-      "Show confirmation dialog warning data will be deleted",
-      "On confirm, call reset endpoint",
-      "Redirect to step 1"
+    "description": "Create DraftsIndex page at app/(lawyer)/cases/[clientId]/drafts/page.tsx. Grid of 7 document type cards. Each card shows: doc type name, status badge, last updated, action button (Create/Edit/View). For recommendation_letter: expandable section showing one card per recommender with status >= confirmed. Quick stats row: X of 7 started, X finalized.",
+    "acceptanceCriteria": [
+      "Page renders 7 document type cards in grid",
+      "Each card shows type name, status badge, last updated",
+      "Recommendation letter section expands to show per-recommender cards",
+      "Quick stats row displays correctly",
+      "Create/Edit buttons link to drafting workspace"
     ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Implement cascade delete in reset endpoint (CriterionResponse, Documents, S3, Pinecone)",
-    "steps": [
-      "Delete CriterionResponses by clientId",
-      "Fetch Documents by vaultId, delete each from S3",
-      "Delete Pinecone namespace for vault",
-      "Delete Document records from DB",
-      "Reset client fields"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Add 5 new document categories to lib/document-categories.ts",
-    "steps": [
-      "Add 'immigration-form' category",
-      "Add 'financial-record' category",
-      "Add 'personal-statement' category",
-      "Add 'business-plan' category",
-      "Add 'identity-document' category",
-      "Update DOCUMENT_CATEGORIES array"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Update categorization prompt in lib/categorize-document.ts for new categories",
-    "steps": [
-      "Update generateObject schema enum with new categories",
-      "Update prompt to describe new category definitions",
-      "Test categorization with sample documents"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Add role-based filtering to GET /api/vaults",
-    "steps": [
-      "Check user role from session",
-      "Applicant: return only their own vault",
-      "Lawyer: return vaults for assigned cases",
-      "Admin: return all vaults"
-    ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Auto-select applicant vault in assistant page, hide multi-vault UI",
-    "steps": [
-      "Check user role in assistant page",
-      "If applicant, auto-select their vault",
-      "Hide vault selection modal for applicants",
-      "Show vault name as static text instead"
+    "description": "Create drafting workspace page at app/(lawyer)/cases/[clientId]/drafts/[id]/page.tsx. Two-panel layout. Header with document type title, status badge, Save button (debounced auto-save), Save Version button, back link to drafts index.",
+    "acceptanceCriteria": [
+      "Page renders two-panel layout",
+      "Header shows title, status badge, save controls, back link",
+      "Auto-save triggers on content change with debounce"
     ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Scope vault/[id] page access by role",
-    "steps": [
-      "In vault detail page, verify user has access",
-      "Applicant: only own vault",
-      "Lawyer: only assigned client vaults",
-      "Return 403 if unauthorized"
-    ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Create app/(lawyer)/layout.tsx",
-    "steps": [
-      "Create layout with lawyer-specific sidebar",
-      "Include navigation: Dashboard, Cases",
-      "Add session check for lawyer role"
+    "description": "Build AI Panel (left side of drafting workspace, ~40% width, collapsible). Contains: Generate button (full doc), section list with per-section Regenerate buttons, optional instruction input per section, generation status/progress indicator.",
+    "acceptanceCriteria": [
+      "Panel is collapsible",
+      "Generate button triggers /generate endpoint",
+      "Section list renders from draft.sections metadata",
+      "Each section has regenerate button + instruction input",
+      "Progress indicator shows during generation"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Create lawyer dashboard page (case list with tabs)",
-    "steps": [
-      "Create app/(lawyer)/dashboard/page.tsx",
-      "Tabs: All Cases, My Cases, Unassigned",
-      "Fetch cases from GET /api/lawyer/cases",
-      "Show case cards in grid"
+    "description": "Integrate TipTap rich text editor in right panel of drafting workspace (~60% width). Include toolbar (bold, italic, headings, lists, etc). Section headings rendered as navigable anchors. Real-time content from AI streams into editor. Manual editing always available.",
+    "acceptanceCriteria": [
+      "TipTap editor renders with toolbar",
+      "Section headings are navigable anchors",
+      "AI-streamed content appears in editor in real-time",
+      "User can manually edit content alongside AI generation"
     ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create GET /api/lawyer/cases endpoint",
-    "steps": [
-      "Create route file",
-      "Accept query params: tab (all/mine/unassigned), search, page",
-      "Return cases with client info, status, assignment",
-      "Paginate results"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create POST /api/lawyer/cases/[clientId]/assign endpoint",
-    "steps": [
-      "Create route file",
-      "Create CaseAssignment record",
-      "Set lawyerId from session",
-      "Return assignment record"
-    ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Create lawyer case detail page with 3 tabs (vault, gap analysis, assistant)",
-    "steps": [
-      "Create app/(lawyer)/cases/[clientId]/page.tsx",
-      "Tab 1: Vault - reuse vault detail component scoped to client",
-      "Tab 2: Gap Analysis - show analysis results",
-      "Tab 3: Assistant - reuse assistant scoped to client vault"
+    "description": "Add version history dropdown to drafting workspace toolbar. Lists CaseDraftVersions by date desc. Selecting a version loads that version's content into the editor (with confirmation dialog). Show version note and createdAt.",
+    "acceptanceCriteria": [
+      "Dropdown in toolbar shows version history",
+      "Each entry shows date and version note",
+      "Selecting a version shows confirmation dialog",
+      "On confirm, editor content replaced with version content"
     ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create GET /api/lawyer/cases/[clientId]/gap-analysis endpoint",
-    "steps": [
-      "Create route file",
-      "Fetch latest gap analysis for client",
-      "Return analysis with per-criterion breakdown",
-      "Return 404 if no analysis exists"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create POST /api/lawyer/cases/[clientId]/gap-analysis/refresh endpoint",
-    "steps": [
-      "Create route file",
-      "Trigger new gap analysis run",
-      "Return 202 accepted",
-      "Non-blocking execution"
-    ],
-    "passes": true
-  },
-  {
-    "category": "backend",
-    "description": "Create lib/gap-analysis.ts (extends eb1a-evaluator)",
-    "steps": [
-      "Create lib/gap-analysis.ts",
-      "Reuse eb1a-evaluator patterns with gemini-2.5-flash",
-      "Focus on gaps: missing evidence, weak criteria, recommendations",
-      "Save results to GapAnalysis model or reuse EligibilityReport"
-    ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Create gap analysis UI (per-criterion strength, docs, recommendations)",
-    "steps": [
-      "Create components/lawyer/gap-analysis-view.tsx",
-      "Per-criterion card: strength score, supporting docs, gaps",
-      "Recommendations section per criterion",
-      "Overall strength summary"
+    "description": "Add Drafts tab to lawyer case detail page at app/(lawyer)/cases/[clientId]/page.tsx. Mini drafts index showing document type cards in a compact grid. Each card links to full drafting workspace. Fetch drafts via GET /api/cases/[clientId]/drafts.",
+    "acceptanceCriteria": [
+      "Drafts tab visible on case detail page",
+      "Shows compact card grid of document types with status",
+      "Cards link to /cases/[clientId]/drafts/[id]"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Add case card component (name, date, verdict, criteria count, status)",
-    "steps": [
-      "Create components/lawyer/case-card.tsx",
-      "Show client name, submission date",
-      "Show verdict badge if evaluated",
-      "Show criteria count, case status"
+    "description": "Add Recommenders section to applicant dashboard. Show list of recommenders for own case (view + add). Applicant can add recommenders via RecommenderForm but cannot trigger AI suggestions or change status beyond 'identified'.",
+    "acceptanceCriteria": [
+      "Applicant dashboard shows recommenders section",
+      "Applicant can view and add recommenders",
+      "No AI suggest button visible to applicant",
+      "Status changes limited for applicant role"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Add self-assign button with optimistic UI to case cards",
-    "steps": [
-      "Add Assign to Me button on unassigned case cards",
-      "Optimistic UI: immediately update card state",
-      "Call POST /api/lawyer/cases/[clientId]/assign",
-      "Revert on error"
+    "description": "Add Drafts section to applicant dashboard. Applicant can view and edit personal_statement draft. Can view (read-only) other draft types. Link to drafting workspace for personal statement.",
+    "acceptanceCriteria": [
+      "Applicant dashboard shows drafts section",
+      "Personal statement is editable",
+      "Other drafts are view-only for applicant",
+      "Links to appropriate drafting workspace"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "ui",
-    "description": "Scope vault/assistant reuse to client context in lawyer view",
-    "steps": [
-      "Pass clientId to vault and assistant components",
-      "Filter vault data by client's vaultId",
-      "Scope assistant context to client vault",
-      "Ensure lawyer cannot access other client data"
+    "category": "auth",
+    "description": "Implement role-based access control on all recommender API endpoints. Lawyer must have CaseAssignment for the clientId. Applicant can only access own client record (Client.userId matches session user). Admin has full access.",
+    "acceptanceCriteria": [
+      "Lawyer without CaseAssignment gets 403",
+      "Applicant accessing other client's recommenders gets 403",
+      "Admin can access any client's recommenders"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "ui",
-    "description": "Add loading/empty/error states to lawyer pages",
-    "steps": [
-      "Add loading skeletons to dashboard and case detail",
-      "Add empty state for no cases",
-      "Add error state with retry",
-      "Add empty state for no gap analysis"
+    "category": "auth",
+    "description": "Implement role-based access control on all drafts API endpoints. Same pattern as recommenders: lawyer needs CaseAssignment, applicant can only access own case. Additional: applicant can only PATCH personal_statement drafts, all others read-only for applicant.",
+    "acceptanceCriteria": [
+      "Lawyer without CaseAssignment gets 403",
+      "Applicant can PATCH personal_statement but gets 403 on PATCH other types",
+      "Applicant can GET all draft types for own case"
     ],
-    "passes": true
+    "passes": false
   },
   {
-    "category": "ui",
-    "description": "Create components/ui/file-dropzone.tsx (react-dropzone wrapper)",
-    "steps": [
-      "Create reusable file-dropzone component",
-      "Props: onDrop, accept, maxSize, multiple, disabled",
-      "Drag-and-drop visual states",
-      "File type and size validation",
-      "Show selected files list"
+    "category": "functional",
+    "description": "Create reusable auth helper for case-scoped API routes. Extract common pattern: check auth, check role, verify CaseAssignment for lawyer / ownership for applicant. Use in all recommender and draft routes to reduce duplication. Place in lib/case-auth.ts.",
+    "acceptanceCriteria": [
+      "lib/case-auth.ts exports a helper function",
+      "Returns { user, client } or throws appropriate HTTP error",
+      "Used by recommender and draft API routes"
     ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Replace existing dropzone usages with shared file-dropzone component",
-    "steps": [
-      "Replace dropzone in vault detail page",
-      "Replace dropzone in onboarding upload step",
-      "Replace dropzone in assistant file attachment",
-      "Verify all upload flows still work"
-    ],
-    "passes": true
+    "passes": false
   }
 ]

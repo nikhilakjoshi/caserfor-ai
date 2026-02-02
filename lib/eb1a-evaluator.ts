@@ -1,9 +1,25 @@
-import { generateText, tool, stepCountIs } from "ai"
-import { z } from "zod"
-import { analysisModel } from "@/lib/ai"
-import { prisma } from "@/lib/db"
-import { queryRelevantChunks } from "@/lib/rag"
-import type { EligibilityVerdict } from "@prisma/client"
+import { generateText, tool, stepCountIs, Output } from "ai";
+import { z } from "zod";
+import { analysisModel } from "@/lib/ai";
+import { prisma } from "@/lib/db";
+import { queryRelevantChunks } from "@/lib/rag";
+import type { EligibilityVerdict } from "@prisma/client";
+
+const criterionSchema = z.object({
+  slug: z.string(),
+  label: z.string(),
+  score: z.number().min(1).max(5).describe("1=no evidence, 2=minimal, 3=some evidence, 4=good evidence, 5=strong evidence"),
+  analysis: z.string().describe("1-2 paragraph analysis of this criterion"),
+  evidence: z.array(z.string()).describe("Specific evidence items found"),
+});
+
+const evaluationSchema = z.object({
+  verdict: z.enum(["strong", "moderate", "weak", "insufficient"]).describe(
+    "strong: 4+ criteria score >= 4, moderate: 3+ criteria score >= 3, weak: 1-2 criteria score >= 3, insufficient: 0 criteria score >= 3"
+  ),
+  summary: z.string().describe("2-3 paragraph overall assessment"),
+  criteria: z.array(criterionSchema).describe("All 10 EB-1A criteria evaluations"),
+});
 
 const SYSTEM_PROMPT = `You are an expert U.S. immigration attorney specializing in EB-1A extraordinary ability petitions. Your task is to evaluate a client's eligibility based on USCIS standards.
 
@@ -35,72 +51,35 @@ The petitioner must demonstrate extraordinary ability in sciences, arts, educati
    - strong: 4+ criteria score >= 4
    - moderate: 3+ criteria score >= 3
    - weak: 1-2 criteria score >= 3
-   - insufficient: 0 criteria score >= 3
-
-## Output Format
-After your analysis, output a JSON block wrapped in \`\`\`json ... \`\`\` with this structure:
-{
-  "verdict": "strong" | "moderate" | "weak" | "insufficient",
-  "summary": "2-3 paragraph overall assessment",
-  "criteria": [
-    {
-      "slug": "awards",
-      "label": "Awards",
-      "score": 1-5,
-      "analysis": "1-2 paragraph analysis of this criterion",
-      "evidence": ["list of specific evidence items found"]
-    }
-  ]
-}
-`
-
-interface CriterionResult {
-  slug: string
-  label: string
-  score: number
-  analysis: string
-  evidence: string[]
-}
-
-interface EvaluationResult {
-  verdict: EligibilityVerdict
-  summary: string
-  criteria: CriterionResult[]
-}
+   - insufficient: 0 criteria score >= 3`;
 
 /**
  * Runs the EB-1A eligibility evaluation for a client.
- * Fetches intake data and searches uploaded documents via RAG,
- * then produces a structured eligibility report.
+ * Phase 1: Agentic tool-use loop to gather intake data + search evidence.
+ * Phase 2: Structured output call to produce the final evaluation.
  */
 export async function runEvaluation(clientId: string): Promise<void> {
   try {
-    // Set status to under_review
-    await prisma.client.update({
-      where: { id: clientId },
-      data: { status: "under_review" },
-    })
-
     const client = await prisma.client.findUniqueOrThrow({
       where: { id: clientId },
       include: {
         criterionResponses: true,
         vault: { include: { documents: true } },
       },
-    })
+    });
 
-    const vaultId = client.vaultId
-    const documentIds = client.vault?.documents.map((d) => d.id) ?? []
+    const vaultId = client.vaultId;
+    const documentIds = client.vault?.documents.map((d) => d.id) ?? [];
 
-    // Build tools for the evaluator agent
     const tools = {
       get_intake_data: tool({
-        description: "Retrieve the client's intake form data including personal info, achievements, and criterion-specific responses",
+        description:
+          "Retrieve the client's intake form data including personal info, achievements, and criterion-specific responses",
         inputSchema: z.object({}),
         execute: async () => {
-          const criterionData: Record<string, unknown> = {}
+          const criterionData: Record<string, unknown> = {};
           for (const cr of client.criterionResponses) {
-            criterionData[cr.criterion] = cr.responses
+            criterionData[cr.criterion] = cr.responses;
           }
           return JSON.stringify({
             personal: {
@@ -130,33 +109,42 @@ export async function runEvaluation(clientId: string): Promise<void> {
             criterionResponses: criterionData,
             evidenceChecklist: client.evidenceChecklist,
             altCategories: client.altCategories,
-          })
+          });
         },
       }),
       search_evidence: tool({
-        description: "Search the client's uploaded documents for evidence related to a specific query. Use this to find supporting evidence for each EB-1A criterion.",
+        description:
+          "Search the client's uploaded documents for evidence related to a specific query. Use this to find supporting evidence for each EB-1A criterion.",
         inputSchema: z.object({
-          query: z.string().describe("Search query to find relevant evidence in uploaded documents"),
+          query: z
+            .string()
+            .describe(
+              "Search query to find relevant evidence in uploaded documents",
+            ),
         }),
         execute: async ({ query }) => {
           if (documentIds.length === 0) {
-            return "No documents uploaded by client."
+            return "No documents uploaded by client.";
           }
           const chunks = await queryRelevantChunks(query, documentIds, {
             topK: 5,
             vaultId: vaultId ?? undefined,
-          })
+          });
           if (chunks.length === 0) {
-            return "No relevant evidence found in uploaded documents."
+            return "No relevant evidence found in uploaded documents.";
           }
           return chunks
-            .map((c) => `[${c.documentName}] (score: ${c.score.toFixed(2)})\n${c.text}`)
-            .join("\n\n---\n\n")
+            .map(
+              (c) =>
+                `[${c.documentName}] (score: ${c.score.toFixed(2)})\n${c.text}`,
+            )
+            .join("\n\n---\n\n");
         },
       }),
-    }
+    };
 
-    const result = await generateText({
+    // Phase 1: Agentic loop -- gather evidence via tools
+    const research = await generateText({
       model: analysisModel,
       system: SYSTEM_PROMPT,
       tools,
@@ -168,22 +156,20 @@ ${client.hasMajorAchievement ? `They claim a major achievement: ${client.majorAc
 Please:
 1. First call get_intake_data to review all intake responses
 2. For each of the 10 EB-1A criteria, search for relevant evidence using search_evidence
-3. Score each criterion and provide your overall assessment
-4. Output your final evaluation as a JSON block`,
-    })
+3. Score each criterion and provide your overall assessment`,
+    });
 
-    // Parse the JSON from the response
-    const jsonMatch = result.text.match(/```json\s*([\s\S]*?)\s*```/)
-    if (!jsonMatch) {
-      throw new Error("No JSON output found in evaluator response")
-    }
+    // Phase 2: Structured output from gathered context
+    const { output: evaluation } = await generateText({
+      model: analysisModel,
+      output: Output.object({ schema: evaluationSchema }),
+      prompt: `Based on the following EB-1A evaluation analysis, produce the final structured evaluation report.
 
-    const evaluation: EvaluationResult = JSON.parse(jsonMatch[1])
+${research.text}`,
+    });
 
-    // Validate verdict
-    const validVerdicts: EligibilityVerdict[] = ["strong", "moderate", "weak", "insufficient"]
-    if (!validVerdicts.includes(evaluation.verdict)) {
-      evaluation.verdict = "insufficient"
+    if (!evaluation) {
+      throw new Error("No structured output generated from evaluation");
     }
 
     // Save report
@@ -194,32 +180,32 @@ Please:
         verdict: evaluation.verdict,
         summary: evaluation.summary,
         criteria: JSON.parse(JSON.stringify(evaluation.criteria)),
-        rawOutput: result.text,
+        rawOutput: research.text,
       },
       update: {
         verdict: evaluation.verdict,
         summary: evaluation.summary,
         criteria: JSON.parse(JSON.stringify(evaluation.criteria)),
-        rawOutput: result.text,
+        rawOutput: research.text,
       },
-    })
+    });
 
     // Update client status
     await prisma.client.update({
       where: { id: clientId },
       data: { status: "reviewed" },
-    })
+    });
   } catch (error) {
-    console.error("EB1A evaluation failed:", error)
+    console.error("EB1A evaluation failed:", error);
     // Reset status to submitted so user can retry
     try {
       await prisma.client.update({
         where: { id: clientId },
         data: { status: "submitted" },
-      })
+      });
     } catch {
       // ignore secondary error
     }
-    throw error
+    throw error;
   }
 }

@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { step4Schema, type Step4Data } from "@/app/onboarding/_lib/onboarding-schema"
@@ -28,6 +29,14 @@ export function StepBackground({ data, onUpdate, resumeConfidence = {} }: Props)
     },
     mode: "onBlur",
   })
+
+  useEffect(() => {
+    setValue("citizenship", data.citizenship || "")
+    setValue("fieldOfExpertise", data.fieldOfExpertise || "")
+    setValue("currentEmployer", data.currentEmployer || "")
+    setValue("dateOfBirth", data.dateOfBirth || "")
+    setValue("education", (data.education as Step4Data["education"]) || [])
+  }, [data.citizenship, data.fieldOfExpertise, data.currentEmployer, data.dateOfBirth, data.education, setValue])
 
   const education = watch("education") || []
 

@@ -70,7 +70,7 @@ export default function StepPage() {
       case 1:
         return <StepWelcome />
       case 2:
-        return <StepBasicInfo data={clientData} onUpdate={updateFields} resumeConfidence={resumeConfidence} />
+        return <StepBasicInfo data={clientData} onUpdate={updateFields} resumeConfidence={resumeConfidence} clientId={clientData.id} onAttachmentAdded={addAttachment} />
       case 3:
         return (
           <StepResumeUpload

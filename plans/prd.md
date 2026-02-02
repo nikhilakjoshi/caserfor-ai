@@ -1,394 +1,387 @@
-# PRD: Onboarding Revamp, Vault Integration, Lawyer Dashboard & Auth
+# PRD: Recommender Management, Smart Ingestion & Document Drafting
 
 ## Overview
 
-Transform the existing EB1A evaluation platform from a single-user prototype into a multi-role production system. Key changes: restructured onboarding with resume-first flow and AI pre-population, document vault integration throughout, lawyer dashboard with case management and gap analysis, document classification agent, and real authentication with roles.
+Three interconnected features that take a case from evaluated to petition-ready: (A) manage recommenders with AI-powered suggestions, (B) silently classify every uploaded doc and extract recommender candidates from LinkedIn PDFs, (C) dedicated two-panel drafting workspace for all 7 EB1A document types with specialized AI agents.
 
-**Updated User Flow:**
-- Applicant: Landing (`/`) -> Onboarding (`/onboarding`) -> Evaluation (`/evaluation/[clientId]`) -> Payment -> Assistant (`/assistant`) w/ vault access
-- Lawyer: Login -> Dashboard (`/lawyer`) -> Case detail (`/lawyer/cases/[clientId]`) -> Vault + Gap Analysis
+**Depends on:** Existing Client model, Vault/RAG pipeline, Gap Analysis, EligibilityReport, document processing endpoint.
 
 ---
 
 ## Goals
 
-- Restructure onboarding into 9 sections per spec, with resume-first flow that pre-populates fields via AI
-- Connect onboarding data + uploads to per-applicant vault, accessible from assistant post-payment
-- Build lawyer dashboard: self-assign cases, view vault/docs, see gap analysis with AI recommendations
-- Add "start over" to onboarding with confirmation dialog
-- Implement document classification agent on every upload
-- Add auth with roles (applicant, lawyer, admin)
-- Use react-dropzone for all file uploads
+- Let lawyers and applicants build a recommender roster with AI-suggested candidates based on profile + evidence
+- Silently classify every uploaded document; auto-extract recommender candidates from LinkedIn PDFs
+- Provide a structured drafting workspace for all 7 petition document types with AI generation, per-section regeneration, and version history
+- Keep all new features scoped to existing client/case context
 
 ## Non-goals
 
-- Real-time collaboration between lawyer and applicant
-- Billing/subscription management for lawyers
-- Mobile app
-- Email notification system (future)
-- Workflow builder UI
+- E-signature or recommender portal (recommenders don't log in)
+- Real-time co-editing between lawyer and applicant on drafts
+- Automated USCIS filing or e-filing integration
+- Email/SMS notifications to recommenders (future)
+- Template marketplace
 
 ---
 
 ## User Stories
 
 **Applicant:**
-- Upload resume first, see onboarding fields pre-populated, verify/correct each step
-- Start over mid-onboarding if needed (with confirmation)
-- After payment, access assistant with my vault containing all uploaded docs
-- Upload documents at any step, have them auto-classified
+- View AI-suggested recommender roles based on my profile and evidence
+- Add recommenders I know, upload their CV/bio, track status
+- Access drafting workspace for personal statement
+- Review lawyer-generated drafts in editor
 
 **Lawyer:**
-- Log in, see dashboard of unassigned cases + my assigned cases
-- Self-assign unassigned cases
-- Click a case -> see applicant's vault, documents, and gap analysis
-- Gap analysis shows per-criterion strength, doc coverage, and AI recommendations for weak areas
+- See AI-suggested recommender types with reasoning and criteria coverage
+- Manage full recommender pipeline: identify -> contact -> confirm -> draft letter -> finalize
+- Generate any of 7 document types using AI with full case context
+- Edit AI-generated drafts in rich text editor, regenerate individual sections
+- Track draft status and version history across all document types
 
 ---
 
-## Functional Requirements
+## A. Recommender Management
 
-### 1. Authentication & Roles
+### Data Models
 
-**Implementation:** NextAuth.js (or Clerk -- TBD based on speed preference)
+```prisma
+enum RecommenderStatus {
+  suggested
+  identified
+  contacted
+  confirmed
+  letter_drafted
+  letter_finalized
+}
 
-**Roles:**
-- `applicant` - onboarding flow, assistant, own vault only
-- `lawyer` - lawyer dashboard, assigned cases' vaults, gap analysis
-- `admin` - all access (future, minimal for now)
+enum RecommenderSourceType {
+  manual
+  ai_suggested
+  linkedin_extract
+}
 
-**Schema changes to `User` model:**
-```
-role    UserRole  @default(applicant)  // enum: applicant, lawyer, admin
-```
+model Recommender {
+  id            String              @id @default(cuid())
+  clientId      String
+  client        Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name          String
+  title         String?
+  organization  String?
+  relationship  String?
+  linkedinUrl   String?
+  email         String?
+  phone         String?
+  notes         String?             @db.Text
+  status        RecommenderStatus   @default(suggested)
+  sourceType    RecommenderSourceType @default(manual)
+  aiReasoning   String?             @db.Text
+  criteriaRelevance String[]        // which EB1A criteria this recommender covers
+  attachments   RecommenderAttachment[]
+  caseDrafts    CaseDraft[]         // rec letters linked to this recommender
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
 
-**Schema: new `CaseAssignment` model:**
-```
-CaseAssignment {
-  id        String   @id @default(cuid())
-  clientId  String
-  lawyerId  String
-  assignedAt DateTime @default(now())
-  client    Client   @relation(fields: [clientId], references: [id])
-  lawyer    User     @relation(fields: [lawyerId], references: [id])
-  @@unique([clientId])  // one lawyer per case
+  @@index([clientId])
+}
+
+model RecommenderAttachment {
+  id              String       @id @default(cuid())
+  recommenderId   String
+  recommender     Recommender  @relation(fields: [recommenderId], references: [id], onDelete: Cascade)
+  name            String
+  fileType        String
+  storageKey      String
+  createdAt       DateTime     @default(now())
 }
 ```
 
-**Files to modify:**
-- `prisma/schema.prisma` - add `UserRole` enum, `role` field on User, `CaseAssignment` model
-- Replace all `MOCK_USER_ID` usage with session user ID
-- Add middleware or layout-level auth checks
+### Status Flow
 
-**Files to create:**
-- `lib/auth.ts` - NextAuth config
-- `app/api/auth/[...nextauth]/route.ts`
-- `middleware.ts` - route protection
-
----
-
-### 2. Onboarding Restructure (9 Sections)
-
-Restructure the current 6-step flow into 9 sections. The new step mapping:
-
-| New Section | Content | Current Code |
-|---|---|---|
-| 1. Getting Started | Welcome + Basic Info | Partial in step-personal |
-| 2. Resume Upload | Upload resume, AI parses & pre-populates | NEW |
-| 3. Background & Eligibility | Citizenship, applicant type, criteria selection | Partial in step-personal + step-criteria |
-| 4. Evidence Collection | Dynamic per-criterion fields | step-criteria (restructure) |
-| 5. Immigration Status | Visa, I-140, issues, criminal record | NEW |
-| 6. Personal Circumstances | Dependents, deadlines | NEW |
-| 7. Supporting Documents | Additional doc uploads | step-docs-timeline (partial) |
-| 8. Preferences & Attribution | Lawyer prefs, referral source, social | NEW |
-| 9. Review & Submit | Summary + submit | step-review (adapt) |
-
-**Key changes to existing components:**
-
-`app/onboarding/_lib/onboarding-schema.ts` - Expand Zod schema to include all new fields:
-- Section 1: consent checkboxes (texts, marketing, terms)
-- Section 3: applicantType enum, country of citizenship as multi-select
-- Section 5: currentVisaStatus, visaExpiration, otherVisas, i140Status, priorImmigrationIssues, criminalRecord
-- Section 6: hasDependents, dependentsInfo, hasDeadlines
-- Section 7: (file uploads handled via vault, not form fields)
-- Section 8: lawyerPreferences, referralSource, socialPlatform, followerCount, profileLink
-- Section 9: anythingElse text, additional file upload
-
-`prisma/schema.prisma` - Add corresponding fields to `Client` model.
-
-**New step components** in `app/onboarding/_components/`:
-- `step-welcome.tsx` - Value props + start button
-- `step-basic-info.tsx` - Name, email, phone, consent
-- `step-resume-upload.tsx` - Dropzone for resume, processing indicator, skip option
-- `step-background.tsx` - Citizenship, applicant type, criteria checkboxes
-- `step-evidence.tsx` - Dynamic criteria evidence (refactor from step-criteria)
-- `step-immigration.tsx` - Visa status, I-140, issues
-- `step-circumstances.tsx` - Dependents, deadlines
-- `step-documents.tsx` - Additional supporting docs upload
-- `step-preferences.tsx` - Lawyer prefs, referral, social
-- `step-review.tsx` - Review all (adapt existing)
-
-**Files to modify:**
-- `app/onboarding/page.tsx` - Update step count (6 -> 10 screens including welcome), step routing
-- `app/onboarding/_lib/use-onboarding.ts` - Update step management, add resume pre-population merge logic
-- `app/onboarding/_lib/onboarding-schema.ts` - Expand schema
-- `app/onboarding/_lib/criteria-questions.ts` - Restructure to match new evidence collection fields per spec
-
----
-
-### 3. Resume Upload & AI Pre-Population Agent
-
-**Flow:**
-1. After welcome screen, applicant sees dedicated resume upload screen
-2. Upload via react-dropzone (PDF, DOC, DOCX - max 20MB)
-3. File stored in applicant's vault via existing upload pipeline
-4. Simultaneously, resume parsing agent extracts structured data
-5. Pre-populated fields shown with confidence indicators
-6. Applicant proceeds through steps, verifying/correcting pre-filled data
-
-**Resume Parsing Agent** (`lib/resume-parser.ts`):
-- Input: extracted text from resume (reuse `extractText()` from `lib/document-parser.ts`)
-- Model: `gemini-2.5-flash` for speed
-- Output: JSON matching onboarding schema fields + confidence per field (0-1)
-- Fields to extract:
-  - firstName, lastName, email, phone
-  - citizenship (infer from education/work locations)
-  - fieldOfExpertise, currentEmployer
-  - education array (institution, degree, year)
-  - Work history -> potential criteria evidence
-  - Publications -> scholarly articles
-  - Awards/honors -> awards criterion
-  - Professional memberships -> membership criterion
-
-**Confidence display:**
-- High confidence (>0.8): normal field styling, small checkmark
-- Medium confidence (0.5-0.8): light yellow/amber background
-- Low confidence (<0.5): orange background, "Please verify" label
-
-**API endpoint:** `POST /api/onboarding/[clientId]/parse-resume`
-- Accepts file or documentId
-- Returns `{ fields: Record<string, any>, confidence: Record<string, number> }`
-- Stores parsed data in client record
-
-**Files to create:**
-- `lib/resume-parser.ts` - AI parsing logic
-- `app/api/onboarding/[clientId]/parse-resume/route.ts`
-- `app/onboarding/_components/step-resume-upload.tsx`
-
----
-
-### 4. Start Over Button
-
-**Location:** Persistent in onboarding header/nav area (visible on all steps except welcome)
-
-**Behavior:**
-1. Click "Start Over" -> confirmation dialog appears
-2. Dialog: "This will delete all your progress including uploaded documents. Are you sure?"
-3. Confirm -> API call to reset
-4. Cancel -> dismiss dialog
-
-**API endpoint:** `POST /api/onboarding/[clientId]/reset`
-- Deletes all `CriterionResponse` records for client
-- Deletes all `Document` records in client's vault (+ S3 files + Pinecone vectors)
-- Resets all client fields to null/defaults
-- Resets `currentStep` to 1
-- Resets `status` to `draft`
-- Returns `{ success: true }`
-
-**Files to create:**
-- `app/api/onboarding/[clientId]/reset/route.ts`
-
-**Files to modify:**
-- `app/onboarding/page.tsx` - Add start over button in header area + confirmation dialog
-
----
-
-### 5. Document Classification Agent
-
-**Already partially implemented** in `lib/categorize-document.ts`. Current system:
-- 18 categories (10 EB1A evidence + 8 general legal)
-- Uses Gemini 2.5-flash
-- Runs during document processing pipeline
-
-**Changes needed:**
-- Ensure classification runs on EVERY upload path (onboarding uploads, vault uploads, assistant uploads)
-- Verify onboarding upload path (`/api/onboarding/[clientId]/upload`) triggers processing pipeline (currently it does call process endpoint)
-- Add categories for resume-specific docs not in current list:
-  - `resume-cv` - Resumes and CVs
-  - `recommendation-letter` - Letters of recommendation
-  - `employment-verification` - Employment verification letters
-  - `identity-document` - Passport, ID copies
-  - `immigration-document` - Visa copies, I-140 receipts, prior petitions
-
-**Updated category list (23 total):**
 ```
-EB-1A Evidence (10): awards, membership, press, judging, original-contribution,
-  scholarly-articles, exhibitions, leading-role, high-salary, commercial-success
-
-Supporting Documents (5): resume-cv, recommendation-letter, employment-verification,
-  identity-document, immigration-document
-
-General Legal (8): contract, template, memo, policy, research, financial,
-  correspondence, other
+suggested -> identified -> contacted -> confirmed -> letter_drafted -> letter_finalized
 ```
 
-**Files to modify:**
-- `lib/document-categories.ts` - Add 5 new categories
-- `lib/categorize-document.ts` - Update prompt with new categories
-- Vault UI category dropdown - auto-updates if it reads from `document-categories.ts`
+Any status can revert to a previous state. `suggested` is set by AI agent or LinkedIn extraction. `identified` means lawyer/applicant confirmed this is a real person they want to pursue.
+
+### AI Suggestion Agent
+
+- Model: `gemini-2.5-pro`
+- Trigger: Manual "Suggest Recommenders" button on Recommenders tab
+- Approach: Agentic tool-use loop (same pattern as EB1A evaluator)
+- Tools available:
+  - `get_client_profile` - intake data, field of expertise, achievements
+  - `search_vault` - RAG search across client's vault
+  - `get_gap_analysis` - current gap analysis with weak criteria
+  - `get_eligibility_report` - criteria scores and evidence
+- Output: 5-8 suggested recommender *role types* (not specific people), each with:
+  - `roleType`: e.g. "Former PhD Advisor", "Industry CTO who adopted your research"
+  - `reasoning`: why this type of recommender strengthens the case
+  - `criteriaRelevance`: which EB1A criteria they'd address
+  - `idealQualifications`: what makes a strong pick for this role
+  - `sampleTalkingPoints`: 2-3 key points their letter should cover
+- Suggestions saved as `Recommender` records with `status=suggested`, `sourceType=ai_suggested`
+
+### API Endpoints
+
+```
+GET    /api/cases/[clientId]/recommenders          - list all
+POST   /api/cases/[clientId]/recommenders          - create one
+PATCH  /api/cases/[clientId]/recommenders/[id]     - update
+DELETE /api/cases/[clientId]/recommenders/[id]     - delete
+POST   /api/cases/[clientId]/recommenders/suggest  - trigger AI suggestion agent
+POST   /api/cases/[clientId]/recommenders/[id]/attachments - upload CV/bio
+DELETE /api/cases/[clientId]/recommenders/[id]/attachments/[attachmentId]
+```
+
+All endpoints require auth. Lawyer must be assigned to case. Applicant can only access own case.
+
+### UI Components
+
+- **Recommenders Tab** on case detail page (lawyer) + applicant dashboard section
+- **RecommenderList**: table/cards with name, title, org, status badge, criteria tags, actions
+- **RecommenderForm**: sheet/dialog for add/edit with fields: name, title, org, relationship, LinkedIn URL, email, phone, notes
+- **RecommenderDetail**: slide-over sheet showing full info, attachments, linked draft status
+- **AISuggestionsPanel**: triggered by button, shows streaming suggestions with accept/dismiss actions
+- **StatusPipeline**: visual pipeline showing count at each status stage
 
 ---
 
-### 6. Vault Integration: Onboarding -> Assistant
+## B. Smart Document Ingestion
 
-**Current state:** Vault is created per client during onboarding draft. Documents uploaded during onboarding go to this vault.
+### Enhanced Document Processing
 
-**Required changes:**
+Modify existing `POST /api/vaults/[id]/documents/process` pipeline:
 
-**Applicant assistant view (`/assistant`):**
-- After payment, applicant lands on assistant page
-- Assistant should auto-select/show only the applicant's vault
-- Hide vault creation/selection UI for applicants (they have one vault)
-- Existing assistant already supports vault-scoped queries via Pinecone namespace
+1. **Silent classification** (already exists via `categorizeDocument`) - no changes needed, already runs in parallel with embedding
+2. **Add `linkedin-profile` category** to `DOCUMENT_CATEGORIES` in `lib/document-categories.ts`:
+   ```
+   { slug: "linkedin-profile", label: "LinkedIn Profile", description: "LinkedIn profile exports and professional network data" }
+   ```
+3. **LinkedIn PDF detection**: after categorization, if category is `linkedin-profile`:
+   - Run LinkedIn extraction agent to parse structured data
+   - Extract potential recommender candidates (people mentioned: managers, collaborators, endorsers)
+   - Auto-create `Recommender` records with `status=suggested`, `sourceType=linkedin_extract`
+   - Requires `clientId` passed to processing endpoint (currently only has `vaultId` - need to resolve client from vault)
 
-**Files to modify:**
-- `app/(dashboard)/assistant/page.tsx` - For applicant role: auto-load their vault, hide multi-vault UI
-- `app/(dashboard)/vault/[id]/page.tsx` - For applicant role: read-only or scoped access
+### LinkedIn Extraction Agent
 
-**API changes:**
-- `GET /api/vaults` - Filter by user role: applicants see only their vault, lawyers see assigned clients' vaults
+- Model: `gemini-2.5-flash` (fast, structured extraction)
+- Input: full text of LinkedIn PDF
+- Output schema:
+  ```ts
+  {
+    profileData: {
+      headline: string
+      currentRole: string
+      company: string
+      skills: string[]
+      recommendations: { recommenderName: string, recommenderTitle: string, text: string }[]
+    }
+    potentialRecommenders: {
+      name: string
+      title: string
+      organization: string
+      relationship: string  // inferred: "manager", "colleague", "endorser"
+      reasoning: string
+    }[]
+  }
+  ```
+- Only creates recommenders if client record exists (vault -> client lookup)
+
+### Changes Required
+
+- Add `linkedin-profile` to `DOCUMENT_CATEGORIES`
+- Add client lookup from vault in processing route
+- Add LinkedIn extraction function in `lib/linkedin-parser.ts` (enhance existing file)
+- Create recommender records from extraction results
+- No UI changes to upload flow - classification remains silent
 
 ---
 
-### 7. Lawyer Dashboard
+## C. Dedicated Document Drafting UI
 
-**New routes:**
+### Document Types (7)
 
-**`/lawyer` - Dashboard (case list)**
-- Two tabs: "My Cases" and "Unassigned"
-- Each case card shows: applicant name, submission date, evaluation verdict, criteria count, status badge
-- "Unassigned" tab: cases with status `paid` and no `CaseAssignment`
-- "Assign to Me" button on unassigned cases
-- Click case -> `/lawyer/cases/[clientId]`
+| Type | Slug | Description |
+|------|------|-------------|
+| Petition Letter | `petition-letter` | Main I-140 petition letter arguing EB1A eligibility |
+| Personal Statement | `personal-statement` | Applicant's narrative of achievements and contributions |
+| Recommendation Letter | `recommendation-letter` | Letter from recommender (linked to Recommender record) |
+| Cover Letter | `cover-letter` | Cover letter for the petition package |
+| Exhibit List | `exhibit-list` | Numbered list of all exhibits with descriptions |
+| Table of Contents | `table-of-contents` | TOC for the petition package |
+| RFE Response | `rfe-response` | Response to Request for Evidence |
 
-**`/lawyer/cases/[clientId]` - Case Detail**
-- Three sub-views (tabs or sidebar nav):
-  1. **Vault** - Reuse existing vault UI (`components/vault/`), scoped to client's vault
-  2. **Gap Analysis** - New component (see below)
-  3. **Assistant** - Reuse assistant UI, scoped to client's vault
+### Data Models
 
-**Gap Analysis View** (`/lawyer/cases/[clientId]/gap-analysis`):
+```prisma
+enum DraftDocumentType {
+  petition_letter
+  personal_statement
+  recommendation_letter
+  cover_letter
+  exhibit_list
+  table_of_contents
+  rfe_response
+}
 
-Display per-criterion:
-- Strength level: strong / moderate / weak / no evidence (color-coded)
-- Document count per criterion (from document classification)
-- AI confidence score
-- Summary from EligibilityReport criteria JSON
+enum DraftStatus {
+  not_started
+  generating
+  draft
+  in_review
+  final
+}
 
-Plus:
-- Overall verdict banner
-- AI-generated recommendations for weak/missing criteria (what evidence to gather)
-- "Refresh Analysis" button to re-run evaluator
+model CaseDraft {
+  id             String            @id @default(cuid())
+  clientId       String
+  client         Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  documentType   DraftDocumentType
+  title          String
+  content        Json?             // TipTap JSON document
+  plainText      String?           @db.Text  // plain text mirror for AI context
+  sections       Json?             // section metadata: [{ id, title, status, order }]
+  status         DraftStatus       @default(not_started)
+  recommenderId  String?           // only for recommendation_letter type
+  recommender    Recommender?      @relation(fields: [recommenderId], references: [id])
+  versions       CaseDraftVersion[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
 
-**API endpoints:**
-- `GET /api/lawyer/cases` - List cases (assigned + unassigned)
-- `POST /api/lawyer/cases/[clientId]/assign` - Self-assign
-- `GET /api/lawyer/cases/[clientId]/gap-analysis` - Get gap analysis data
-- `POST /api/lawyer/cases/[clientId]/gap-analysis/refresh` - Re-run evaluation
+  @@index([clientId])
+  @@index([clientId, documentType])
+  @@unique([clientId, documentType, recommenderId]) // one draft per type per recommender
+}
 
-**Gap analysis data structure:**
-```typescript
-{
-  verdict: "strong" | "moderate" | "weak" | "insufficient",
-  summary: string,
-  criteria: Array<{
-    name: string,
-    strength: "strong" | "moderate" | "weak" | "none",
-    confidence: number,
-    documentCount: number,
-    documents: Array<{ id: string, name: string, category: string }>,
-    analysis: string,
-    recommendations: string[]  // AI-generated next steps
-  }>,
-  overallRecommendations: string[]
+model CaseDraftVersion {
+  id          String    @id @default(cuid())
+  draftId     String
+  draft       CaseDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  content     Json      // TipTap JSON snapshot
+  plainText   String?   @db.Text
+  sections    Json?
+  versionNote String?
+  createdBy   String?   // userId
+  createdAt   DateTime  @default(now())
+
+  @@index([draftId])
 }
 ```
 
-**Files to create:**
-- `app/(lawyer)/layout.tsx` - Lawyer layout with nav
-- `app/(lawyer)/lawyer/page.tsx` - Case list dashboard
-- `app/(lawyer)/lawyer/cases/[clientId]/page.tsx` - Case detail
-- `app/(lawyer)/lawyer/cases/[clientId]/gap-analysis/page.tsx` - Gap analysis view
-- `app/api/lawyer/cases/route.ts` - List cases
-- `app/api/lawyer/cases/[clientId]/assign/route.ts` - Self-assign
-- `app/api/lawyer/cases/[clientId]/gap-analysis/route.ts` - Gap analysis data
-- `lib/gap-analysis.ts` - Gap analysis generation logic (extends eb1a-evaluator)
+### AI Drafting Agents
+
+7 specialized agents, one per document type. All share the same tool set but have type-specific system prompts.
+
+**Shared tools:**
+- `get_client_profile` - full intake data
+- `search_vault` - RAG search with query
+- `get_gap_analysis` - current gap analysis
+- `get_eligibility_report` - criteria scores
+- `get_existing_drafts` - other drafts for cross-reference (e.g., petition letter references personal statement)
+- `get_recommender` - recommender details (for rec letter agent)
+
+**Generation approach - hybrid:**
+1. **Full generation**: agent generates complete document with section markers
+2. **Per-section regeneration**: user selects a section, provides optional instruction, agent regenerates just that section with full document context
+3. **Chat refinement**: user can chat with agent about the draft, agent suggests edits
+
+**Model selection:**
+- `gemini-2.5-pro` for petition letter and RFE response (complex, long)
+- `gemini-2.5-flash` for other document types
+
+**Token strategy for long documents:**
+- Petition letter: generate section-by-section sequentially, assembling into full document
+- Other docs: single generation call
+- All regeneration: single section at a time with full doc as context
+
+### API Endpoints
+
+```
+GET    /api/cases/[clientId]/drafts                     - list all drafts
+POST   /api/cases/[clientId]/drafts                     - create draft
+GET    /api/cases/[clientId]/drafts/[id]                - get draft with content
+PATCH  /api/cases/[clientId]/drafts/[id]                - update content/status
+DELETE /api/cases/[clientId]/drafts/[id]                - delete draft
+POST   /api/cases/[clientId]/drafts/[id]/generate       - trigger full AI generation (streaming)
+POST   /api/cases/[clientId]/drafts/[id]/regenerate     - regenerate specific section (streaming)
+POST   /api/cases/[clientId]/drafts/[id]/versions       - save version snapshot
+GET    /api/cases/[clientId]/drafts/[id]/versions       - list versions
+```
+
+### UI Pages
+
+#### Drafts Index: `/cases/[clientId]/drafts`
+
+- Grid of 7 document type cards
+- Each card shows: doc type name, status badge, last updated, action button (Create/Edit/View)
+- For recommendation letters: expandable section showing one card per recommender with `status >= confirmed`
+- Quick stats: X of 7 started, X finalized
+
+#### Drafting Workspace: `/cases/[clientId]/drafts/[id]`
+
+Two-panel layout:
+
+**Left panel - AI Panel (collapsible, ~40% width):**
+- "Generate" button (full document generation)
+- Section list with per-section "Regenerate" buttons
+- Optional instruction input per section
+- Chat interface for refinement questions
+- Generation status/progress indicator
+
+**Right panel - Editor (~60% width):**
+- TipTap rich text editor with toolbar
+- Section headings as navigable anchors
+- Real-time content from AI streams into editor
+- Manual editing always available
+- Version history dropdown in toolbar
+
+**Header:**
+- Document type title, status badge
+- Save button (auto-save on edit with debounce)
+- "Save Version" button (explicit snapshot)
+- Back to drafts index
+
+#### Case Detail Integration
+
+Add two new tabs to lawyer case detail page:
+- **Recommenders tab**: RecommenderList + AISuggestionsPanel
+- **Drafts tab**: mini drafts index (cards grid) with link to full drafts page
+
+Add to applicant dashboard:
+- Recommenders section (view + add own recommenders)
+- Drafts section (view + edit personal statement, review other drafts)
 
 ---
 
-### 8. react-dropzone Standardization
+## Data Model Summary
 
-Already used in step-docs-timeline and vault page. Ensure all new upload points use it:
-- `step-resume-upload.tsx` - Resume upload
-- `step-documents.tsx` - Supporting docs
-- `step-review.tsx` - "Anything else" file upload
-- Any lawyer-side upload capability
+New models: `Recommender`, `RecommenderAttachment`, `CaseDraft`, `CaseDraftVersion`
 
-Create a shared dropzone component if one doesn't exist:
+New enums: `RecommenderStatus`, `RecommenderSourceType`, `DraftDocumentType`, `DraftStatus`
 
-**File to create:**
-- `components/ui/file-dropzone.tsx` - Reusable wrapper around react-dropzone with consistent styling, file type validation, size limits, progress indicator
+Relations added to `Client`:
+```prisma
+model Client {
+  // ... existing fields
+  recommenders  Recommender[]
+  caseDrafts    CaseDraft[]
+}
+```
 
----
+### Migration Notes
 
-## Technical Considerations
-
-### Architecture
-- Next.js App Router with route groups: `(dashboard)` for applicant, `(lawyer)` for lawyer
-- Prisma ORM, PostgreSQL
-- Google AI (Gemini) for all AI tasks
-- Pinecone for vector search, S3 for file storage
-- Existing patterns: react-hook-form + Zod, Radix UI, Tailwind, Lucide icons
-
-### Key existing files to build on
-- Onboarding schema: `app/onboarding/_lib/onboarding-schema.ts`
-- Onboarding hook: `app/onboarding/_lib/use-onboarding.ts`
-- Document processing: `app/api/vaults/[id]/documents/process/route.ts`
-- Document categorization: `lib/categorize-document.ts`, `lib/document-categories.ts`
-- EB1A evaluator: `lib/eb1a-evaluator.ts`
-- AI config: `lib/ai.ts`
-- Text extraction: `lib/document-parser.ts`
-- S3: `lib/s3.ts`
-- Pinecone: `lib/pinecone.ts`
-
-### Migration path
-- Add new fields to Client model (nullable for backward compat)
-- Add UserRole enum, CaseAssignment model
-- Run `npx prisma migrate dev`
-- Incremental deployment: auth first, then onboarding restructure, then lawyer dashboard
-
----
-
-## Edge Cases & Error Handling
-
-- Resume parsing fails: show error toast, allow skip to manual entry
-- Resume too large: reject at dropzone level (20MB limit)
-- Resume has no extractable text (scanned image PDF): show message suggesting re-upload with text-based PDF
-- Start over while documents are processing: cancel processing, then delete
-- Lawyer tries to access unassigned case: 403
-- Applicant tries to access lawyer routes: redirect to `/assistant`
-- Gap analysis with no evaluation report: prompt to run evaluation first
-- Multiple lawyers try to assign same case simultaneously: DB unique constraint on CaseAssignment.clientId handles race condition
-- Pre-populated field overwritten by user then resume re-uploaded: user edits take precedence, don't overwrite
+- Existing `Client.recommenders` Json field contains free-text recommender data from onboarding intake. Migration strategy: keep the Json field as `recommenderNotes` (rename), new structured data goes into `Recommender` model. Optionally parse existing Json into Recommender records post-migration.
 
 ---
 
 ## Open Questions
 
-- NextAuth vs Clerk for auth? Clerk faster to ship, NextAuth more flexible
-- Should lawyers be able to unassign themselves from a case?
-- Gap analysis recommendations -- use gemini-2.5-pro or flash?
-- Should applicant see gap analysis too (post-payment) or lawyer-only?
-- LinkedIn URL parsing for resume alternative -- build now or later?
-- Max cases per lawyer limit?
-- Should "start over" require email re-verification?
+- Migrate existing `Client.recommenders` JSON field to new model or keep as legacy notes?
+- Rec letter drafts: require linked recommender or allow generic?
+- Token strategy for 40-page petition letter: single call or section-by-section?
+- Draft export format: server-side (puppeteer/docx) or client-side?
+- Rate limiting on AI generation: per-user or per-case?
+- Single route for drafting page (role-based layout) or separate routes per role?

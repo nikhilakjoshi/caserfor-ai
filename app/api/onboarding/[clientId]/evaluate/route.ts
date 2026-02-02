@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { runEvaluation } from "@/lib/eb1a-evaluator"
 
+export const maxDuration = 300
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ clientId: string }> }

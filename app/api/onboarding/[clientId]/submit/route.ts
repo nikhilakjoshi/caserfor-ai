@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
+import { after } from "next/server"
 import { prisma } from "@/lib/db"
 import { getUser } from "@/lib/get-user"
+import { runEvaluation } from "@/lib/eb1a-evaluator"
 
 export async function POST(
   request: NextRequest,
@@ -34,25 +36,22 @@ export async function POST(
       )
     }
 
-    // Update status to submitted, then under_review
+    // Update status
     await prisma.client.update({
-      where: { id: clientId },
-      data: { status: "submitted" },
-    })
-
-    const updated = await prisma.client.update({
       where: { id: clientId },
       data: { status: "under_review" },
     })
 
-    // Trigger EB1A evaluator non-blocking
-    const baseUrl = request.nextUrl.origin
-    fetch(`${baseUrl}/api/onboarding/${clientId}/evaluate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    }).catch((err) => console.error("Failed to trigger evaluator:", err))
+    // Run evaluation after response is sent (keeps serverless alive)
+    after(async () => {
+      try {
+        await runEvaluation(clientId)
+      } catch (err) {
+        console.error("Background evaluation failed:", err)
+      }
+    })
 
-    return NextResponse.json(updated, { status: 202 })
+    return NextResponse.json({ id: clientId, status: "under_review" }, { status: 202 })
   } catch (error) {
     console.error("Failed to submit intake:", error)
     return NextResponse.json(

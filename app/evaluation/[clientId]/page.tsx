@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useParams, useSearchParams, useRouter } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -38,7 +38,7 @@ export default function EvaluationPage() {
   const [polling, setPolling] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [pollCount, setPollCount] = useState(0)
+  const pollCountRef = useRef(0)
 
   const paymentParam = searchParams.get("payment")
 
@@ -56,15 +56,14 @@ export default function EvaluationPage() {
       }
       const body = await res.json()
       setClientStatus(body.status)
-      setPollCount(prev => prev + 1)
+      pollCountRef.current += 1
 
       if (body.report) {
         setReport(body.report)
         setPolling(false)
       } else if (body.status === "reviewed" || body.status === "paid") {
         setPolling(false)
-      } else if (body.status === "draft" || (body.status === "submitted" && pollCount > 5)) {
-        // Evaluation likely failed and reset status
+      } else if (body.status === "draft" || (body.status === "submitted" && pollCountRef.current > 5)) {
         setError("Evaluation failed. Please try resubmitting or contact support.")
         setPolling(false)
       }
@@ -74,7 +73,7 @@ export default function EvaluationPage() {
       setPolling(false)
       setLoading(false)
     }
-  }, [clientId, pollCount])
+  }, [clientId])
 
   useEffect(() => {
     if (!polling) return
@@ -86,7 +85,7 @@ export default function EvaluationPage() {
   async function handleRetry() {
     setError(null)
     setLoading(true)
-    setPollCount(0)
+    pollCountRef.current = 0
     // Re-trigger evaluation
     try {
       await fetch(`/api/onboarding/${clientId}/evaluate`, { method: "POST" })
