@@ -96,7 +96,7 @@ export async function PATCH(request: NextRequest) {
     if (majorAchievementDetails !== undefined) data.majorAchievementDetails = majorAchievementDetails
     if (socialFollowing !== undefined) data.socialFollowing = socialFollowing
     if (keynotes !== undefined) data.keynotes = keynotes
-    if (recommenders !== undefined) data.recommenders = recommenders
+    if (recommenders !== undefined) data.recommenderNotes = recommenders
     if (selfAssessment !== undefined) data.selfAssessment = selfAssessment
     if (standingLevel !== undefined) data.standingLevel = standingLevel
     if (recognitionScope !== undefined) data.recognitionScope = recognitionScope

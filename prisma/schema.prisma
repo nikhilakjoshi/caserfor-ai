@@ -92,6 +92,39 @@ enum EligibilityVerdict {
   insufficient
 }
 
+enum RecommenderStatus {
+  suggested
+  identified
+  contacted
+  confirmed
+  letter_drafted
+  letter_finalized
+}
+
+enum RecommenderSourceType {
+  manual
+  ai_suggested
+  linkedin_extract
+}
+
+enum DraftDocumentType {
+  petition_letter
+  personal_statement
+  recommendation_letter
+  cover_letter
+  exhibit_list
+  table_of_contents
+  rfe_response
+}
+
+enum DraftStatus {
+  not_started
+  generating
+  draft
+  in_review
+  final
+}
+
 // ============================================
 // MODELS
 // ============================================
@@ -383,7 +416,7 @@ model Client {
   majorAchievementDetails  String?           @db.Text
   socialFollowing          String?
   keynotes                 String?           @db.Text
-  recommenders             Json?
+  recommenderNotes         Json?
   selfAssessment           String?           @db.Text
   standingLevel            String?
   recognitionScope         String?
@@ -415,6 +448,8 @@ model Client {
   eligibilityReport  EligibilityReport?
   gapAnalyses        GapAnalysis[]
   caseAssignments    CaseAssignment[]
+  recommenders       Recommender[]
+  caseDrafts         CaseDraft[]
 
   @@index([userId])
   @@index([status])
@@ -466,4 +501,87 @@ model GapAnalysis {
 
   @@index([clientId])
   @@map("gap_analyses")
+}
+
+model Recommender {
+  id                String                @id @default(cuid())
+  clientId          String
+  name              String
+  title             String?
+  organization      String?
+  relationship      String?
+  linkedinUrl       String?
+  email             String?
+  phone             String?
+  notes             String?               @db.Text
+  status            RecommenderStatus     @default(suggested)
+  sourceType        RecommenderSourceType @default(manual)
+  aiReasoning       String?               @db.Text
+  criteriaRelevance String[]
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  // Relations
+  client      Client                  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  attachments RecommenderAttachment[]
+  caseDrafts  CaseDraft[]
+
+  @@index([clientId])
+  @@map("recommenders")
+}
+
+model RecommenderAttachment {
+  id            String   @id @default(cuid())
+  recommenderId String
+  name          String
+  fileType      String
+  storageKey    String
+  createdAt     DateTime @default(now())
+
+  // Relations
+  recommender Recommender @relation(fields: [recommenderId], references: [id], onDelete: Cascade)
+
+  @@index([recommenderId])
+  @@map("recommender_attachments")
+}
+
+model CaseDraft {
+  id            String            @id @default(cuid())
+  clientId      String
+  documentType  DraftDocumentType
+  title         String?
+  content       Json?
+  plainText     String?           @db.Text
+  sections      Json?
+  status        DraftStatus       @default(not_started)
+  recommenderId String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  // Relations
+  client      Client             @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  recommender Recommender?       @relation(fields: [recommenderId], references: [id])
+  versions    CaseDraftVersion[]
+
+  @@index([clientId])
+  @@index([clientId, documentType])
+  @@unique([clientId, documentType, recommenderId])
+  @@map("case_drafts")
+}
+
+model CaseDraftVersion {
+  id          String   @id @default(cuid())
+  draftId     String
+  content     Json
+  plainText   String?  @db.Text
+  sections    Json?
+  versionNote String?
+  createdBy   String?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  draft CaseDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+
+  @@index([draftId])
+  @@map("case_draft_versions")
 }

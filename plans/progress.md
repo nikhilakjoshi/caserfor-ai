@@ -1,5 +1,22 @@
 # Progress Log
 
+## 2026-02-02: Data layer for recommenders + drafting system
+
+### Completed
+- Added 4 enums: RecommenderStatus, RecommenderSourceType, DraftDocumentType, DraftStatus
+- Added 4 models: Recommender, RecommenderAttachment, CaseDraft, CaseDraftVersion
+- Added recommenders/caseDrafts relations to Client model
+- Renamed Client.recommenders (Json) -> recommenderNotes to avoid conflict w/ new Recommender[] relation
+- Updated all code refs: eb1a-evaluator, draft API route, step-impact component, ClientData interface
+- prisma generate succeeds, typecheck clean, lint clean (0 errors)
+
+### Notes for next dev
+- DB migration not run (no DB available) - run `prisma db push` or `prisma migrate dev` when DB is up
+- ClientData interface in use-onboarding.ts now uses `recommenderNotes` field name
+- Draft API route maps incoming `recommenders` field from onboarding form to `recommenderNotes` in DB
+- Next priority: case-auth helper (lib/case-auth.ts) - many API routes depend on it
+- Then recommender API routes, then drafts API routes
+
 ## 2026-02-01: Mark auto mode routing verification as complete
 
 ### Completed

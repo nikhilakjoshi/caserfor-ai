@@ -101,7 +101,7 @@ export async function runEvaluation(clientId: string): Promise<void> {
             impact: {
               socialFollowing: client.socialFollowing,
               keynotes: client.keynotes,
-              recommenders: client.recommenders,
+              recommenders: client.recommenderNotes,
               selfAssessment: client.selfAssessment,
               standingLevel: client.standingLevel,
               recognitionScope: client.recognitionScope,

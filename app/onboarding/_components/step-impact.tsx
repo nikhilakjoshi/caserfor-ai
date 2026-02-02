@@ -21,7 +21,7 @@ export function StepImpact({ data, onUpdate }: Props) {
     defaultValues: {
       socialFollowing: data.socialFollowing || "",
       keynotes: data.keynotes || "",
-      recommenders: (data.recommenders as ImpactData["recommenders"]) || [],
+      recommenders: (data.recommenderNotes as ImpactData["recommenders"]) || [],
       selfAssessment: data.selfAssessment || "",
       standingLevel: data.standingLevel || "",
       recognitionScope: data.recognitionScope || "",

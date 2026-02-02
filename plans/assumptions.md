@@ -134,3 +134,9 @@
 - Case detail assistant tab uses autoSelectAll=1 param to pre-attach all vault files on assistant page
 - Assistant page autoSelectAll fetches all docs and attaches them without file picker step
 - Case detail requires CaseAssignment for lawyer access (admin bypasses)
+
+## Recommender/Drafting Data Layer
+- Client.recommenders Json field renamed to recommenderNotes (not deleted) to preserve onboarding intake data
+- Onboarding form still sends field as "recommenders" in request body; API maps to recommenderNotes
+- prisma db push not run during implementation - dev runs when DB available
+- CaseDraft unique constraint [clientId, documentType, recommenderId] allows null recommenderId (Postgres treats nulls as distinct)

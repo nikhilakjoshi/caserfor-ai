@@ -20,7 +20,7 @@ export interface ClientData {
   majorAchievementDetails?: string | null
   socialFollowing?: string | null
   keynotes?: string | null
-  recommenders?: { name: string; title: string; relationship: string }[] | null
+  recommenderNotes?: { name: string; title: string; relationship: string }[] | null
   selfAssessment?: string | null
   standingLevel?: string | null
   recognitionScope?: string | null

@@ -6,7 +6,7 @@
       "Both enums exist in prisma/schema.prisma",
       "prisma db push succeeds without errors"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data",
@@ -16,7 +16,7 @@
       "@@index([clientId]) present",
       "Relation to Client defined"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data",
@@ -25,7 +25,7 @@
       "RecommenderAttachment model exists in schema",
       "Cascade delete configured on recommender relation"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data",
@@ -33,7 +33,7 @@
     "acceptanceCriteria": [
       "Both enums exist in prisma/schema.prisma"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data",
@@ -42,7 +42,7 @@
       "CaseDraft model exists with all fields, indexes, and unique constraint",
       "Relations to Client and Recommender defined"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data",
@@ -51,7 +51,7 @@
       "CaseDraftVersion model exists in schema",
       "Cascade delete on draft relation"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data",
@@ -61,7 +61,7 @@
       "Old Json field renamed to recommenderNotes",
       "Existing onboarding code referencing Client.recommenders updated to use recommenderNotes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data",
@@ -69,7 +69,7 @@
     "acceptanceCriteria": [
       "Recommender model has caseDrafts CaseDraft[] relation"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data",
@@ -79,7 +79,7 @@
       "prisma generate succeeds",
       "All new tables exist in database"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
