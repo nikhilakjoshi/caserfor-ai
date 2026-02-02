@@ -1,5 +1,27 @@
 # Progress Log
 
+## 2026-02-02: Drafting workspace page (4 PRD items)
+
+### Completed
+- Created `app/(lawyer)/cases/[clientId]/drafts/[id]/page.tsx` - full drafting workspace
+- Two-panel layout: collapsible AI panel (left, 340px) + TipTap editor (right, flex)
+- Header: back link, title, status badge, save/save-version buttons, version history dropdown
+- AI Panel: Generate Full Document button, section list with per-section regenerate + instruction input
+- TipTap editor via existing DocumentEditor component with toolbar
+- Auto-save with 2s debounce on content change
+- Version history dropdown showing all versions by date desc, restore confirmation dialog
+- Polls for generation completion every 3s when status=generating
+- Section navigation: clicking section in AI panel scrolls editor to heading anchor
+- TipTap JSON -> HTML converter for rendering stored content
+
+### Notes for next dev
+- Version restore is wired UI-only - no GET /versions/[versionId] endpoint exists for full content retrieval. Need to add that endpoint.
+- AI generation is fire-and-forget (202) with polling - not streaming. PRD says "streams response" but agents return complete results.
+- Save currently only saves plainText (HTML from editor) - not TipTap JSON content field. Would need HTML->TipTap conversion or save raw HTML.
+- Remaining UI: applicant recommenders section, applicant drafts section (2 PRD items left)
+
+---
+
 ## 2026-02-02: Drafts tab on case detail page
 
 ### Completed

@@ -205,3 +205,11 @@
 - Download link for recommender attachments uses placeholder URL pattern `/api/vaults/presign?key=` - no generic presign-by-storageKey endpoint exists yet
 - Existing presign endpoint is document-specific (requires vaultId + docId) so recommender attachments need their own presign route or a generic one
 - Component re-exports RecommenderStatus/statusConfig from recommender-list.tsx types rather than duplicating the enum
+
+## Drafting Workspace Page
+- TipTap JSON stored in draft.content is converted to HTML client-side for the DocumentEditor (which accepts HTML string)
+- Custom tiptapToHtml renderer handles basic node types (heading, paragraph, bulletList, orderedList, listItem, blockquote, codeBlock, text with marks)
+- Auto-save sends plainText (editor HTML) only - does not reverse-convert HTML back to TipTap JSON. Full TipTap JSON content is only set by AI generation.
+- Version restore UI shows confirmation dialog but actual restore requires a GET /versions/[versionId] endpoint that doesn't exist yet - version list only returns metadata
+- Section regeneration polls once after 5s delay then refreshes draft - not true real-time polling
+- AI panel width is fixed 340px (not percentage-based ~40% as PRD suggests) for consistent layout

@@ -438,7 +438,7 @@
       "Header shows title, status badge, save controls, back link",
       "Auto-save triggers on content change with debounce"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -450,7 +450,7 @@
       "Each section has regenerate button + instruction input",
       "Progress indicator shows during generation"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -461,7 +461,7 @@
       "AI-streamed content appears in editor in real-time",
       "User can manually edit content alongside AI generation"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -472,7 +472,7 @@
       "Selecting a version shows confirmation dialog",
       "On confirm, editor content replaced with version content"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
