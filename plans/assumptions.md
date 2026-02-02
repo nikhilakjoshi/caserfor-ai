@@ -200,3 +200,8 @@
 - Section replacement in TipTap JSON identifies target section by heading node with matching id attr, replaces content until next h2 heading
 - Uses defaultModel (gemini-2.5-flash) not gemini-2.5-pro - section regen is a focused task, not full doc generation
 - markdownToTiptapParagraphs duplicated again (now in 8 files) - shared util extraction increasingly critical
+
+## RecommenderDetail Component
+- Download link for recommender attachments uses placeholder URL pattern `/api/vaults/presign?key=` - no generic presign-by-storageKey endpoint exists yet
+- Existing presign endpoint is document-specific (requires vaultId + docId) so recommender attachments need their own presign route or a generic one
+- Component re-exports RecommenderStatus/statusConfig from recommender-list.tsx types rather than duplicating the enum

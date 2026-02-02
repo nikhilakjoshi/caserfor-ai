@@ -385,7 +385,7 @@
       "Shows linked draft status if applicable",
       "Status dropdown allows status transitions"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

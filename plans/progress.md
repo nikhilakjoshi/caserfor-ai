@@ -1,5 +1,23 @@
 # Progress Log
 
+## 2026-02-02: RecommenderDetail UI component
+
+### Completed
+- Created `components/recommender/recommender-detail.tsx`
+- Sheet slide-over showing full recommender info (contact, criteria, AI reasoning, notes)
+- Status change via Select dropdown with all 6 RecommenderStatus values
+- Attachments list with upload (multipart POST) and delete actions
+- Download links for attachments (uses presign URL pattern)
+- Linked draft status display (recommendation letter)
+- Typecheck and lint pass (0 errors)
+
+### Notes for next dev
+- Download link uses `/api/vaults/presign?key=` pattern but no such generic endpoint exists yet - need to create one or use a different approach for recommender attachment downloads
+- Next priority: StatusPipeline, AISuggestionsPanel, then Recommenders tab on case detail page
+- Component accepts callbacks for status change, attachment upload/delete - parent wires to API
+
+---
+
 ## 2026-02-02: RecommenderForm UI component
 
 ### Completed
