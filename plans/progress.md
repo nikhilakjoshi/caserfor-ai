@@ -2492,3 +2492,17 @@
 - Next priority: cover-letter, exhibit-list, table-of-contents, rfe-response agents (all simpler, same pattern)
 - Then: generate + regenerate API routes to wire agents to frontend
 - markdownToTiptapParagraphs is now in 3 files - should extract to shared util soon
+
+## 2026-02-02: Table of contents drafting agent
+
+### Completed
+- Created `lib/drafting-agents/table-of-contents.ts` following same 2-phase pattern (research + structured output)
+- Registered `table_of_contents` in generate route agent map
+- Uses `stepCountIs(15)` for research phase (similar to cover letter - TOC is a summary doc)
+- System prompt focuses on inventorying all existing drafts and vault documents for comprehensive TOC
+- Uses `get_existing_drafts` tool heavily to reference all prepared documents
+
+### Notes for next dev
+- markdownToTiptapParagraphs now duplicated in 6 files - extract to shared util
+- RFE response agent is next functional item
+- After that: per-section regeneration + its API route, then all UI work

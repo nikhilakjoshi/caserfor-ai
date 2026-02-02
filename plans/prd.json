@@ -312,7 +312,7 @@
     "acceptanceCriteria": [
       "Agent function exported, references existing drafts for structure"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

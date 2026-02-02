@@ -182,3 +182,9 @@
 - Uses stepCountIs(20) - more research than cover letter (15) since it needs to exhaustively catalog all vault documents
 - PRD says "Should reference vault documents" - research phase uses multiple targeted vault searches (evidence, awards, publications, etc.)
 - markdownToTiptapParagraphs duplicated (now in 5 files) - should extract before next agent
+
+## Table of Contents Drafting Agent
+- Uses defaultModel (gemini-2.5-flash) matching PRD spec
+- Uses stepCountIs(15) - similar to cover letter since TOC is a summary/organizational doc, not heavy research
+- PRD says "Uses get_existing_drafts to reference all other drafts" - research phase calls this plus vault searches
+- markdownToTiptapParagraphs duplicated (now in 6 files) - critical to extract to shared util

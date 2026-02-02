@@ -6,6 +6,7 @@ import { generatePersonalStatement } from "@/lib/drafting-agents/personal-statem
 import { generateRecommendationLetter } from "@/lib/drafting-agents/recommendation-letter"
 import { generateCoverLetter } from "@/lib/drafting-agents/cover-letter"
 import { generateExhibitList } from "@/lib/drafting-agents/exhibit-list"
+import { generateTableOfContents } from "@/lib/drafting-agents/table-of-contents"
 import type { DraftDocumentType } from "@prisma/client"
 
 type Params = { params: Promise<{ clientId: string; id: string }> }
@@ -23,6 +24,7 @@ const agentMap: Partial<
     generateRecommendationLetter(clientId, recommenderId!),
   cover_letter: (clientId) => generateCoverLetter(clientId),
   exhibit_list: (clientId) => generateExhibitList(clientId),
+  table_of_contents: (clientId) => generateTableOfContents(clientId),
 }
 
 export async function POST(_request: NextRequest, { params }: Params) {
