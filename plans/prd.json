@@ -504,7 +504,7 @@
       "Other drafts are view-only for applicant",
       "Links to appropriate drafting workspace"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "auth",

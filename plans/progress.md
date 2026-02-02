@@ -1,5 +1,21 @@
 # Progress Log
 
+## 2026-02-02: Applicant drafts section on My Case page
+
+### Completed
+- Added Drafts section to `app/(dashboard)/my-case/page.tsx` below Recommenders
+- Fetches drafts via `GET /api/cases/[clientId]/drafts`
+- Grid of draft cards showing doc type, status badge, recommender name for rec letters
+- Personal statement shows Edit button linking to drafting workspace
+- All other draft types show View button (read-only intent)
+- Empty state when no drafts exist
+
+### Notes for next dev
+- All PRD items now pass. View-only enforcement for non-personal-statement drafts is UI-only (Edit vs View button label). API-level PATCH restriction for applicant role already exists in case-auth.
+- Drafting workspace route is under `(lawyer)` layout - applicant accessing it will work if middleware allows. May need read-only mode flag on workspace page for non-personal-statement drafts.
+
+---
+
 ## 2026-02-02: Applicant recommenders section on dashboard
 
 ### Completed
