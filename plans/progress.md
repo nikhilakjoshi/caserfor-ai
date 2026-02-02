@@ -1,5 +1,19 @@
 # Progress Log
 
+## 2026-02-02: Draft Letter button in recommender detail sheet (PRD 2)
+
+### Completed
+- Added "Draft Letter" button to RecommenderDetail sheet, below status selector
+- Only shown for confirmed/letter_drafted/letter_finalized status (same DRAFT_ELIGIBLE_STATUSES as list)
+- Button closes sheet and calls onDraftLetter callback (same as list dropdown action)
+- Wired onDraftLetter={handleDraftLetter} in case detail page's RecommenderDetail usage
+
+### Notes for next dev
+- PRD 7 (Generate Full Letter error handling/toast) is next highest priority for completing core workflow
+- Chat panel (PRD 11-15) and add-to-vault (PRD 10, 16-18) are larger feature blocks
+
+---
+
 ## 2026-02-02: Actions panel component (PRD 6)
 
 ### Completed

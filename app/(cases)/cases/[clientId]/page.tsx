@@ -588,6 +588,7 @@ export default function CaseDetailPage() {
               onStatusChange={handleRecStatusChange}
               onAttachmentUploaded={fetchRecommenders}
               onAttachmentDeleted={() => fetchRecommenders()}
+              onDraftLetter={handleDraftLetter}
             />
           </div>
         )

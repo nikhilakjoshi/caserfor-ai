@@ -20,7 +20,7 @@
       "Same POST /api/cases/[clientId]/drafts logic as list action",
       "Call parent callback to switch to workspace view with draft + recommender data"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

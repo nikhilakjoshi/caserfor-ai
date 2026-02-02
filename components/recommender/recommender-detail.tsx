@@ -24,10 +24,17 @@ import {
   FileText,
   Loader2,
   Paperclip,
+  PenLine,
   Trash2,
   Upload,
 } from "lucide-react"
 import type { Recommender, RecommenderStatus } from "./recommender-list"
+
+const DRAFT_ELIGIBLE_STATUSES: RecommenderStatus[] = [
+  "confirmed",
+  "letter_drafted",
+  "letter_finalized",
+]
 
 export interface RecommenderAttachment {
   id: string
@@ -71,6 +78,7 @@ interface RecommenderDetailProps {
   onStatusChange?: (id: string, status: RecommenderStatus) => void
   onAttachmentUploaded?: () => void
   onAttachmentDeleted?: (attachmentId: string) => void
+  onDraftLetter?: (recommender: Recommender) => void
 }
 
 export function RecommenderDetail({
@@ -83,6 +91,7 @@ export function RecommenderDetail({
   onStatusChange,
   onAttachmentUploaded,
   onAttachmentDeleted,
+  onDraftLetter,
 }: RecommenderDetailProps) {
   const [uploading, setUploading] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -175,6 +184,22 @@ export function RecommenderDetail({
               </SelectContent>
             </Select>
           </div>
+
+          {/* Draft Letter action */}
+          {onDraftLetter && DRAFT_ELIGIBLE_STATUSES.includes(recommender.status) && (
+            <Button
+              variant="default"
+              size="sm"
+              className="w-full"
+              onClick={() => {
+                onOpenChange(false)
+                onDraftLetter(recommender)
+              }}
+            >
+              <PenLine className="mr-2 h-4 w-4" />
+              Draft Letter
+            </Button>
+          )}
 
           <Separator />
 
