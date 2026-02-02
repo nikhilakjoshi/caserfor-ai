@@ -1,6 +1,7 @@
 import { PrismaPg } from "@prisma/adapter-pg"
 import { Prisma, PrismaClient } from "@prisma/client"
 import { Pool } from "pg"
+import bcrypt from "bcryptjs"
 
 const connectionString = process.env.DATABASE_URL
 
@@ -388,6 +389,262 @@ async function main() {
   }
 
   console.log(`\nSeeded ${systemWorkflows.length} system workflows.`)
+
+  // ============================================
+  // DEMO DATA: Users, Client, Vault, Criteria, etc.
+  // ============================================
+  console.log("\nSeeding demo data...")
+
+  const lawyerPassword = "lawyer123"
+  const applicantPassword = "applicant123"
+  const lawyerHash = await bcrypt.hash(lawyerPassword, 10)
+  const applicantHash = await bcrypt.hash(applicantPassword, 10)
+
+  // Lawyer user
+  const lawyer = await prisma.user.upsert({
+    where: { email: "lawyer@demo.com" },
+    update: {},
+    create: {
+      id: "demo-lawyer-id",
+      email: "lawyer@demo.com",
+      name: "Sarah Chen",
+      passwordHash: lawyerHash,
+      role: "lawyer",
+    },
+  })
+  console.log(`  Lawyer: ${lawyer.email} / ${lawyerPassword}`)
+
+  // Applicant user
+  const applicant = await prisma.user.upsert({
+    where: { email: "applicant@demo.com" },
+    update: {},
+    create: {
+      id: "demo-applicant-id",
+      email: "applicant@demo.com",
+      name: "Raj Patel",
+      passwordHash: applicantHash,
+      role: "applicant",
+    },
+  })
+  console.log(`  Applicant: ${applicant.email} / ${applicantPassword}`)
+
+  // Vault
+  const vault = await prisma.vault.upsert({
+    where: { id: "demo-vault-id" },
+    update: {},
+    create: {
+      id: "demo-vault-id",
+      name: "Raj Patel - EB-1A Documents",
+      description: "Knowledge base for Raj Patel EB-1A petition",
+      type: "knowledge_base",
+    },
+  })
+  console.log(`  Vault: ${vault.id}`)
+
+  // Client (ML researcher)
+  const client = await prisma.client.upsert({
+    where: { id: "demo-client-id" },
+    update: {},
+    create: {
+      id: "demo-client-id",
+      userId: applicant.id,
+      firstName: "Raj",
+      lastName: "Patel",
+      email: "applicant@demo.com",
+      phone: "+1-555-0123",
+      citizenship: "India",
+      fieldOfExpertise: "Machine Learning / Artificial Intelligence",
+      education: {
+        degrees: [
+          { degree: "Ph.D.", field: "Computer Science", institution: "Stanford University", year: 2019 },
+          { degree: "B.Tech", field: "Computer Science", institution: "IIT Bombay", year: 2014 },
+        ],
+      },
+      currentEmployer: "Google DeepMind",
+      usIntentType: "EB-1A",
+      usIntentDetails: "Seeking EB-1A classification based on extraordinary ability in AI/ML research",
+      hasMajorAchievement: false,
+      selfAssessment: "I believe I have strong evidence for at least 5 of the 10 EB-1A criteria based on my publications, awards, and industry impact.",
+      standingLevel: "top_of_field",
+      recognitionScope: "international",
+      currentStep: 10,
+      status: "submitted",
+      vaultId: vault.id,
+    },
+  })
+  console.log(`  Client: ${client.id} (${client.firstName} ${client.lastName})`)
+
+  // 10 EB-1A CriterionResponses
+  const criteriaData: { criterion: string; responses: Prisma.InputJsonValue }[] = [
+    {
+      criterion: "awards",
+      responses: {
+        hasEvidence: true,
+        details: "Best Paper Award at NeurIPS 2021 for 'Efficient Transformers for Long-Range Dependencies'. Runner-up Best Paper at ICML 2020. Google Research Scholar Award 2022. MIT Technology Review Innovators Under 35 (2023).",
+        documents: ["NeurIPS 2021 Best Paper certificate", "ICML 2020 Runner-up notification", "Google Research Scholar letter", "MIT TR35 profile"],
+      },
+    },
+    {
+      criterion: "membership",
+      responses: {
+        hasEvidence: true,
+        details: "Senior Member of IEEE (requires 10+ years experience and significant contributions). Member of AAAI (invited based on publication record). ACM Distinguished Member nominee.",
+        documents: ["IEEE Senior Member certificate", "AAAI membership letter"],
+      },
+    },
+    {
+      criterion: "press",
+      responses: {
+        hasEvidence: true,
+        details: "Featured in Wired magazine article 'The Next Generation of AI Researchers' (2023). Interview in MIT Technology Review about efficient transformer architectures. Coverage in VentureBeat, TechCrunch for open-source model release.",
+        documents: ["Wired article PDF", "MIT Tech Review interview link", "VentureBeat coverage"],
+      },
+    },
+    {
+      criterion: "judging",
+      responses: {
+        hasEvidence: true,
+        details: "Area Chair for NeurIPS 2023 and ICML 2024. Program Committee member for AAAI 2022-2024. Reviewer for Nature Machine Intelligence and JMLR. NSF grant proposal reviewer.",
+        documents: ["NeurIPS area chair invitation", "NSF reviewer confirmation email"],
+      },
+    },
+    {
+      criterion: "original_contribution",
+      responses: {
+        hasEvidence: true,
+        details: "Developed EfficientAttn architecture (2021) now used by 50+ organizations including Meta, Microsoft, and Amazon. Open-source implementation has 12,000+ GitHub stars. Patent filed for novel attention mechanism (US Patent App. 2022/0345678).",
+        documents: ["Patent application", "GitHub repository stats", "Industry adoption letters"],
+      },
+    },
+    {
+      criterion: "scholarly_articles",
+      responses: {
+        hasEvidence: true,
+        details: "42 peer-reviewed publications. H-index: 38. Total citations: 8,500+. Published in Nature Machine Intelligence (2x), NeurIPS (8x), ICML (6x), ICLR (4x), CVPR (3x), and JMLR (2x).",
+        documents: ["Google Scholar profile", "Publication list PDF"],
+      },
+    },
+    {
+      criterion: "exhibitions",
+      responses: {
+        hasEvidence: false,
+        details: "Not applicable to my field of ML/AI research.",
+        documents: [],
+      },
+    },
+    {
+      criterion: "leading_role",
+      responses: {
+        hasEvidence: true,
+        details: "Lead Research Scientist at Google DeepMind, heading a team of 12 researchers focused on efficient large language models. Previously Tech Lead at Google Brain (2020-2022). Founded and lead the EfficientML open-source consortium (200+ contributors).",
+        documents: ["Google DeepMind offer letter", "Team org chart", "EfficientML consortium charter"],
+      },
+    },
+    {
+      criterion: "high_salary",
+      responses: {
+        hasEvidence: true,
+        details: "Total compensation of $850,000/year (base + equity + bonus) at Google DeepMind. This places me in the top 1% of ML researchers nationally per Levels.fyi and Glassdoor data.",
+        documents: ["Compensation letter (redacted)", "Levels.fyi comparison data"],
+      },
+    },
+    {
+      criterion: "commercial_success",
+      responses: {
+        hasEvidence: false,
+        details: "Not directly applicable, though EfficientAttn architecture has been commercially deployed by multiple Fortune 500 companies.",
+        documents: [],
+      },
+    },
+  ]
+
+  for (const cr of criteriaData) {
+    await prisma.criterionResponse.upsert({
+      where: { clientId_criterion: { clientId: client.id, criterion: cr.criterion } },
+      update: { responses: cr.responses },
+      create: {
+        clientId: client.id,
+        criterion: cr.criterion,
+        responses: cr.responses,
+      },
+    })
+  }
+  console.log(`  Created ${criteriaData.length} criterion responses`)
+
+  // EligibilityReport
+  await prisma.eligibilityReport.upsert({
+    where: { clientId: client.id },
+    update: {},
+    create: {
+      id: "demo-eligibility-id",
+      clientId: client.id,
+      verdict: "moderate",
+      summary: "Raj Patel presents a moderately strong EB-1A case with clear evidence in at least 5 of the 10 criteria. The awards criterion is supported by recognized conference prizes (NeurIPS, ICML) and the MIT TR35 honor. Publications and citations are strong (h-index 38, 8500+ citations). The original contribution criterion is well-supported by the widely-adopted EfficientAttn architecture. Judging and leading role criteria are also well-documented.\n\nHowever, the case would benefit from stronger evidence of sustained national/international acclaim beyond the academic community. Additional press coverage, industry testimonials, and expert opinion letters would strengthen the petition significantly. The exhibitions and commercial success criteria are acknowledged as not applicable.",
+      criteria: criteriaData.map((cr, i) => ({
+        slug: cr.criterion,
+        label: cr.criterion.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()),
+        score: [4, 3, 3, 4, 5, 5, 1, 4, 3, 2][i],
+        analysis: `Analysis for ${cr.criterion}`,
+        evidence: ((cr.responses as Record<string, unknown>).documents as string[]) || [],
+      })),
+    },
+  })
+  console.log(`  Created eligibility report (verdict: moderate)`)
+
+  // Recommenders
+  const recommenders = [
+    {
+      id: "demo-rec-1",
+      name: "Dr. Yoshua Bengio",
+      title: "Full Professor",
+      organization: "Universite de Montreal / Mila",
+      relationship: "Ph.D. committee member and research collaborator",
+      email: "yoshua.bengio@mila.quebec",
+      status: "confirmed" as const,
+      sourceType: "manual" as const,
+      criteriaRelevance: ["original_contribution", "scholarly_articles", "awards"],
+      notes: "Turing Award winner. Can speak to Raj's original contributions in efficient attention mechanisms and their impact on the field.",
+    },
+    {
+      id: "demo-rec-2",
+      name: "Dr. Fei-Fei Li",
+      title: "Professor of Computer Science",
+      organization: "Stanford University",
+      relationship: "Former doctoral advisor",
+      email: "feifeili@stanford.edu",
+      status: "contacted" as const,
+      sourceType: "manual" as const,
+      criteriaRelevance: ["scholarly_articles", "leading_role", "original_contribution"],
+      notes: "Former PhD advisor at Stanford. Can provide detailed account of Raj's academic trajectory and research impact.",
+    },
+    {
+      id: "demo-rec-3",
+      name: "Dr. Jeff Dean",
+      title: "Chief Scientist",
+      organization: "Google DeepMind",
+      relationship: "Direct manager at Google",
+      email: "jeff@google.com",
+      status: "suggested" as const,
+      sourceType: "ai_suggested" as const,
+      criteriaRelevance: ["leading_role", "high_salary", "original_contribution"],
+      aiReasoning: "As Chief Scientist at Google DeepMind and Raj's organizational leader, Jeff Dean can provide authoritative testimony about Raj's leading role and the commercial significance of his contributions.",
+      notes: "AI-suggested recommender. Senior Google leadership who can attest to Raj's impact within the organization.",
+    },
+  ]
+
+  for (const rec of recommenders) {
+    await prisma.recommender.upsert({
+      where: { id: rec.id },
+      update: {},
+      create: {
+        ...rec,
+        clientId: client.id,
+      },
+    })
+  }
+  console.log(`  Created ${recommenders.length} recommenders`)
+
+  console.log("\nDemo data seeding complete!")
 }
 
 main()

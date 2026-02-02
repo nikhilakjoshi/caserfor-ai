@@ -1,5 +1,25 @@
 # Progress Log
 
+## 2026-02-02: Seed demo data (PRD items 4-10)
+
+### Completed
+- Seed lawyer user: lawyer@demo.com / lawyer123, role=lawyer
+- Seed applicant user: applicant@demo.com / applicant123, role=applicant
+- Seed Client: ML researcher "Raj Patel", status=submitted, currentStep=10, linked to applicant + vault
+- Seed Vault: knowledge_base type, linked to client
+- Seed 10 CriterionResponse records (all EB-1A criteria, realistic ML researcher data)
+- Seed EligibilityReport: verdict=moderate w/ per-criterion scores
+- Seed 3 Recommenders: confirmed (Bengio), contacted (Li), suggested/ai_suggested (Dean)
+
+### Notes for next dev
+- All seed records use deterministic IDs (demo-*) so upsert is idempotent
+- Passwords logged to console during seed for easy copy
+- Recommender statuses: suggested, contacted, confirmed (not "pending" - enum uses "suggested" instead)
+- Vault has no documents seeded - just the empty vault record
+- EligibilityReport criteria scores: awards=4, membership=3, press=3, judging=4, original_contribution=5, scholarly_articles=5, exhibitions=1, leading_role=4, high_salary=3, commercial_success=2
+
+---
+
 ## 2026-02-02: Auth - remove CaseAssignment requirement for lawyers
 
 ### Completed

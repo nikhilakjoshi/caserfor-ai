@@ -39,7 +39,7 @@
       "Log password to console",
       "Run prisma db seed and confirm lawyer user created"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data",
@@ -50,7 +50,7 @@
       "Log password to console",
       "Run prisma db seed and confirm applicant user created"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data",
@@ -61,7 +61,7 @@
       "Link to seed applicant user via userId",
       "Verify record created after seeding"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data",
@@ -71,7 +71,7 @@
       "Link to seed client",
       "Verify vault accessible via API after seeding"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data",
@@ -82,7 +82,7 @@
       "Content is realistic for ML researcher profile",
       "All linked to seed client"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data",
@@ -92,7 +92,7 @@
       "Link to seed client",
       "Verify report shows on evaluation page"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "data",
@@ -103,7 +103,7 @@
       "Link all to seed client",
       "Verify recommenders show on case detail recommenders tab"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
