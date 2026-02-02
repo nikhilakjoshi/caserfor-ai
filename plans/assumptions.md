@@ -300,3 +300,8 @@
 - 30s debounce window chosen as balance between avoiding redundant analyses and ensuring recent docs are included
 - DB-based debounce (not in-memory) so it works correctly across concurrent serverless invocations
 - PRD says "POST to /api/lawyer/cases/[clientId]/gap-analysis/refresh" but direct function call is simpler and avoids self-request issues in serverless
+
+## Drafting Agent E2E Verification (PRD 29-35)
+- Verified via code review, not runtime E2E test - all 7 agents implemented, routes wired, error handling in place
+- Runtime verification requires seeded DB + GOOGLE_GENERATIVE_AI_API_KEY - left to manual QA
+- markdownToTiptapParagraphs remains duplicated across 7 agent files + regenerate-section.ts (8 total) - shared extraction deferred

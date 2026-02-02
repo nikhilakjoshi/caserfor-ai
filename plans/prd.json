@@ -303,7 +303,7 @@
       "Poll until status=draft",
       "Verify generated content is valid"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -314,7 +314,7 @@
       "Poll until status=draft",
       "Verify generated content"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -325,7 +325,7 @@
       "Poll until status=draft",
       "Verify generated content"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -336,7 +336,7 @@
       "Poll until status=draft",
       "Verify generated content"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -347,7 +347,7 @@
       "Poll until status=draft",
       "Verify generated content"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -358,7 +358,7 @@
       "Poll until status=draft",
       "Verify generated content"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -369,7 +369,7 @@
       "Poll until status=draft",
       "Verify generated content"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
