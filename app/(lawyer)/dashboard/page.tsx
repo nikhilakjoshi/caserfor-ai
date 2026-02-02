@@ -1,215 +1,126 @@
 "use client"
 
-import * as React from "react"
-import { useCallback, useEffect, useState } from "react"
-import { Input } from "@/components/ui/input"
+import { useEffect, useState } from "react"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CaseCard, type CaseData } from "@/components/lawyer/case-card"
-import { AlertCircle, Loader2, RefreshCw } from "lucide-react"
+import { DashboardChat } from "@/components/lawyer/dashboard-chat"
+import { CaseTable } from "@/components/lawyer/case-table"
+import {
+  Briefcase,
+  ClipboardCheck,
+  FileEdit,
+  UserX,
+  Loader2,
+} from "lucide-react"
 
-interface Pagination {
-  page: number
-  pageSize: number
-  total: number
-  totalPages: number
+interface DashboardStats {
+  activeCases: number
+  pendingReview: number
+  draftsInProgress: number
+  unassigned: number
 }
 
+function getGreeting(): string {
+  const h = new Date().getHours()
+  if (h < 12) return "Good morning"
+  if (h < 18) return "Good afternoon"
+  return "Good evening"
+}
+
+const quickActions = [
+  "Summarize all my active cases",
+  "Check upcoming deadlines",
+  "Show draft status across cases",
+  "Which cases need gap analysis?",
+]
+
+const statCards = [
+  { key: "activeCases" as const, label: "Active Cases", icon: Briefcase },
+  {
+    key: "pendingReview" as const,
+    label: "Pending Review",
+    icon: ClipboardCheck,
+  },
+  {
+    key: "draftsInProgress" as const,
+    label: "Drafts In Progress",
+    icon: FileEdit,
+  },
+  { key: "unassigned" as const, label: "Unassigned", icon: UserX },
+]
+
 export default function LawyerDashboardPage() {
-  const [tab, setTab] = useState("all")
-  const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [page, setPage] = useState(1)
-  const [cases, setCases] = useState<CaseData[]>([])
-  const [pagination, setPagination] = useState<Pagination | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [assigningId, setAssigningId] = useState<string | null>(null)
-  const [currentUserId, setCurrentUserId] = useState("")
+  const [userName, setUserName] = useState("")
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [chatPrefill, setChatPrefill] = useState("")
 
-  // Debounce search
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(search), 300)
-    return () => clearTimeout(t)
-  }, [search])
-
-  // Reset page on tab/search change
-  useEffect(() => {
-    setPage(1)
-  }, [tab, debouncedSearch])
-
-  // Fetch current user id
   useEffect(() => {
     fetch("/api/auth/session")
       .then((r) => r.json())
       .then((d) => {
-        if (d?.user?.id) setCurrentUserId(d.user.id)
+        if (d?.user?.name) setUserName(d.user.name)
+      })
+      .catch(() => {})
+
+    fetch("/api/lawyer/dashboard/stats")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d && !d.error) setStats(d)
       })
       .catch(() => {})
   }, [])
 
-  const fetchCases = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const params = new URLSearchParams({ tab, page: String(page) })
-      if (debouncedSearch) params.set("search", debouncedSearch)
-      const res = await fetch(`/api/lawyer/cases?${params}`)
-      if (!res.ok) throw new Error("Failed to fetch cases")
-      const data = await res.json()
-      setCases(data.cases)
-      setPagination(data.pagination)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch cases")
-    } finally {
-      setLoading(false)
-    }
-  }, [tab, page, debouncedSearch])
-
-  useEffect(() => {
-    fetchCases()
-  }, [fetchCases])
-
-  const handleAssign = async (clientId: string) => {
-    setAssigningId(clientId)
-    // Optimistic update
-    setCases((prev) =>
-      prev.map((c) =>
-        c.id === clientId
-          ? {
-              ...c,
-              assignedTo: [
-                ...c.assignedTo,
-                { lawyerId: currentUserId, lawyerName: "You" },
-              ],
-            }
-          : c
-      )
-    )
-    try {
-      const res = await fetch(`/api/lawyer/cases/${clientId}/assign`, {
-        method: "POST",
-      })
-      if (!res.ok) {
-        // Revert optimistic update
-        setCases((prev) =>
-          prev.map((c) =>
-            c.id === clientId
-              ? {
-                  ...c,
-                  assignedTo: c.assignedTo.filter(
-                    (a) => a.lawyerId !== currentUserId
-                  ),
-                }
-              : c
-          )
-        )
-      }
-    } catch {
-      // Revert on error
-      setCases((prev) =>
-        prev.map((c) =>
-          c.id === clientId
-            ? {
-                ...c,
-                assignedTo: c.assignedTo.filter(
-                  (a) => a.lawyerId !== currentUserId
-                ),
-              }
-            : c
-        )
-      )
-    } finally {
-      setAssigningId(null)
-    }
-  }
-
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Cases</h1>
+    <div className="space-y-8">
+      {/* Greeting */}
+      <h1 className="text-2xl font-semibold text-center">
+        {getGreeting()}
+        {userName ? `, ${userName}` : ""}
+      </h1>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <Tabs value={tab} onValueChange={setTab}>
-          <TabsList>
-            <TabsTrigger value="all">All Cases</TabsTrigger>
-            <TabsTrigger value="mine">My Cases</TabsTrigger>
-            <TabsTrigger value="unassigned">Unassigned</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        <Input
-          placeholder="Search cases..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full sm:w-64"
-        />
+      {/* Chat input */}
+      <DashboardChat prefillText={chatPrefill} />
+
+      {/* Quick action buttons */}
+      <div className="flex flex-wrap justify-center gap-2">
+        {quickActions.map((text) => (
+          <Button
+            key={text}
+            variant="outline"
+            size="sm"
+            onClick={() => setChatPrefill(text)}
+          >
+            {text}
+          </Button>
+        ))}
       </div>
 
-      {loading && (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
-      )}
+      {/* Stat cards */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {statCards.map(({ key, label, icon: Icon }) => (
+          <Card key={key}>
+            <CardContent className="flex items-center gap-4 py-4">
+              <div className="rounded-md bg-muted p-2">
+                <Icon className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">{label}</p>
+                {stats ? (
+                  <p className="text-2xl font-semibold">{stats[key]}</p>
+                ) : (
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mt-1" />
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-      {error && !loading && (
-        <div className="flex flex-col items-center gap-3 py-12 text-center">
-          <AlertCircle className="h-8 w-8 text-destructive" />
-          <p className="text-sm text-muted-foreground">{error}</p>
-          <Button variant="outline" size="sm" onClick={fetchCases}>
-            <RefreshCw className="mr-1 h-3 w-3" />
-            Retry
-          </Button>
-        </div>
-      )}
-
-      {!loading && !error && cases.length === 0 && (
-        <div className="py-12 text-center text-sm text-muted-foreground">
-          {tab === "mine"
-            ? "No cases assigned to you yet."
-            : tab === "unassigned"
-              ? "No unassigned cases."
-              : "No cases found."}
-        </div>
-      )}
-
-      {!loading && !error && cases.length > 0 && (
-        <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {cases.map((c) => (
-              <CaseCard
-                key={c.id}
-                data={c}
-                currentUserId={currentUserId}
-                onAssign={handleAssign}
-                assigning={assigningId === c.id}
-              />
-            ))}
-          </div>
-
-          {pagination && pagination.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 pt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page <= 1}
-                onClick={() => setPage((p) => p - 1)}
-              >
-                Previous
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                Page {pagination.page} of {pagination.totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page >= pagination.totalPages}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          )}
-        </>
-      )}
+      {/* Case table */}
+      <div>
+        <h2 className="text-lg font-semibold mb-3">Cases</h2>
+        <CaseTable />
+      </div>
     </div>
   )
 }

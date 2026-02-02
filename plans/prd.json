@@ -172,7 +172,7 @@
     "section": "D4",
     "title": "Create dashboard stats API",
     "description": "app/api/lawyer/dashboard/stats/route.ts - returns {activeCases, pendingReview, draftsInProgress, unassigned} counts from DB.",
-    "status": "pending",
+    "status": "done",
     "dependencies": []
   },
   {
@@ -180,7 +180,7 @@
     "section": "D4",
     "title": "Create greeting component",
     "description": "Time-of-day greeting (Good morning/afternoon/evening) + lawyer name from session.",
-    "status": "pending",
+    "status": "done",
     "dependencies": []
   },
   {
@@ -188,7 +188,7 @@
     "section": "D4",
     "title": "Create dashboard chat input component",
     "description": "components/lawyer/dashboard-chat.tsx - centered text input for assistant queries. Accepts optional prefilled text prop.",
-    "status": "pending",
+    "status": "done",
     "dependencies": []
   },
   {
@@ -196,7 +196,7 @@
     "section": "D4",
     "title": "Create quick action buttons component",
     "description": "Row of 4 buttons that prepopulate dashboard chat input with predefined queries.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D4-3"]
   },
   {
@@ -204,7 +204,7 @@
     "section": "D4",
     "title": "Create stat cards row component",
     "description": "4 stat cards fetching from /api/lawyer/dashboard/stats. Active cases, pending review, drafts in progress, unassigned.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D4-1"]
   },
   {
@@ -212,7 +212,7 @@
     "section": "D4",
     "title": "Create case table component",
     "description": "components/lawyer/case-table.tsx - shadcn Table with search. Columns: Name, Status, Updated, Visa Type (fieldOfExpertise), Case Files count.",
-    "status": "pending",
+    "status": "done",
     "dependencies": []
   },
   {
@@ -220,7 +220,7 @@
     "section": "D4",
     "title": "Add Create Case + Upload Files stub buttons",
     "description": "Buttons above case table that show 'coming soon' toast on click.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D4-6"]
   },
   {
@@ -228,7 +228,7 @@
     "section": "D4",
     "title": "Assemble lawyer dashboard page",
     "description": "app/(lawyer)/dashboard/page.tsx - compose greeting + chat + quick actions + stats + table.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D4-2", "D4-3", "D4-4", "D4-5", "D4-6", "D4-7"]
   },
   {

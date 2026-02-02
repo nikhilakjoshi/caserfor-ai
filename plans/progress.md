@@ -1,5 +1,27 @@
 # Progress Log
 
+## 2026-02-02: D4 - Lawyer Dashboard Redesign
+
+### Completed
+- D4-1: `app/api/lawyer/dashboard/stats/route.ts` - stats API returning activeCases, pendingReview, draftsInProgress, unassigned counts.
+- D4-2: Greeting inline in dashboard page - time-of-day greeting + user name from session.
+- D4-3: `components/lawyer/dashboard-chat.tsx` - centered chat input with prefillText prop. Stubbed submit (D5 will wire to assistant API).
+- D4-4: Quick action buttons row - 4 buttons that set chat prefill text.
+- D4-5: Stat cards row - 4 cards fetching from stats API with icons + loading state.
+- D4-6: `components/lawyer/case-table.tsx` - shadcn Table replacing card grid. Columns: Name, Status, Updated, Visa Type, Case Files. Search + pagination.
+- D4-7: Create Case + Upload Files stub buttons above case table (alert on click).
+- D4-8: `app/(lawyer)/dashboard/page.tsx` - rewritten to compose greeting + chat + quick actions + stats + table.
+
+### Notes for next dev
+- Greeting, quick actions, stat cards are inline in dashboard page (not separate component files) - simple enough to not warrant extraction.
+- DashboardChat submit is stubbed with alert(). D5 will wire it to /api/lawyer/assistant via useChat.
+- Quick action buttons set chatPrefill state which DashboardChat reads - this will need refactoring in D5 to use useChat's setInput or similar.
+- Stub buttons use alert() not toast (no toast library installed).
+- Case table reuses /api/lawyer/cases endpoint (tab="all" only). Old dashboard had tabs (all/mine/unassigned) - new dashboard drops tabs in favor of search-only table per PRD.
+- D5 (dashboard assistant) is next.
+
+---
+
 ## 2026-02-02: D3 - CaseSidebar + Case Sub-Pages
 
 ### Completed

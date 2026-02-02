@@ -242,3 +242,10 @@
 - Recommenders sub-page role-gates Add button and AI suggestions via useRole() client-side check (not API-level)
 - Timeline is placeholder only - no toast, just static "coming soon" text (simpler than PRD's "toast" spec)
 - Draft type sub-links use `?type=slug` query param - drafts index page doesn't filter by this yet
+
+## Lawyer Dashboard (D4)
+- Greeting, quick actions, stat cards kept inline in dashboard page - not extracted to separate components (too simple to warrant it)
+- DashboardChat prefillText prop uses controlled state from parent - D5 will need to refactor to useChat's native input management
+- Stub buttons use alert() instead of toast - no toast/sonner library installed in project
+- Case table drops tab filtering (all/mine/unassigned) from old dashboard - PRD shows single table with search only
+- Stats API counts "active cases" as CaseAssignment count for lawyer, not distinct client count - one client with multiple assignments still counts once (unique constraint prevents duplicates anyway)
