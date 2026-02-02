@@ -113,7 +113,7 @@
       "Dashboard item only highlighted when pathname === '/'",
       "/cases highlights Cases nav item, not Dashboard"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

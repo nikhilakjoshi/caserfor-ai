@@ -1,5 +1,15 @@
 # Progress Log
 
+## 2026-02-02: Fix LawyerSidebar active state (PRD item 11)
+
+### Completed
+- Special-cased `/` URL in isActive check to use exact match only
+- Dashboard nav item now only highlights when pathname is exactly `/`
+- `/cases` and sub-routes correctly highlight Cases, not Dashboard
+
+### Notes
+- The bug was latent: `startsWith("//")` accidentally prevented false positives, but the fix makes intent explicit
+
 ## 2026-02-02: Seed demo data (PRD items 4-10)
 
 ### Completed
