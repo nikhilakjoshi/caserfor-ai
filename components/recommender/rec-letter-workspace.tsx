@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useCallback, useRef, useEffect } from "react"
+import { useState, useCallback, useRef, useEffect, useMemo } from "react"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { DocumentEditor } from "@/components/editor/document-editor"
+import { RecLetterActions } from "./rec-letter-actions"
 
 interface TiptapDoc {
   type: string
@@ -133,6 +134,34 @@ export function RecLetterWorkspace({
     Array<{ role: "user" | "assistant"; content: string }>
   >([])
   const [draftStatus, setDraftStatus] = useState(draft.status)
+
+  // Extract sections from draft.sections or draft.content
+  const sections = useMemo(() => {
+    if (draft.sections && Array.isArray(draft.sections)) {
+      return (draft.sections as Array<{ id: string; heading: string }>).map((s) => ({
+        id: s.id || s.heading,
+        heading: s.heading,
+      }))
+    }
+    return []
+  }, [draft.sections])
+
+  // Generate full letter
+  const handleGenerate = useCallback(async () => {
+    try {
+      setDraftStatus("generating")
+      await fetch(`/api/cases/${clientId}/drafts/${draft.id}/generate`, {
+        method: "POST",
+      })
+    } catch {
+      setDraftStatus("not_started")
+    }
+  }, [clientId, draft.id])
+
+  // Regenerate a single section (placeholder -- PRD 8)
+  const handleRegenSection = useCallback(async (_sectionId: string, _instruction?: string) => {
+    // Will be wired in PRD 8
+  }, [])
 
   const autoSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -291,36 +320,16 @@ export function RecLetterWorkspace({
 
         {/* Right: Actions */}
         <div className="w-1/4 rounded-lg border bg-card overflow-y-auto p-3">
-          <h3 className="text-xs font-medium text-muted-foreground mb-2">
-            Actions
-          </h3>
-          {/* Recommender context card */}
-          <div className="rounded border p-2 space-y-1 mb-3">
-            <p className="text-xs font-medium">{recommender.name}</p>
-            {recommender.title && (
-              <p className="text-xs text-muted-foreground">
-                {recommender.title}
-                {recommender.organization && ` at ${recommender.organization}`}
-              </p>
-            )}
-            {recommender.relationship && (
-              <p className="text-xs text-muted-foreground">
-                {recommender.relationship}
-              </p>
-            )}
-            {recommender.criteriaRelevance.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-1">
-                {recommender.criteriaRelevance.map((c) => (
-                  <Badge key={c} variant="outline" className="text-[10px] px-1 py-0">
-                    {c}
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Generate, version history, and add-to-vault actions coming next.
-          </p>
+          <RecLetterActions
+            draft={{ ...draft, status: draftStatus }}
+            recommender={recommender}
+            clientId={clientId}
+            onGenerate={handleGenerate}
+            onRegenSection={handleRegenSection}
+            sections={sections}
+            isStreaming={isStreaming}
+            editorContent={editorContent}
+          />
         </div>
       </div>
     </div>

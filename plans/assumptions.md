@@ -319,3 +319,10 @@
 - DocumentEditor border-0 rounded-none class overrides used to blend into workspace panel
 - Generation polling uses 2s interval (matches PRD 7 spec), clears on status change or unmount
 - draftStatus tracked locally (not from prop) so polling can update it without re-mounting workspace
+
+## Rec-Letter Actions Panel (PRD 6)
+- RecLetterActions is a pure presentational component -- all handlers (generate, regen, save, vault) are callbacks from parent workspace
+- Generate button partially wired (fires POST, parent polling handles completion) -- error toast deferred to PRD 7
+- Section list reads from draft.sections (assumed array of {id, heading}) -- empty until a letter is generated
+- Save Version and Add to Vault buttons render with correct disabled states but onClick handlers are stubs (PRD 9, 10)
+- aiReasoning snippet shown with line-clamp-3 in context card (PRD says "snippet")

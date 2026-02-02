@@ -1,5 +1,23 @@
 # Progress Log
 
+## 2026-02-02: Actions panel component (PRD 6)
+
+### Completed
+- Created components/recommender/rec-letter-actions.tsx with recommender context card, generate button, section list, version history save button, add-to-vault button
+- Wired into rec-letter-workspace.tsx replacing placeholder right panel
+- Added handleGenerate (fires POST to /generate endpoint, triggers polling via draftStatus state)
+- Extracted sections from draft.sections into section list display
+- All sub-actions (generate, regen, save version, vault) have correct disabled states
+
+### Notes for next dev
+- Generate button (PRD 7) is partially wired -- fires POST and triggers polling, but needs toast error handling
+- Section regenerate buttons render but onClick not wired (PRD 8)
+- Save Version button renders but onClick not wired (PRD 9)
+- Add to Vault button renders but onClick not wired (PRD 10)
+- clientId and onRegenSection passed but unused (underscore-prefixed) -- will be consumed by PRD 7-10
+
+---
+
 ## 2026-02-02: Editor panel in rec-letter workspace (PRD 5, 18, 19)
 
 ### Completed

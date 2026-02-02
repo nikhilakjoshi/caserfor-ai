@@ -67,7 +67,7 @@
       "Top section: read-only recommender context card (name, title, org, relationship, criteriaRelevance tags, aiReasoning snippet)",
       "Render all sub-sections vertically with dividers"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
