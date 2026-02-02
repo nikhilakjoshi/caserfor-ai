@@ -1,5 +1,24 @@
 # Progress Log
 
+## 2026-02-02: Lawyer dashboard page (PRD 17-19, 36)
+
+### Completed
+- Created `/dashboard` route under `(dashboard)` group for lawyer dashboard
+- LawyerDashboard component: 4 stats cards from /api/lawyer/dashboard/stats, recent cases grid (6 CaseCards), DashboardChat with quick actions, empty state
+- Role guard: non-lawyers redirected to /assistant via useRole + useEffect
+- Updated (dashboard)/layout.tsx to conditionally render LawyerSidebar for lawyers, AppSidebar for others
+- LawyerSidebar Dashboard link changed from `/` to `/dashboard`
+- Removed special-case `/` exact match in isActive (no longer needed since URL is `/dashboard`)
+
+### Notes for next dev
+- Dashboard lives at `/dashboard` not `/` - root page.tsx (public landing) and (dashboard)/page.tsx both resolve to `/` so we can't use that path
+- (dashboard)/page.tsx still redirects to /assistant (dead code since app/page.tsx takes precedence, but kept for clarity)
+- Stats cards use same API as before (D4/D5 work)
+- Quick action buttons prefill DashboardChat input via controlled state
+- Case list page at /cases (PRD 20-22) not yet created
+
+---
+
 ## 2026-02-02: CaseCard gap analysis strength badge (PRD 23-25, 37)
 
 ### Completed

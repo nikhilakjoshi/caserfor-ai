@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/sidebar"
 
 const navItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Cases", url: "/cases", icon: Briefcase },
 ]
 
@@ -39,7 +39,7 @@ export function LawyerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="p-4">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
+        <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
           <Briefcase className="h-5 w-5" />
           <span className="group-data-[collapsible=icon]:hidden">Lawyer Portal</span>
         </Link>
@@ -49,9 +49,7 @@ export function LawyerSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {
-                const isActive = item.url === "/"
-                  ? pathname === "/"
-                  : pathname === item.url || pathname.startsWith(item.url + "/")
+                const isActive = pathname === item.url || pathname.startsWith(item.url + "/")
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>

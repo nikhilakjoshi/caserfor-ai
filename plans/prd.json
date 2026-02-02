@@ -175,7 +175,7 @@
       "Redirect non-lawyers to /assistant",
       "Lawyer sees dashboard content"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -185,7 +185,7 @@
       "Render 4 cards: active cases, pending review, drafts in progress, unassigned",
       "Show loading state while fetching"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -196,7 +196,7 @@
       "'View All Cases' link navigates to /cases",
       "Empty state when no cases"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -379,7 +379,7 @@
       "Message suggests what to do next",
       "No blank/broken grid"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

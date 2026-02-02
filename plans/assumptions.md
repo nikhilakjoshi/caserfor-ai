@@ -278,3 +278,10 @@
 - Default tab changed from "gap-analysis" to "overview" to match PRD nav order
 - Overview tab content is basic info cards (field, citizenship, employer, criteria count, eligibility, assigned lawyers) - not specified in PRD but needed for the overview tab to show something
 - Timeline tab is placeholder text only
+
+## Lawyer Dashboard Route (PRD 17-19)
+- Dashboard at `/dashboard` not `/` - app/page.tsx (public landing) takes precedence over (dashboard)/page.tsx for `/` path
+- LawyerSidebar Dashboard link updated from `/` to `/dashboard`
+- (dashboard)/layout.tsx now role-aware: renders LawyerSidebar for lawyer/admin, AppSidebar for others
+- useRole() used for role check (client-side) - middleware doesn't restrict /dashboard specifically
+- Recent cases grid fetches 6 cases (pageSize=6) not all

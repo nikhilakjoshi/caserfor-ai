@@ -1,7 +1,9 @@
 "use client"
 
 import { AppSidebar } from "@/components/app-sidebar"
+import { LawyerSidebar } from "@/components/lawyer-sidebar"
 import { DevRoleToggle } from "@/components/dev-role-toggle"
+import { useRole } from "@/components/role-provider"
 import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
@@ -14,9 +16,12 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
+  const { role } = useRole()
+  const isLawyer = role === "lawyer" || role === "admin"
+
   return (
     <SidebarProvider>
-      <AppSidebar />
+      {isLawyer ? <LawyerSidebar /> : <AppSidebar />}
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
           <SidebarTrigger className="-ml-1" />
