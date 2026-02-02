@@ -8,6 +8,7 @@ import type { VectorMetadata } from "@/lib/pinecone"
 import { categorizeDocument } from "@/lib/categorize-document"
 import { downloadFile } from "@/lib/s3"
 import { extractLinkedInProfile } from "@/lib/linkedin-parser"
+import { runGapAnalysis } from "@/lib/gap-analysis"
 
 // POST /api/vaults/[id]/documents/process - Process document for embedding
 export async function POST(
@@ -130,6 +131,11 @@ export async function POST(
         data: updateData,
       })
 
+      // Auto-trigger gap analysis refresh (non-blocking, debounced)
+      triggerGapAnalysisIfNeeded(vaultId).catch((err) =>
+        console.error("Auto gap analysis trigger failed (non-fatal):", err)
+      )
+
       return NextResponse.json({
         status: "completed",
         chunkCount: chunks.length,
@@ -155,6 +161,40 @@ export async function POST(
       { status: 500 }
     )
   }
+}
+
+const GAP_ANALYSIS_DEBOUNCE_MS = 30_000 // 30 seconds
+
+async function triggerGapAnalysisIfNeeded(vaultId: string) {
+  // Resolve client from vault
+  const vault = await prisma.vault.findUnique({
+    where: { id: vaultId },
+    include: { client: { select: { id: true, status: true } } },
+  })
+  if (!vault?.client || vault.client.status === "draft") return
+
+  const clientId = vault.client.id
+
+  // Debounce: skip if gap analysis was created recently
+  const recent = await prisma.gapAnalysis.findFirst({
+    where: {
+      clientId,
+      createdAt: { gte: new Date(Date.now() - GAP_ANALYSIS_DEBOUNCE_MS) },
+    },
+    select: { id: true },
+  })
+  if (recent) return
+
+  const result = await runGapAnalysis(clientId)
+  await prisma.gapAnalysis.create({
+    data: {
+      clientId,
+      overallStrength: result.overallStrength,
+      summary: result.summary,
+      criteria: JSON.parse(JSON.stringify(result.criteria)),
+      priorityActions: JSON.parse(JSON.stringify(result.priorityActions)),
+    },
+  })
 }
 
 async function runLinkedInExtraction(vaultId: string, text: string) {

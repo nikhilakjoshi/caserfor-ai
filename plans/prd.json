@@ -282,7 +282,7 @@
       "POST to /api/lawyer/cases/[clientId]/gap-analysis/refresh",
       "Do not trigger on processing failure"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -292,7 +292,7 @@
       "Use debounce or last-write-wins approach",
       "Final gap analysis reflects all processed documents"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

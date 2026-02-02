@@ -1,5 +1,21 @@
 # Progress Log
 
+## 2026-02-02: Auto-trigger gap analysis after doc processing (PRD 27, 28)
+
+### Completed
+- After document embedding completes, auto-triggers gap analysis for owning client (non-blocking, fire-and-forget)
+- Debounce via DB check: skips if gap analysis created within last 30s for same client
+- Does not trigger on processing failure (only on embeddingStatus=completed path)
+- Calls runGapAnalysis directly (not via HTTP) to avoid auth overhead in internal trigger
+
+### Notes for next dev
+- Debounce is DB-based (checks createdAt of most recent GapAnalysis), not in-memory timer - works across multiple concurrent requests
+- 30s debounce window means if 5 docs process within 30s, only first triggers analysis; last docs' embeddings won't be reflected until manual refresh or next upload batch
+- triggerGapAnalysisIfNeeded resolves client from vault->client relation (same pattern as runLinkedInExtraction)
+- Remaining passes:false items: PRD 29-35 (E2E draft agent verification)
+
+---
+
 ## 2026-02-02: No-vault edge case handling (PRD 37, 38)
 
 ### Completed

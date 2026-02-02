@@ -294,3 +294,9 @@
 ## No-Vault Edge Case (PRD 37)
 - Gap analysis sub-page fetches /api/cases/[clientId] to check vault existence - extra API call per page load
 - PRD 38 (draft failure revert) was already implemented before this session - marked passes:true without code changes
+
+## Auto-Trigger Gap Analysis (PRD 27, 28)
+- Calls runGapAnalysis directly from process route (not HTTP POST to refresh endpoint) - avoids auth overhead for internal trigger
+- 30s debounce window chosen as balance between avoiding redundant analyses and ensuring recent docs are included
+- DB-based debounce (not in-memory) so it works correctly across concurrent serverless invocations
+- PRD says "POST to /api/lawyer/cases/[clientId]/gap-analysis/refresh" but direct function call is simpler and avoids self-request issues in serverless
