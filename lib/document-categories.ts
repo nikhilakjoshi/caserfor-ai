@@ -32,6 +32,7 @@ export const DOCUMENT_CATEGORIES = [
   { slug: "personal-statement", label: "Personal Statement", description: "Personal narratives, cover letters, and self-authored statements" },
   { slug: "business-plan", label: "Business Plan", description: "Business plans, market analyses, and entrepreneurial proposals" },
   { slug: "identity-document", label: "Identity Document", description: "Passports, birth certificates, IDs, and identity verification documents" },
+  { slug: "linkedin-profile", label: "LinkedIn Profile", description: "LinkedIn profile exports and professional network data" },
 ] as const satisfies readonly DocumentCategory[]
 
 export type DocumentCategorySlug = (typeof DOCUMENT_CATEGORIES)[number]["slug"]

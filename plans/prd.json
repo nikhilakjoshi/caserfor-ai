@@ -168,7 +168,7 @@
       "New category object present in DOCUMENT_CATEGORIES array",
       "Slug is 'linkedin-profile'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -178,7 +178,7 @@
       "Uses gemini-2.5-flash via ai-sdk",
       "Returns typed object matching the specified schema"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -190,7 +190,7 @@
       "Creates Recommender records from extraction results",
       "Non-blocking: extraction runs in parallel with embedding, doesn't block the response"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",

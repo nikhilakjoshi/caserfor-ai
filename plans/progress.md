@@ -1,5 +1,21 @@
 # Progress Log
 
+## 2026-02-02: LinkedIn profile extraction pipeline
+
+### Completed
+- Added `linkedin-profile` category to DOCUMENT_CATEGORIES in lib/document-categories.ts
+- Added `extractLinkedInProfile()` to lib/linkedin-parser.ts: AI extraction via gemini-2.5-flash w/ structured output (zod schema)
+  - Returns profileData (headline, currentRole, company, skills, recommendations) + potentialRecommenders array
+- Integrated into document processing route (app/api/vaults/[id]/documents/process)
+  - After categorization, if linkedin-profile: resolves clientId via Vault->Client, runs extraction
+  - Creates Recommender records w/ status=suggested, sourceType=linkedin_extract
+  - Non-blocking: fire-and-forget pattern, doesn't block embedding response
+
+### Notes for next dev
+- Extraction uses `Output.object()` pattern (not tool-use loop) since it's a single-pass structured extraction
+- Uses `resolvedCategory` which checks both AI categorization result and pre-assigned documentType
+- Next priority: drafting agents (petition-letter, personal-statement, recommendation-letter, etc)
+
 ## 2026-02-02: Recommender suggestion agent + API route
 
 ### Completed

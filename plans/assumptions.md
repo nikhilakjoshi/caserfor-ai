@@ -145,3 +145,9 @@
 - authorizeCaseAccess returns NextResponse on error (not throw) - callers use isAuthError() type guard
 - PRD says "throws appropriate HTTP error" but return pattern matches existing codebase style (gap-analysis route etc)
 - Helper also fetches and returns client record to avoid redundant DB query in route handlers
+
+## LinkedIn Extraction
+- extractLinkedInProfile uses Output.object() (single-pass structured output) not agentic tool loop - PDF text is self-contained context
+- LinkedIn extraction checks both AI-categorized and pre-assigned documentType via `resolvedCategory`
+- Extraction runs fire-and-forget after categorization resolves (parallel with nothing - embedding already done by then)
+- No deduplication of recommenders from LinkedIn extraction - multiple uploads may create duplicates

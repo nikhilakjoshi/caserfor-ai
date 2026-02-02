@@ -7,6 +7,7 @@ import { upsertVectors, vaultNamespace } from "@/lib/pinecone"
 import type { VectorMetadata } from "@/lib/pinecone"
 import { categorizeDocument } from "@/lib/categorize-document"
 import { downloadFile } from "@/lib/s3"
+import { extractLinkedInProfile } from "@/lib/linkedin-parser"
 
 // POST /api/vaults/[id]/documents/process - Process document for embedding
 export async function POST(
@@ -74,6 +75,15 @@ export async function POST(
 
       // Await categorization (started earlier)
       const categorization = await categorizePromise
+
+      // If LinkedIn profile, extract recommenders in background (non-blocking)
+      const resolvedCategory =
+        categorization?.category || document.documentType
+      if (resolvedCategory === "linkedin-profile") {
+        runLinkedInExtraction(vaultId, text).catch((err) =>
+          console.error("LinkedIn extraction failed (non-fatal):", err)
+        )
+      }
 
       // Prepare pinecone records
       const namespace = vaultNamespace(vaultId)
@@ -144,5 +154,34 @@ export async function POST(
       { error: "Failed to process document" },
       { status: 500 }
     )
+  }
+}
+
+async function runLinkedInExtraction(vaultId: string, text: string) {
+  // Resolve clientId from Vault -> Client relation
+  const vault = await prisma.vault.findUnique({
+    where: { id: vaultId },
+    include: { client: { select: { id: true } } },
+  })
+  if (!vault?.client) return
+
+  const clientId = vault.client.id
+  const result = await extractLinkedInProfile(text)
+
+  // Create Recommender records from extracted potential recommenders
+  for (const rec of result.potentialRecommenders) {
+    await prisma.recommender.create({
+      data: {
+        clientId,
+        name: rec.name,
+        title: rec.title,
+        organization: rec.organization,
+        relationship: rec.relationship,
+        notes: rec.reasoning,
+        status: "suggested",
+        sourceType: "linkedin_extract",
+        aiReasoning: rec.reasoning,
+      },
+    })
   }
 }

@@ -1,5 +1,8 @@
 import type { ResumeParseResult } from "@/lib/resume-parser"
 import type { BrightDataLinkedInResult } from "@/lib/brightdata"
+import { generateText, Output } from "ai"
+import { defaultModel } from "@/lib/ai"
+import { z } from "zod"
 
 /**
  * Map Bright Data structured LinkedIn response to ResumeParseResult.
@@ -136,4 +139,51 @@ export function linkedInProfileToText(profile: BrightDataLinkedInResult): string
   }
 
   return sections.join("\n")
+}
+
+const linkedInExtractionSchema = z.object({
+  profileData: z.object({
+    headline: z.string().nullable(),
+    currentRole: z.string().nullable(),
+    company: z.string().nullable(),
+    skills: z.array(z.string()),
+    recommendations: z.array(z.string()),
+  }),
+  potentialRecommenders: z.array(
+    z.object({
+      name: z.string(),
+      title: z.string(),
+      organization: z.string(),
+      relationship: z.string(),
+      reasoning: z.string(),
+    })
+  ),
+})
+
+export type LinkedInExtractionResult = z.infer<typeof linkedInExtractionSchema>
+
+/**
+ * AI-powered extraction from LinkedIn PDF text.
+ * Extracts profile data and identifies potential recommenders.
+ */
+export async function extractLinkedInProfile(
+  text: string
+): Promise<LinkedInExtractionResult> {
+  const { experimental_output: output } = await generateText({
+    model: defaultModel,
+    output: Output.object({ schema: linkedInExtractionSchema }),
+    prompt: `You are analyzing a LinkedIn profile PDF export for an EB-1A immigration petition.
+
+Extract the following from this LinkedIn profile text:
+
+1. profileData: headline, currentRole, company, skills (list), recommendations (list of recommendation text snippets)
+2. potentialRecommenders: People mentioned in the profile who could serve as recommenders. For each, provide name, title, organization, their likely relationship to the profile owner, and reasoning for why they'd be a good EB-1A recommender.
+
+Look for recommenders in: recommendations section, mutual connections mentioned, co-authors, supervisors, collaborators mentioned in experience descriptions.
+
+LinkedIn Profile Text:
+${text}`,
+  })
+
+  return output!
 }
