@@ -288,7 +288,7 @@
       "Accepts recommenderId parameter",
       "Uses recommender details in generation context"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

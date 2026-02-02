@@ -2426,3 +2426,20 @@
 - Tools are created via factory function (not bare exports) so each agent call is scoped to a client
 - Next priority: drafting agents (petition-letter, personal-statement, etc.) that consume these tools
 - Or: linkedin-profile doc category + linkedin extraction agent
+
+## 2026-02-02: Recommendation letter drafting agent
+
+### Completed
+- Created `lib/drafting-agents/recommendation-letter.ts`
+  - Two-phase pattern: research loop (stepCountIs(20)) then structured output
+  - Uses `defaultModel` (gemini-2.5-flash) - same as personal-statement
+  - Accepts `clientId` + `recommenderId` params
+  - Research phase fetches recommender details, client profile, eligibility report, gap analysis, existing drafts, vault evidence
+  - 7 sections: introduction, relationship, expertise, impact, criterion-specific testimony, peer comparison, conclusion
+  - Third-person perspective from recommender's voice
+  - markdownToTiptapParagraphs duplicated (same as personal-statement) - extract to shared util when 4th agent needs it
+
+### Notes for next dev
+- Next priority: cover-letter, exhibit-list, table-of-contents, rfe-response agents (all simpler, same pattern)
+- Then: generate + regenerate API routes to wire agents to frontend
+- markdownToTiptapParagraphs is now in 3 files - should extract to shared util soon

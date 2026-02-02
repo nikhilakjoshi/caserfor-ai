@@ -162,3 +162,8 @@
 - PRD says "single generation call" but implemented as two-phase (research + generate) like petition-letter for better context gathering
 - Research phase uses stepCountIs(15) vs petition-letter's 25 - personal statement needs less evidence mining
 - markdownToTiptapParagraphs duplicated from petition-letter rather than extracted to shared util - acceptable until 3+ agents share it
+
+## Recommendation Letter Drafting Agent
+- Uses defaultModel (gemini-2.5-flash) not gemini-2.5-pro - PRD says "gemini-2.5-flash" which matches
+- Research phase uses stepCountIs(20) - between petition-letter (25) and personal-statement (15) since rec letters need recommender + applicant context
+- markdownToTiptapParagraphs now duplicated in 3 files - should extract to shared util with next agent
