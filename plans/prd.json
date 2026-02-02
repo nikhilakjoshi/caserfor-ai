@@ -396,7 +396,7 @@
       "Each suggestion card shows all specified fields",
       "Accept creates recommender (status=identified), dismiss removes"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

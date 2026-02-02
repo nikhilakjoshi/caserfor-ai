@@ -1,5 +1,19 @@
 # Progress Log
 
+## 2026-02-02: AISuggestionsPanel UI component
+
+### Completed
+- Created `components/recommender/ai-suggestions-panel.tsx`
+- Trigger button calls POST /suggest, polls for new ai_suggested recommenders
+- Displays suggestion cards with reasoning, criteria tags, accept/dismiss buttons
+- Filters suggestions by status=suggested + sourceType in (ai_suggested, linkedin_extract)
+- Auto-stops polling after 2 min; dispatches custom event for parent re-fetch
+
+### Notes for next dev
+- Recommenders tab (PRD item) is next highest priority - wires StatusPipeline + AISuggestionsPanel + RecommenderList into case detail page
+- Parent component needs to listen for recommenders-updated custom event or pass refresh callback
+- onAccept/onDismiss are callback props - parent must implement PATCH (status->identified) and DELETE calls
+
 ## 2026-02-02: StatusPipeline UI component
 
 ### Completed
