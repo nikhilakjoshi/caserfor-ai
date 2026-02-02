@@ -1,5 +1,25 @@
 # Progress Log
 
+## 2026-02-02: D2 - Cases Route Group + Unified Case Layout
+
+### Completed
+- D2-1: `app/(cases)/cases/[clientId]/layout.tsx` - role-aware layout. Lawyer gets LawyerSidebar, applicant gets AppSidebar. Uses useRole() hook.
+- D2-2: `app/(cases)/cases/[clientId]/page.tsx` - case overview page with header, summary cards (email, citizenship, employer, criteria, vault, lawyers), eligibility summary.
+- D2-2 (API): `app/api/cases/[clientId]/route.ts` - unified case data API using authorizeCaseAccess (works for all roles).
+- D2-3: `app/(dashboard)/my-case/page.tsx` - converted to server component redirect. Fetches clientId from session via prisma, redirects to `/cases/{clientId}`. Falls back to /onboarding if no case.
+- D2-4: AppSidebar "My Case" link now resolves to `/cases/{clientId}` when clientId available (via useRole), falls back to `/my-case` (which redirects).
+- D2-5: Copied drafts routes from `(lawyer)/cases/[clientId]/drafts/` to `(cases)/cases/[clientId]/drafts/`. Both index and [id] workspace pages.
+- D2-6: Middleware already allows all authenticated users on `/cases/*` (no explicit restriction existed). No change needed.
+- D2-7: `lib/case-auth.ts` already existed from prior work. Already handles lawyer (CaseAssignment check), applicant (userId ownership), admin (full access).
+
+### Notes for next dev
+- CaseSidebar (D3-1) not yet built - layout currently only shows AppSidebar or LawyerSidebar, no second case-specific sidebar. D3 will add it.
+- Drafts routes exist in both (lawyer) and (cases) groups. The (lawyer) copies can be removed once all lawyer case navigation points to /cases/ instead of /lawyer/cases/.
+- Case overview is a summary page. Recommender/drafts management was in old my-case page - that content will live in D3 sub-pages (recommenders, vault, etc).
+- The unified `/api/cases/[clientId]` route returns same shape as `/api/lawyer/cases/[clientId]` but uses authorizeCaseAccess for multi-role support.
+
+---
+
 ## 2026-02-02: D1 - RoleProvider + DevRoleToggle
 
 ### Completed

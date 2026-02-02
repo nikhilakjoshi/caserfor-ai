@@ -17,6 +17,7 @@ import {
   Settings,
   Workflow,
 } from "lucide-react"
+import { useRole } from "@/components/role-provider"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -53,9 +54,8 @@ interface Vault {
   fileCount: number
 }
 
-const navItemsTop = [
+const navItemsTopStatic = [
   { title: "Assistant", url: "/assistant", icon: MessageSquare },
-  { title: "My Case", url: "/my-case", icon: Briefcase },
 ]
 
 const navItemsBottom = [
@@ -74,8 +74,15 @@ const MAX_SIDEBAR_VAULTS = 10
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
+  const { clientId } = useRole()
   const [vaults, setVaults] = React.useState<Vault[]>([])
   const [vaultsOpen, setVaultsOpen] = React.useState(false)
+
+  const myCaseUrl = clientId ? `/cases/${clientId}` : "/my-case"
+  const navItemsTop = [
+    ...navItemsTopStatic,
+    { title: "My Case", url: myCaseUrl, icon: Briefcase },
+  ]
 
   React.useEffect(() => {
     async function fetchVaults() {
@@ -119,7 +126,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               {navItemsTop.map((item) => {
-                const isActive = pathname === item.url || pathname.startsWith(item.url + "/")
+                const isActive = item.title === "My Case"
+                  ? pathname.startsWith("/cases/") || pathname === "/my-case"
+                  : pathname === item.url || pathname.startsWith(item.url + "/")
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>

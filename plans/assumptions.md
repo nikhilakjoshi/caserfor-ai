@@ -225,3 +225,11 @@
 - DevRoleToggle only changes client-side context, not JWT/session - middleware still enforces real role
 - RoleProvider returns null (no children) until session fetch completes - prevents FOUC but adds small delay
 - clientId is fetched from /api/my-case for all users - lawyers will get a silent 404 (clientId stays null)
+
+## Cases Route Group (D2)
+- (cases) layout uses LawyerSidebar for lawyer/admin, AppSidebar for applicant - no CaseSidebar yet (D3)
+- Drafts routes copied (not moved) from (lawyer) to (cases) - both exist simultaneously until lawyer case detail is refactored to use /cases/ routes
+- /cases/* middleware access: no explicit restriction needed since middleware only blocks specific route prefixes (/onboarding, /evaluation, /lawyer). All authenticated users can access /cases/* - actual auth is in API via authorizeCaseAccess
+- Unified /api/cases/[clientId] route created alongside existing /api/lawyer/cases/[clientId] - both coexist, unified route uses authorizeCaseAccess for multi-role support
+- my-case server redirect uses prisma directly (not API call) since it's a server component - avoids extra HTTP hop
+- AppSidebar My Case isActive check matches both /cases/ and /my-case paths for highlight consistency during redirect

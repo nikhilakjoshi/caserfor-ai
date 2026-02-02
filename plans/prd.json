@@ -28,7 +28,7 @@
     "section": "D2",
     "title": "Create (cases) route group layout",
     "description": "app/(cases)/cases/[clientId]/layout.tsx - role-aware layout. Lawyer: dual sidebar (AppSidebar collapsed + CaseSidebar). Applicant: AppSidebar only. Use useRole() to determine.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D1-1"]
   },
   {
@@ -36,7 +36,7 @@
     "section": "D2",
     "title": "Create case overview page",
     "description": "app/(cases)/cases/[clientId]/page.tsx - case header + summary. Fetch case data by clientId. Reuse existing case detail components where possible.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D2-1"]
   },
   {
@@ -44,7 +44,7 @@
     "section": "D2",
     "title": "Convert /my-case to redirect",
     "description": "app/(dashboard)/my-case/page.tsx - server redirect to /cases/{clientId}. Fetch clientId from session, redirect().",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D2-1"]
   },
   {
@@ -52,7 +52,7 @@
     "section": "D2",
     "title": "Update AppSidebar My Case link",
     "description": "Update AppSidebar 'My Case' nav item href to resolve to /cases/[clientId] using RoleProvider clientId.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D1-1", "D2-1"]
   },
   {
@@ -60,7 +60,7 @@
     "section": "D2",
     "title": "Move drafts routes to (cases) group",
     "description": "Move drafts routes from (lawyer)/cases/[clientId]/drafts/ to (cases)/cases/[clientId]/drafts/. Update imports.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D2-1"]
   },
   {
@@ -68,7 +68,7 @@
     "section": "D2",
     "title": "Update middleware for /cases/* access",
     "description": "middleware.ts - allow both lawyer and applicant roles on /cases/* routes.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D2-1"]
   },
   {
@@ -76,7 +76,7 @@
     "section": "D2",
     "title": "Create case-level auth utility",
     "description": "lib/case-auth.ts - authorization checks: lawyer can access any case, applicant only their own. Export canAccessCase(session, clientId).",
-    "status": "pending",
+    "status": "done",
     "dependencies": []
   },
   {
