@@ -166,10 +166,51 @@ export function RecLetterWorkspace({
     }
   }, [clientId, draft.id])
 
-  // Regenerate a single section (placeholder -- PRD 8)
-  const handleRegenSection = useCallback(async (_sectionId: string, _instruction?: string) => {
-    // Will be wired in PRD 8
-  }, [])
+  // Regenerate a single section
+  const regenPollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const handleRegenSection = useCallback(async (sectionId: string, instruction?: string) => {
+    try {
+      setIsStreaming(true)
+      const res = await fetch(`/api/cases/${clientId}/drafts/${draft.id}/regenerate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sectionId, instruction }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: "Regeneration failed" }))
+        toast.error(data.error || "Failed to regenerate section")
+        setIsStreaming(false)
+        return
+      }
+      // Poll for content change (regen route doesn't change draft status)
+      const startContent = editorContent
+      let attempts = 0
+      regenPollRef.current = setInterval(async () => {
+        attempts++
+        try {
+          const r = await fetch(`/api/cases/${clientId}/drafts/${draft.id}`)
+          if (!r.ok) return
+          const data = await r.json()
+          const newHtml = tiptapToHtml(data.content) || data.plainText || ""
+          if (newHtml !== startContent || attempts >= 30) {
+            if (regenPollRef.current) clearInterval(regenPollRef.current)
+            setIsStreaming(false)
+            if (newHtml !== startContent) {
+              setEditorContent(newHtml)
+              toast.success("Section regenerated")
+            } else {
+              toast.error("Section regeneration timed out")
+            }
+          }
+        } catch {
+          // keep polling
+        }
+      }, 2000)
+    } catch {
+      toast.error("Network error -- could not regenerate section")
+      setIsStreaming(false)
+    }
+  }, [clientId, draft.id, editorContent])
 
   const autoSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -202,10 +243,11 @@ export function RecLetterWorkspace({
     }, 2000)
   }, [saveDraft])
 
-  // Cleanup auto-save timer
+  // Cleanup timers
   useEffect(() => {
     return () => {
       if (autoSaveRef.current) clearTimeout(autoSaveRef.current)
+      if (regenPollRef.current) clearInterval(regenPollRef.current)
     }
   }, [])
 

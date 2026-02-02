@@ -93,7 +93,7 @@
       "Poll for completion, update editor content on done",
       "Disable regenerate buttons during any active generation"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

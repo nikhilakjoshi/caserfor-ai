@@ -1,9 +1,10 @@
 "use client"
 
+import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { Sparkles, RotateCcw, Save, Upload } from "lucide-react"
+import { Sparkles, RotateCcw, Save, Upload, X, Send } from "lucide-react"
 
 interface Draft {
   id: string
@@ -44,13 +45,15 @@ export function RecLetterActions({
   recommender,
   clientId: _clientId,
   onGenerate,
-  onRegenSection: _onRegenSection,
+  onRegenSection,
   sections,
   isStreaming,
   editorContent,
 }: RecLetterActionsProps) {
   const hasContent = editorContent.length > 0
   const isGenerating = draft.status === "generating" || isStreaming
+  const [regenSectionId, setRegenSectionId] = useState<string | null>(null)
+  const [regenInstruction, setRegenInstruction] = useState("")
 
   return (
     <div className="space-y-3">
@@ -113,20 +116,51 @@ export function RecLetterActions({
         ) : (
           <div className="space-y-1">
             {sections.map((s) => (
-              <div
-                key={s.id}
-                className="flex items-center justify-between text-xs rounded px-2 py-1.5 hover:bg-muted"
-              >
-                <span className="truncate">{s.heading}</span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-5 w-5 shrink-0"
-                  disabled={isGenerating}
-                  title="Regenerate section"
-                >
-                  <RotateCcw className="h-3 w-3" />
-                </Button>
+              <div key={s.id}>
+                <div className="flex items-center justify-between text-xs rounded px-2 py-1.5 hover:bg-muted">
+                  <span className="truncate">{s.heading}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-5 w-5 shrink-0"
+                    disabled={isGenerating}
+                    title="Regenerate section"
+                    onClick={() =>
+                      setRegenSectionId(regenSectionId === s.id ? null : s.id)
+                    }
+                  >
+                    {regenSectionId === s.id ? (
+                      <X className="h-3 w-3" />
+                    ) : (
+                      <RotateCcw className="h-3 w-3" />
+                    )}
+                  </Button>
+                </div>
+                {regenSectionId === s.id && (
+                  <div className="px-2 pb-1.5 space-y-1">
+                    <textarea
+                      className="w-full text-xs border rounded p-1.5 resize-none bg-background"
+                      rows={2}
+                      placeholder="Optional instruction..."
+                      value={regenInstruction}
+                      onChange={(e) => setRegenInstruction(e.target.value)}
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full h-6 text-xs"
+                      disabled={isGenerating}
+                      onClick={() => {
+                        onRegenSection(s.id, regenInstruction || undefined)
+                        setRegenSectionId(null)
+                        setRegenInstruction("")
+                      }}
+                    >
+                      <Send className="h-3 w-3 mr-1" />
+                      Regenerate
+                    </Button>
+                  </div>
+                )}
               </div>
             ))}
           </div>

@@ -331,3 +331,8 @@
 - Installed sonner (not react-hot-toast) -- lightweight, zero-config, works with Next.js App Router
 - `<Toaster>` added to root layout (app/layout.tsx) -- available globally to all client components
 - Generate endpoint returns sections with `title` field (not `heading`) from agents -- polling maps both
+
+## Per-Section Regenerate UI (PRD 8)
+- Regen route doesn't update draft status -- polling detects completion by comparing HTML content before/after
+- 30-poll timeout (~60s) before showing error -- regenerateSection typically completes in 10-20s
+- Instruction textarea is inline per-section (not a modal) -- simpler UX, collapses on submit or X click

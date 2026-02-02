@@ -1,5 +1,21 @@
 # Progress Log
 
+## 2026-02-02: Per-section regenerate in actions panel (PRD 8)
+
+### Completed
+- Wired section regen buttons in rec-letter-actions.tsx: click toggles instruction textarea + submit
+- Instruction input optional (textarea + Send button), X to cancel
+- handleRegenSection in workspace calls POST /regenerate with sectionId + instruction
+- Polls draft every 2s for content change (regen route doesn't set status to generating), 30 attempt timeout
+- Sets isStreaming during regen to disable all buttons
+- Toast on success/failure/timeout
+- Cleanup regen poll interval on unmount
+
+### Notes for next dev
+- Regen route is fire-and-forget, no status field change -- polling compares HTML content diff
+- editorContent is a dep of handleRegenSection (captures start content for comparison)
+- Section list still reads from draft.sections array (set during initial generation)
+
 ## 2026-02-02: Generate Full Letter error handling + toasts (PRD 7)
 
 ### Completed
