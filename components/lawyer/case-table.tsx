@@ -38,7 +38,7 @@ const statusVariant: Record<string, string> = {
   paid: "bg-purple-100 text-purple-800",
 }
 
-export function CaseTable() {
+export function CaseTable({ tab = "all" }: { tab?: string }) {
   const [cases, setCases] = useState<CaseData[]>([])
   const [pagination, setPagination] = useState<Pagination | null>(null)
   const [search, setSearch] = useState("")
@@ -54,13 +54,13 @@ export function CaseTable() {
 
   useEffect(() => {
     setPage(1)
-  }, [debouncedSearch])
+  }, [debouncedSearch, tab])
 
   const fetchCases = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
-      const params = new URLSearchParams({ tab: "all", page: String(page) })
+      const params = new URLSearchParams({ tab, page: String(page) })
       if (debouncedSearch) params.set("search", debouncedSearch)
       const res = await fetch(`/api/lawyer/cases?${params}`)
       if (!res.ok) throw new Error("Failed to fetch cases")
@@ -72,7 +72,7 @@ export function CaseTable() {
     } finally {
       setLoading(false)
     }
-  }, [page, debouncedSearch])
+  }, [page, debouncedSearch, tab])
 
   useEffect(() => {
     fetchCases()

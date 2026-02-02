@@ -207,7 +207,7 @@
       "Tab selection calls /api/lawyer/cases?tab=X",
       "Cases displayed as CaseCard grid"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -218,7 +218,7 @@
       "Search calls /api/lawyer/cases?search=Y",
       "Results update in grid"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -228,7 +228,7 @@
       "API called with ?page=Z",
       "Page state updates grid content"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",

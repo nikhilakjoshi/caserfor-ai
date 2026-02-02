@@ -285,3 +285,8 @@
 - (dashboard)/layout.tsx now role-aware: renders LawyerSidebar for lawyer/admin, AppSidebar for others
 - useRole() used for role check (client-side) - middleware doesn't restrict /dashboard specifically
 - Recent cases grid fetches 6 cases (pageSize=6) not all
+
+## Case List Page (PRD 20-22)
+- Cases list uses CaseTable (table view) not CaseCard grid - table is more appropriate for browsable list, cards for dashboard preview
+- No (cases)/layout.tsx created - cases/page.tsx has inline SidebarProvider to avoid double-nesting with [clientId]/layout.tsx which has its own SidebarProvider
+- CaseTable tab prop defaults to "all" for backward compatibility with dashboard usage

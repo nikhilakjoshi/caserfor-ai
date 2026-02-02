@@ -1,5 +1,21 @@
 # Progress Log
 
+## 2026-02-02: Case list page at /cases (PRD 20-22)
+
+### Completed
+- Created `app/(cases)/cases/page.tsx` with All / My Cases / Unassigned tabs
+- Page uses shadcn Tabs controlling `CaseTable` component via new `tab` prop
+- Modified `CaseTable` to accept `tab` prop (was hardcoded to "all"), added tab to fetch/reset deps
+- Page includes own sidebar layout (LawyerSidebar for lawyers, AppSidebar for others)
+- Search (debounced 300ms) and pagination already handled by CaseTable component
+
+### Notes for next dev
+- Cases displayed as table (not CaseCard grid) - table better for list view, cards used on dashboard
+- No `(cases)/layout.tsx` created - page has inline layout to avoid double-nesting with `[clientId]/layout.tsx`
+- CaseTable resets page to 1 on tab change
+
+---
+
 ## 2026-02-02: Lawyer dashboard page (PRD 17-19, 36)
 
 ### Completed
