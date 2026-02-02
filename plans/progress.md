@@ -2329,3 +2329,19 @@
 - Reset uses Record<string, unknown> cast for data object because Prisma generated types may not include expanded fields
 - S3 and Pinecone deletions are best-effort with try/catch - DB cleanup proceeds even if external services fail
 - Start Over button only visible when currentStep > 1
+
+## 2026-02-02: Drafts CRUD API routes
+
+### Completed
+- GET+POST /api/cases/[clientId]/drafts (list w/ recommender name, create w/ zod + 409 on duplicate)
+- GET+PATCH+DELETE /api/cases/[clientId]/drafts/[id] (full detail w/ recommender info, partial update, delete w/ cascade)
+- GET+POST /api/cases/[clientId]/drafts/[id]/versions (list versions desc, snapshot current content)
+- Drafts auth: applicant can only PATCH personal_statement, 403 on other types
+- All routes use authorizeCaseAccess, same pattern as recommender routes
+- Typecheck clean, lint 0 errors
+
+### Notes for next dev
+- Draft unique constraint checked manually before insert (findFirst) to return 409 instead of Prisma error
+- Version POST requires draft.content to exist (returns 400 if no content to snapshot)
+- updateSchema uses z.any() for content/sections (TipTap JSON, arbitrary structure)
+- Next priority: linkedin-profile doc category + linkedin extraction agent, OR drafting tools + agents

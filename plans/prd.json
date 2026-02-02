@@ -200,7 +200,7 @@
       "Returns JSON array of drafts with recommender info included",
       "Proper auth checks"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -210,7 +210,7 @@
       "Enforces unique constraint, returns 409 on duplicate",
       "Returns created draft with 201"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -219,7 +219,7 @@
       "Returns complete draft object with content field",
       "404 if not found"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -228,7 +228,7 @@
       "Partial update works for content, plainText, sections, status, title",
       "Returns updated draft"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -237,7 +237,7 @@
       "Returns 204 on success",
       "Versions cascade-deleted"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -247,7 +247,7 @@
       "GET returns version list ordered by createdAt desc",
       "Route file at app/api/cases/[clientId]/drafts/[id]/versions/route.ts"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -524,7 +524,7 @@
       "Applicant can PATCH personal_statement but gets 403 on PATCH other types",
       "Applicant can GET all draft types for own case"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
