@@ -341,7 +341,7 @@
       "Updates draft status lifecycle: generating -> draft",
       "Saves final content to CaseDraft record"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",

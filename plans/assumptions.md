@@ -167,3 +167,8 @@
 - Uses defaultModel (gemini-2.5-flash) not gemini-2.5-pro - PRD says "gemini-2.5-flash" which matches
 - Research phase uses stepCountIs(20) - between petition-letter (25) and personal-statement (15) since rec letters need recommender + applicant context
 - markdownToTiptapParagraphs now duplicated in 3 files - should extract to shared util with next agent
+
+## Draft Generation API Route
+- PRD says "streams response" but agents return complete results (research loop + structured output) - used fire-and-forget async pattern instead (matches gap-analysis refresh)
+- On generation failure, status reverts to not_started so user can retry
+- JSON.parse(JSON.stringify()) used for tiptap/sections to satisfy Prisma's InputJsonValue type

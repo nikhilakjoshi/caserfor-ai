@@ -1,5 +1,22 @@
 # Progress Log
 
+## 2026-02-02: Draft generation API route
+
+### Completed
+- Created `app/api/cases/[clientId]/drafts/[id]/generate/route.ts`
+  - POST triggers AI generation for a draft, dispatches to correct agent by documentType
+  - Supports petition_letter, personal_statement, recommendation_letter
+  - Fire-and-forget async pattern (like gap-analysis refresh): returns 202, runs agent in background
+  - Status lifecycle: not_started -> generating -> draft (or reverts to not_started on error)
+  - Auth via authorizeCaseAccess
+  - Validates recommendation_letter has recommenderId
+
+### Notes for next dev
+- cover_letter, exhibit_list, table_of_contents, rfe_response agents not yet built - route returns 400 for unsupported types
+- PRD says "streams response" but agents are non-streaming (research loop + structured output) - async fire-and-forget is more appropriate
+- Regenerate route (per-section) still needed
+- UI polling needed to detect when generation completes (status changes from generating to draft)
+
 ## 2026-02-02: Personal statement drafting agent
 
 ### Completed
