@@ -252,7 +252,7 @@
     "section": "D5",
     "title": "Add search_vault tool",
     "description": "Tool wrapping queryRelevantChunks for RAG search within a case's vault.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D5-1"]
   },
   {

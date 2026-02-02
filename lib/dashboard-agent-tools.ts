@@ -1,6 +1,7 @@
 import { tool } from "ai"
 import { z } from "zod"
 import { prisma } from "@/lib/db"
+import { queryRelevantChunks } from "@/lib/rag"
 
 /**
  * Creates tool definitions for the lawyer dashboard assistant.
@@ -121,6 +122,67 @@ export function createDashboardTools(lawyerId: string) {
           createdAt: client.createdAt,
           updatedAt: client.updatedAt,
         })
+      },
+    }),
+
+    search_vault: tool({
+      description:
+        "Search a case's vault documents using semantic/RAG search. Returns relevant text chunks matching the query. Use to find specific evidence, documents, or information within a client's uploaded files.",
+      inputSchema: z.object({
+        clientId: z.string().describe("The client ID whose vault to search"),
+        query: z
+          .string()
+          .describe("Natural language search query for vault content"),
+        topK: z
+          .number()
+          .optional()
+          .describe("Max results to return (default 10)"),
+      }),
+      execute: async ({ clientId, query, topK }) => {
+        // Verify lawyer has access
+        const assignment = await prisma.caseAssignment.findFirst({
+          where: { lawyerId, clientId },
+          select: { id: true },
+        })
+        if (!assignment) {
+          return "You are not assigned to this case."
+        }
+
+        const client = await prisma.client.findUnique({
+          where: { id: clientId },
+          select: {
+            vault: {
+              select: {
+                id: true,
+                documents: { select: { id: true } },
+              },
+            },
+          },
+        })
+
+        const vault = client?.vault
+        if (!vault || vault.documents.length === 0) {
+          return "No vault or documents found for this case."
+        }
+
+        const documentIds = vault.documents.map((d: { id: string }) => d.id)
+        const chunks = await queryRelevantChunks(query, documentIds, {
+          topK: topK ?? 10,
+          vaultId: vault.id,
+        })
+
+        if (chunks.length === 0) {
+          return "No relevant results found."
+        }
+
+        return JSON.stringify(
+          chunks.map((c) => ({
+            documentName: c.documentName,
+            documentType: c.documentType,
+            text: c.text,
+            score: c.score,
+          }))
+        )
       },
     }),
 

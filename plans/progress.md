@@ -1,5 +1,15 @@
 # Progress Log
 
+## 2026-02-02: D5-3 - search_vault dashboard agent tool
+
+### Completed
+- D5-3: Added `search_vault` tool to `lib/dashboard-agent-tools.ts`. Takes clientId + query + optional topK, verifies lawyer assignment, looks up vault via Client->Vault relation, calls `queryRelevantChunks` for RAG search, returns matching chunks w/ doc name, type, text, score.
+
+### Notes for next dev
+- D5-4 (gap_analysis + eligibility + drafts tools) is next unblocked item
+- Vault lookup goes through Client model (Client has vaultId FK), not Vault.clientId
+- queryRelevantChunks requires vaultId + documentIds array - empty docs returns empty results
+
 ## 2026-02-02: D5-2 - get_case_detail dashboard agent tool
 
 ### Completed
