@@ -1,5 +1,23 @@
 # Progress Log
 
+## 2026-02-02: DraftsIndex page
+
+### Completed
+- Created `app/(lawyer)/cases/[clientId]/drafts/page.tsx`
+- Grid of 6 non-recommendation document type cards + expandable recommendation letters section
+- Each card: doc type name, status badge, last updated, Create/Edit/View button
+- Recommendation letters section filters recommenders by confirmed/letter_drafted/letter_finalized status
+- Quick stats row: X started, X finalized
+- Create button calls POST /api/cases/[clientId]/drafts, links to /cases/[clientId]/drafts/[id]
+- Typecheck and lint pass (0 errors)
+
+### Notes for next dev
+- Drafting workspace page (`/cases/[clientId]/drafts/[id]`) does not exist yet - links will 404
+- Next priorities: drafting workspace page, then Drafts tab on case detail page
+- Back link goes to `/cases/${clientId}` - assumes case detail page route
+
+---
+
 ## 2026-02-02: Recommenders tab on lawyer case detail page
 
 ### Completed

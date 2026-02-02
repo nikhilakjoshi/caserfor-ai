@@ -428,7 +428,7 @@
       "Quick stats row displays correctly",
       "Create/Edit buttons link to drafting workspace"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
