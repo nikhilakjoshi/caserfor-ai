@@ -2345,3 +2345,18 @@
 - Version POST requires draft.content to exist (returns 400 if no content to snapshot)
 - updateSchema uses z.any() for content/sections (TipTap JSON, arbitrary structure)
 - Next priority: linkedin-profile doc category + linkedin extraction agent, OR drafting tools + agents
+
+## 2026-02-02: Shared drafting tools module
+
+### Completed
+- Created lib/drafting-tools.ts with createDraftingTools(clientId) factory
+- 6 tools: get_client_profile, search_vault, get_gap_analysis, get_eligibility_report, get_existing_drafts, get_recommender
+- Follows same ai-sdk tool() pattern as eb1a-evaluator.ts
+- All tools return JSON.stringify'd data, scoped to clientId
+- get_existing_drafts truncates plainText to 2000 chars to avoid token bloat
+- get_recommender validates recommender belongs to clientId
+
+### Notes for next dev
+- Tools are created via factory function (not bare exports) so each agent call is scoped to a client
+- Next priority: drafting agents (petition-letter, personal-statement, etc.) that consume these tools
+- Or: linkedin-profile doc category + linkedin extraction agent

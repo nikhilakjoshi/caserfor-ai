@@ -257,7 +257,7 @@
       "Each tool returns appropriate data from Prisma queries",
       "Tools compatible with ai-sdk generateText tool format"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
