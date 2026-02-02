@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import {
   BookOpen,
   Bot,
+  Briefcase,
   ChevronRight,
   Database,
   FolderOpen,
@@ -54,6 +55,7 @@ interface Vault {
 
 const navItemsTop = [
   { title: "Assistant", url: "/assistant", icon: MessageSquare },
+  { title: "My Case", url: "/my-case", icon: Briefcase },
 ]
 
 const navItemsBottom = [

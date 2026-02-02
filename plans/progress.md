@@ -1,5 +1,22 @@
 # Progress Log
 
+## 2026-02-02: Applicant recommenders section on dashboard
+
+### Completed
+- Created `GET /api/my-case` endpoint - resolves applicant's client record from session userId
+- Created `app/(dashboard)/my-case/page.tsx` - applicant case page with recommender management
+- Added "My Case" nav item with Briefcase icon to AppSidebar
+- Applicant can view and add/edit/delete recommenders via existing RecommenderList + RecommenderForm components
+- No AI suggest button visible (not included in applicant view)
+- No status change dropdown (applicants can only add basic info, not manage pipeline status)
+
+### Notes for next dev
+- Remaining PRD item: applicant drafts section (passes:false) - show personal_statement as editable, others read-only
+- Applicant status changes limited by omission (no status dropdown in RecommenderList for applicant) - could add explicit role-based filtering if needed
+- `/api/my-case` finds most recent non-draft client; if user has multiple submitted cases this returns latest only
+
+---
+
 ## 2026-02-02: Drafting workspace page (4 PRD items)
 
 ### Completed

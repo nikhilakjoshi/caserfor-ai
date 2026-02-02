@@ -493,7 +493,7 @@
       "No AI suggest button visible to applicant",
       "Status changes limited for applicant role"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

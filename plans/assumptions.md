@@ -213,3 +213,9 @@
 - Version restore UI shows confirmation dialog but actual restore requires a GET /versions/[versionId] endpoint that doesn't exist yet - version list only returns metadata
 - Section regeneration polls once after 5s delay then refreshes draft - not true real-time polling
 - AI panel width is fixed 340px (not percentage-based ~40% as PRD suggests) for consistent layout
+
+## Applicant Dashboard
+- PRD says "Add Recommenders section to applicant dashboard" - created as new `/my-case` page under `(dashboard)` layout, not embedded in existing page (no applicant dashboard page existed)
+- `/api/my-case` resolves client via `findFirst({ userId, status: { not: "draft" } })` - assumes one active case per user
+- Applicant status limitations enforced by UI omission (no AI suggest button, no status dropdown) not API-level role checks on status field
+- "My Case" added to AppSidebar (shared by all roles) - lawyers also see this nav item but will get 404 since they have no Client record owned by them
