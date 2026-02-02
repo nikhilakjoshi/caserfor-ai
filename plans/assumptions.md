@@ -326,3 +326,8 @@
 - Section list reads from draft.sections (assumed array of {id, heading}) -- empty until a letter is generated
 - Save Version and Add to Vault buttons render with correct disabled states but onClick handlers are stubs (PRD 9, 10)
 - aiReasoning snippet shown with line-clamp-3 in context card (PRD says "snippet")
+
+## Toast Library (PRD 7)
+- Installed sonner (not react-hot-toast) -- lightweight, zero-config, works with Next.js App Router
+- `<Toaster>` added to root layout (app/layout.tsx) -- available globally to all client components
+- Generate endpoint returns sections with `title` field (not `heading`) from agents -- polling maps both

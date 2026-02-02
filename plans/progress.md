@@ -1,5 +1,22 @@
 # Progress Log
 
+## 2026-02-02: Generate Full Letter error handling + toasts (PRD 7)
+
+### Completed
+- Installed sonner toast library, added `<Toaster>` to root layout
+- handleGenerate now checks POST response status, shows error toast on failure
+- Polling detects server-side generation failure (status reverts to not_started), shows error toast
+- Polling shows success toast on completion
+- Polling now updates sections state from response (not just editorContent)
+- Sections extracted to mutable state so polling can refresh them post-generation
+
+### Notes for next dev
+- PRD 8 (section regenerate) is next logical step -- buttons render but onClick not wired
+- sonner `<Toaster>` in root layout available globally now -- use `toast()` from any client component
+- PRD 11-15 (chat panel) is the other large feature block remaining
+
+---
+
 ## 2026-02-02: Draft Letter button in recommender detail sheet (PRD 2)
 
 ### Completed

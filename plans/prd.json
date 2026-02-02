@@ -80,7 +80,7 @@
       "On completion: update editorContent with returned content, set isStreaming=false",
       "Handle error: show toast, revert status"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

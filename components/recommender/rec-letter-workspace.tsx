@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react"
+import { toast } from "sonner"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -136,7 +137,7 @@ export function RecLetterWorkspace({
   const [draftStatus, setDraftStatus] = useState(draft.status)
 
   // Extract sections from draft.sections or draft.content
-  const sections = useMemo(() => {
+  const initialSections = useMemo(() => {
     if (draft.sections && Array.isArray(draft.sections)) {
       return (draft.sections as Array<{ id: string; heading: string }>).map((s) => ({
         id: s.id || s.heading,
@@ -145,15 +146,22 @@ export function RecLetterWorkspace({
     }
     return []
   }, [draft.sections])
+  const [sections, setSections] = useState(initialSections)
 
   // Generate full letter
   const handleGenerate = useCallback(async () => {
     try {
       setDraftStatus("generating")
-      await fetch(`/api/cases/${clientId}/drafts/${draft.id}/generate`, {
+      const res = await fetch(`/api/cases/${clientId}/drafts/${draft.id}/generate`, {
         method: "POST",
       })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: "Generation failed" }))
+        toast.error(data.error || "Failed to start generation")
+        setDraftStatus("not_started")
+      }
     } catch {
+      toast.error("Network error -- could not start generation")
       setDraftStatus("not_started")
     }
   }, [clientId, draft.id])
@@ -213,9 +221,23 @@ export function RecLetterWorkspace({
           if (data.status !== "generating") {
             setDraftStatus(data.status)
             setIsStreaming(false)
-            const html = tiptapToHtml(data.content) || data.plainText || ""
-            setEditorContent(html)
             if (pollRef.current) clearInterval(pollRef.current)
+
+            if (data.status === "not_started") {
+              // Server reverted status -- generation failed
+              toast.error("Letter generation failed. Please try again.")
+            } else {
+              const html = tiptapToHtml(data.content) || data.plainText || ""
+              setEditorContent(html)
+              if (data.sections && Array.isArray(data.sections)) {
+                setSections(
+                  (data.sections as Array<{ id: string; heading: string; title?: string }>).map(
+                    (s) => ({ id: s.id || s.heading || s.title || "", heading: s.heading || s.title || "" })
+                  )
+                )
+              }
+              toast.success("Letter generated successfully")
+            }
           }
         } catch {
           // non-critical, keep polling
