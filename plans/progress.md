@@ -1,5 +1,18 @@
 # Progress Log
 
+## 2026-02-02: Per-section regeneration + regenerate API route
+
+### Completed
+- Created `lib/drafting-agents/regenerate-section.ts` - loads full draft context, regenerates single section via structured output
+- Created `app/api/cases/[clientId]/drafts/[id]/regenerate/route.ts` - POST accepts sectionId + optional instruction, fire-and-forget pattern
+- Route replaces target section in TipTap JSON content and updates plainText
+
+### Notes for next dev
+- Remaining incomplete PRD items: all UI components (recommender list/form/detail, AI suggestions panel, status pipeline, drafts index, drafting workspace, TipTap editor, version history, applicant sections)
+- markdownToTiptapParagraphs still duplicated across 8 files now - extract to shared util is overdue
+- Regenerate route uses fire-and-forget (not streaming) matching generate route pattern
+- PRD says "streams response" for regenerate but fire-and-forget is consistent with existing codebase
+
 ## 2026-02-02: RFE response drafting agent
 
 ### Completed

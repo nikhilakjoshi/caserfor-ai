@@ -330,7 +330,7 @@
       "Loads full document content for context",
       "Returns only the regenerated section content"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -352,7 +352,7 @@
       "Streams response",
       "Updates only the specified section in draft content"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

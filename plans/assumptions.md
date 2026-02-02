@@ -194,3 +194,9 @@
 - Uses stepCountIs(25) same as petition letter - RFE responses require equally thorough evidence gathering
 - Research phase includes searching for RFE notice/USCIS correspondence in vault (may not exist yet)
 - markdownToTiptapParagraphs duplicated (now in 7 files) - must extract before next agent
+
+## Per-Section Regeneration
+- PRD says "streams response" for regenerate route but implemented as fire-and-forget (202 Accepted) matching existing generate route pattern
+- Section replacement in TipTap JSON identifies target section by heading node with matching id attr, replaces content until next h2 heading
+- Uses defaultModel (gemini-2.5-flash) not gemini-2.5-pro - section regen is a focused task, not full doc generation
+- markdownToTiptapParagraphs duplicated again (now in 8 files) - shared util extraction increasingly critical
