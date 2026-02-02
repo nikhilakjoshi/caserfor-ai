@@ -56,7 +56,7 @@
       "Clone prose styling from existing draft workspace (app/(cases)/cases/[clientId]/drafts/[id]/page.tsx)",
       "Track dirty state to prevent save during streaming"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -234,7 +234,7 @@
       "On poll completion (status changes to 'draft'): update editorContent, set isStreaming=false",
       "Show skeleton or spinner overlay on editor during generation"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -244,7 +244,7 @@
       "Disable 'Add to Vault' button with tooltip 'Generate a letter first' when content is empty",
       "Disable section list and regenerate when no sections exist"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

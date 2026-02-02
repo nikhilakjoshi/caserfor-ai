@@ -1,5 +1,25 @@
 # Progress Log
 
+## 2026-02-02: Editor panel in rec-letter workspace (PRD 5, 18, 19)
+
+### Completed
+- Wired DocumentEditor into center panel of rec-letter-workspace.tsx
+- TipTap JSON -> HTML conversion (tiptapToHtml) duplicated from drafts page (now in 2 files)
+- Auto-save with 2s debounce via PATCH /api/cases/[clientId]/drafts/[id]
+- Dirty/saving state indicators in header
+- Poll for generation completion when status=generating (2s interval), updates editor on done
+- Spinner overlay on editor during generation
+- Empty state placeholder when no content
+
+### Notes for next dev
+- tiptapToHtml duplicated again -- extract to shared util when touching next file that uses it
+- Auto-save sends plainText (HTML) only, same pattern as drafts page -- no reverse HTML->TipTap conversion
+- PRD 5 says "clone prose styling from existing draft workspace" -- using DocumentEditor directly which has its own prose styling via TipTap
+- PRD 18 (generating state on workspace open) and PRD 19 (empty state) handled as part of this
+- Actions panel still placeholder -- PRD 6 (actions panel) is next logical item
+
+---
+
 ## 2026-02-02: Rec-letter workspace shell + integration (PRD 1, 3, 4)
 
 ### Completed

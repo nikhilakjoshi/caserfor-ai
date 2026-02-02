@@ -312,3 +312,10 @@
 - "Draft Letter" action only shown for confirmed/letter_drafted/letter_finalized status (matches PRD "confirmed or later")
 - Workspace height calc uses `h-[calc(100vh-180px)]` -- may need adjustment depending on sidebar/header heights
 - Chat/editor/actions panels are placeholder shells with scaffold state -- wired in subsequent PRD items
+
+## Rec-Letter Editor Panel (PRD 5, 18, 19)
+- tiptapToHtml duplicated from drafts/[id]/page.tsx into rec-letter-workspace.tsx (now in 2 files) -- extract to shared util later
+- Auto-save sends plainText (HTML string) only, same as drafts page -- no reverse HTML->TipTap JSON conversion
+- DocumentEditor border-0 rounded-none class overrides used to blend into workspace panel
+- Generation polling uses 2s interval (matches PRD 7 spec), clears on status change or unmount
+- draftStatus tracked locally (not from prop) so polling can update it without re-mounting workspace
