@@ -416,7 +416,7 @@
       "Tab loads and displays StatusPipeline, AISuggestionsPanel, RecommenderList",
       "Data fetched from recommenders API endpoint"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

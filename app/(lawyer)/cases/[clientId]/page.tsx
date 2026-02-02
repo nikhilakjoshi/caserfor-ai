@@ -12,9 +12,15 @@ import {
   ArrowLeft,
   ExternalLink,
   Loader2,
+  Plus,
   RefreshCw,
 } from "lucide-react"
 import Link from "next/link"
+import { StatusPipeline } from "@/components/recommender/status-pipeline"
+import { AISuggestionsPanel } from "@/components/recommender/ai-suggestions-panel"
+import { RecommenderList, type Recommender } from "@/components/recommender/recommender-list"
+import { RecommenderForm } from "@/components/recommender/recommender-form"
+import { RecommenderDetail, type RecommenderAttachment } from "@/components/recommender/recommender-detail"
 
 interface CaseDetail {
   id: string
@@ -81,6 +87,16 @@ export default function CaseDetailPage() {
   const [gapError, setGapError] = useState<string | null>(null)
   const [gapRefreshing, setGapRefreshing] = useState(false)
 
+  // Recommender state
+  const [recommenders, setRecommenders] = useState<Recommender[]>([])
+  const [recLoading, setRecLoading] = useState(false)
+  const [recFormOpen, setRecFormOpen] = useState(false)
+  const [recFormEdit, setRecFormEdit] = useState<Recommender | null>(null)
+  const [recFormSubmitting, setRecFormSubmitting] = useState(false)
+  const [recDetailOpen, setRecDetailOpen] = useState(false)
+  const [recDetailTarget, setRecDetailTarget] = useState<Recommender | null>(null)
+  const [recAttachments, setRecAttachments] = useState<RecommenderAttachment[]>([])
+
   const fetchCase = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -117,10 +133,75 @@ export default function CaseDetailPage() {
     }
   }, [clientId])
 
+  const fetchRecommenders = useCallback(async () => {
+    setRecLoading(true)
+    try {
+      const res = await fetch(`/api/cases/${clientId}/recommenders`)
+      if (res.ok) setRecommenders(await res.json())
+    } catch {
+      // silent
+    } finally {
+      setRecLoading(false)
+    }
+  }, [clientId])
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleRecSubmit = async (data: any) => {
+    setRecFormSubmitting(true)
+    try {
+      const url = recFormEdit
+        ? `/api/cases/${clientId}/recommenders/${recFormEdit.id}`
+        : `/api/cases/${clientId}/recommenders`
+      const method = recFormEdit ? "PATCH" : "POST"
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (res.ok) {
+        setRecFormOpen(false)
+        setRecFormEdit(null)
+        fetchRecommenders()
+      }
+    } finally {
+      setRecFormSubmitting(false)
+    }
+  }
+
+  const handleRecDelete = async (rec: Recommender) => {
+    if (!confirm(`Delete recommender ${rec.name}?`)) return
+    await fetch(`/api/cases/${clientId}/recommenders/${rec.id}`, { method: "DELETE" })
+    fetchRecommenders()
+  }
+
+  const handleRecStatusChange = async (id: string, status: string) => {
+    await fetch(`/api/cases/${clientId}/recommenders/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    })
+    fetchRecommenders()
+  }
+
+  const handleRecAccept = async (rec: Recommender) => {
+    await fetch(`/api/cases/${clientId}/recommenders/${rec.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "identified" }),
+    })
+    fetchRecommenders()
+  }
+
+  const handleRecDismiss = async (recommenderId: string) => {
+    await fetch(`/api/cases/${clientId}/recommenders/${recommenderId}`, { method: "DELETE" })
+    fetchRecommenders()
+  }
+
   useEffect(() => {
     fetchCase()
     fetchGapAnalysis()
-  }, [fetchCase, fetchGapAnalysis])
+    fetchRecommenders()
+  }, [fetchCase, fetchGapAnalysis, fetchRecommenders])
 
   // Poll for gap analysis when refreshing
   useEffect(() => {
@@ -217,6 +298,7 @@ export default function CaseDetailPage() {
         <TabsList>
           <TabsTrigger value="vault">Vault</TabsTrigger>
           <TabsTrigger value="gap-analysis">Gap Analysis</TabsTrigger>
+          <TabsTrigger value="recommenders">Recommenders</TabsTrigger>
           <TabsTrigger value="assistant">Assistant</TabsTrigger>
         </TabsList>
 
@@ -300,6 +382,76 @@ export default function CaseDetailPage() {
             )}
 
             {gapData && <GapAnalysisView data={gapData} />}
+          </div>
+        </TabsContent>
+
+        {/* Recommenders tab */}
+        <TabsContent value="recommenders" className="mt-4">
+          <div className="space-y-6">
+            <StatusPipeline recommenders={recommenders} />
+
+            <AISuggestionsPanel
+              clientId={clientId}
+              recommenders={recommenders}
+              onAccept={handleRecAccept}
+              onDismiss={handleRecDismiss}
+            />
+
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium">Recommenders</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setRecFormEdit(null)
+                  setRecFormOpen(true)
+                }}
+              >
+                <Plus className="mr-1 h-3 w-3" />
+                Add Recommender
+              </Button>
+            </div>
+
+            {recLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : recommenders.length === 0 ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                No recommenders yet. Add one manually or use AI suggestions.
+              </p>
+            ) : (
+              <RecommenderList
+                recommenders={recommenders}
+                onEdit={(rec) => {
+                  setRecFormEdit(rec)
+                  setRecFormOpen(true)
+                }}
+                onDelete={handleRecDelete}
+              />
+            )}
+
+            <RecommenderForm
+              open={recFormOpen}
+              onOpenChange={(open) => {
+                setRecFormOpen(open)
+                if (!open) setRecFormEdit(null)
+              }}
+              recommender={recFormEdit}
+              onSubmit={handleRecSubmit}
+              isSubmitting={recFormSubmitting}
+            />
+
+            <RecommenderDetail
+              open={recDetailOpen}
+              onOpenChange={setRecDetailOpen}
+              recommender={recDetailTarget}
+              clientId={clientId}
+              attachments={recAttachments}
+              onStatusChange={handleRecStatusChange}
+              onAttachmentUploaded={fetchRecommenders}
+              onAttachmentDeleted={() => fetchRecommenders()}
+            />
           </div>
         </TabsContent>
 

@@ -1,5 +1,21 @@
 # Progress Log
 
+## 2026-02-02: Recommenders tab on lawyer case detail page
+
+### Completed
+- Added Recommenders tab to `app/(lawyer)/cases/[clientId]/page.tsx`
+- Tab includes StatusPipeline, AISuggestionsPanel, RecommenderList with Add button
+- RecommenderForm (create/edit) and RecommenderDetail (slide-over) wired up
+- CRUD handlers: create, edit (PATCH), delete with confirmation
+- AI suggestion accept (status->identified) and dismiss (delete) handlers
+- Status change handler for detail panel
+- Fetches recommenders from GET /api/cases/[clientId]/recommenders on mount
+
+### Notes for next dev
+- RecommenderDetail attachments passed as empty array - no fetching of individual recommender attachments yet (needs per-recommender GET or attachments endpoint)
+- Detail panel isn't triggered from list click yet - only form edit/delete are wired. Could add onClick row -> detail view
+- Remaining UI tasks: DraftsIndex page, drafting workspace, AI panel, TipTap editor, version history, Drafts tab, applicant dashboard sections
+
 ## 2026-02-02: AISuggestionsPanel UI component
 
 ### Completed
