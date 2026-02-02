@@ -406,7 +406,7 @@
       "Each stage shows count of recommenders at that status",
       "Visual indicators (colors/progress) show pipeline flow"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

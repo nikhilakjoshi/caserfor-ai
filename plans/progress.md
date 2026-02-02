@@ -1,5 +1,20 @@
 # Progress Log
 
+## 2026-02-02: StatusPipeline UI component
+
+### Completed
+- Created `components/recommender/status-pipeline.tsx`
+- Horizontal pipeline showing count at each of 6 RecommenderStatus stages
+- Color-coded circles with counts, connected by line segments
+- Imports types from recommender-list.tsx
+- Typecheck and lint pass (0 errors)
+
+### Notes for next dev
+- Next priority: AISuggestionsPanel, then Recommenders tab on case detail page
+- StatusPipeline accepts `recommenders` array prop, computes counts internally
+
+---
+
 ## 2026-02-02: RecommenderDetail UI component
 
 ### Completed
