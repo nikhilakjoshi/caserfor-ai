@@ -12,7 +12,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
-export default function CasesLayout({
+export default function CaseDetailLayout({
   children,
 }: {
   children: React.ReactNode
@@ -22,8 +22,9 @@ export default function CasesLayout({
   const isLawyer = role === "lawyer" || role === "admin"
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       {isLawyer ? <LawyerSidebar collapsible="icon" /> : <AppSidebar />}
+      {isLawyer && <CaseSidebar />}
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
           <SidebarTrigger className="-ml-1" />
@@ -40,7 +41,6 @@ export default function CasesLayout({
           {children}
         </main>
       </SidebarInset>
-      {isLawyer && <CaseSidebar />}
     </SidebarProvider>
   )
 }

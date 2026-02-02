@@ -1,5 +1,26 @@
 # Progress Log
 
+## 2026-02-02: CaseSidebar left + ?tab= routing (PRD items 12-16)
+
+### Completed
+- CaseSidebar: side=right -> side=left, collapsible=none (fixed width)
+- Layout: LawyerSidebar defaults collapsed (defaultOpen=false) when CaseSidebar present, both on left
+- CaseSidebar nav items use ?tab= params instead of sub-route URLs
+- Active state driven by searchParams.get("tab")
+- Case detail page reads ?tab= to conditionally render tab content (no more Tabs component)
+- Added overview tab with case info cards, timeline placeholder
+- Default tab is "overview" (was "gap-analysis")
+- Drafts sub-links use ?tab=drafts&type=slug
+
+### Notes for next dev
+- CaseSidebar is non-collapsible (collapsible="none") - acts as fixed secondary nav
+- SidebarProvider defaultOpen=false collapses LawyerSidebar to icon mode on case detail pages
+- Non-case routes (e.g. /cases list page) still use the (cases) parent layout which has LawyerSidebar fully open
+- The Tabs/TabsList/TabsTrigger UI components removed from case detail - navigation is entirely via CaseSidebar ?tab= links
+- useRouter import kept (used in error state back button)
+
+---
+
 ## 2026-02-02: Fix LawyerSidebar active state (PRD item 11)
 
 ### Completed

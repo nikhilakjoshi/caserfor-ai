@@ -270,3 +270,11 @@
 - CaseAssignment no longer required for lawyer access to case routes - lawyers access any non-draft case like admin
 - Dashboard agent tools still verify CaseAssignment (not updated) - may need updating if dashboard should match route behavior
 - CaseAssignment model retained for data display (assignedTo) not auth gating
+
+## CaseSidebar ?tab= Routing (PRD 12-16)
+- CaseSidebar uses collapsible="none" (not "icon") - always fully visible on case detail pages
+- SidebarProvider defaultOpen={false} controls LawyerSidebar collapse, not CaseSidebar (CaseSidebar is non-collapsible)
+- Tab content rendered via conditional `{activeTab === "x" && (...)}` blocks, not shadcn Tabs component
+- Default tab changed from "gap-analysis" to "overview" to match PRD nav order
+- Overview tab content is basic info cards (field, citizenship, employer, criteria count, eligibility, assigned lawyers) - not specified in PRD but needed for the overview tab to show something
+- Timeline tab is placeholder text only

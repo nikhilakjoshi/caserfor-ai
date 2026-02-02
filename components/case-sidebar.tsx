@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useParams, usePathname } from "next/navigation"
+import { useParams, useSearchParams } from "next/navigation"
 import {
   Bot,
   ChevronRight,
@@ -44,29 +44,32 @@ const DRAFT_TYPES = [
   { slug: "rfe_response", label: "RFE Response" },
 ]
 
+type TabValue = "overview" | "documents" | "recommenders" | "gap-analysis" | "timeline" | "assistant" | "drafts"
+
+const NAV_ITEMS: { title: string; tab: TabValue; icon: React.ComponentType }[] = [
+  { title: "Overview", tab: "overview", icon: LayoutDashboard },
+  { title: "Documents", tab: "documents", icon: FolderOpen },
+  { title: "Recommenders", tab: "recommenders", icon: Users },
+  { title: "Gap Analysis", tab: "gap-analysis", icon: Search },
+  { title: "Timeline", tab: "timeline", icon: Clock },
+  { title: "Assistant", tab: "assistant", icon: Bot },
+]
+
 export function CaseSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const params = useParams()
-  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const clientId = params.clientId as string
   const base = `/cases/${clientId}`
+  const activeTab = searchParams.get("tab") || "overview"
 
   const [draftsOpen, setDraftsOpen] = React.useState(
-    pathname.includes("/drafts")
+    activeTab === "drafts"
   )
 
-  const navItems = [
-    { title: "Overview", url: base, icon: LayoutDashboard, exact: true },
-    { title: "Documents", url: `${base}/vault`, icon: FolderOpen },
-    { title: "Recommenders", url: `${base}/recommenders`, icon: Users },
-    { title: "Gap Analysis", url: `${base}/gap-analysis`, icon: Search },
-    { title: "Timeline", url: `${base}/timeline`, icon: Clock },
-    { title: "Assistant", url: `${base}/assistant`, icon: Bot },
-  ]
-
   return (
-    <Sidebar side="right" collapsible="icon" {...props}>
+    <Sidebar side="left" collapsible="none" className="border-r" {...props}>
       <SidebarHeader className="p-4">
-        <span className="text-sm font-semibold group-data-[collapsible=icon]:hidden">
+        <span className="text-sm font-semibold">
           Case
         </span>
       </SidebarHeader>
@@ -74,14 +77,12 @@ export function CaseSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => {
-                const isActive = item.exact
-                  ? pathname === item.url
-                  : pathname === item.url || pathname.startsWith(item.url + "/")
+              {NAV_ITEMS.map((item) => {
+                const isActive = activeTab === item.tab
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
-                      <Link href={item.url}>
+                      <Link href={`${base}?tab=${item.tab}`}>
                         <item.icon />
                         <span>{item.title}</span>
                       </Link>
@@ -99,7 +100,7 @@ export function CaseSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton
-                      isActive={pathname.includes(`${base}/drafts`)}
+                      isActive={activeTab === "drafts"}
                       tooltip="Drafts"
                     >
                       <FileText />
@@ -112,23 +113,23 @@ export function CaseSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton
                           asChild
-                          isActive={pathname === `${base}/drafts`}
+                          isActive={activeTab === "drafts" && !searchParams.get("type")}
                         >
-                          <Link href={`${base}/drafts`}>All Drafts</Link>
+                          <Link href={`${base}?tab=drafts`}>All Drafts</Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
-                      {DRAFT_TYPES.map((dt) => {
-                        const href = `${base}/drafts?type=${dt.slug}`
-                        return (
-                          <SidebarMenuSubItem key={dt.slug}>
-                            <SidebarMenuSubButton asChild>
-                              <Link href={href}>
-                                <span className="truncate">{dt.label}</span>
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        )
-                      })}
+                      {DRAFT_TYPES.map((dt) => (
+                        <SidebarMenuSubItem key={dt.slug}>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={activeTab === "drafts" && searchParams.get("type") === dt.slug}
+                          >
+                            <Link href={`${base}?tab=drafts&type=${dt.slug}`}>
+                              <span className="truncate">{dt.label}</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>
