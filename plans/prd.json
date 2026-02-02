@@ -260,7 +260,7 @@
     "section": "D5",
     "title": "Add gap_analysis + eligibility + drafts tools",
     "description": "get_gap_analysis(clientId), get_eligibility_report(clientId), get_existing_drafts(clientId) tools.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D5-1"]
   },
   {

@@ -186,6 +186,126 @@ export function createDashboardTools(lawyerId: string) {
       },
     }),
 
+    get_gap_analysis: tool({
+      description:
+        "Retrieve the latest gap analysis for a case. Returns overall strength, summary, criteria breakdown, and priority actions.",
+      inputSchema: z.object({
+        clientId: z.string().describe("The client ID to fetch gap analysis for"),
+      }),
+      execute: async ({ clientId }) => {
+        const assignment = await prisma.caseAssignment.findFirst({
+          where: { lawyerId, clientId },
+          select: { id: true },
+        })
+        if (!assignment) {
+          return "You are not assigned to this case."
+        }
+
+        const gapAnalysis = await prisma.gapAnalysis.findFirst({
+          where: { clientId },
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            overallStrength: true,
+            summary: true,
+            criteria: true,
+            priorityActions: true,
+            createdAt: true,
+          },
+        })
+
+        if (!gapAnalysis) {
+          return "No gap analysis found for this case."
+        }
+
+        return JSON.stringify(gapAnalysis)
+      },
+    }),
+
+    get_eligibility_report: tool({
+      description:
+        "Retrieve the eligibility report for a case. Returns verdict, summary, and criteria assessment.",
+      inputSchema: z.object({
+        clientId: z.string().describe("The client ID to fetch eligibility report for"),
+      }),
+      execute: async ({ clientId }) => {
+        const assignment = await prisma.caseAssignment.findFirst({
+          where: { lawyerId, clientId },
+          select: { id: true },
+        })
+        if (!assignment) {
+          return "You are not assigned to this case."
+        }
+
+        const report = await prisma.eligibilityReport.findUnique({
+          where: { clientId },
+          select: {
+            id: true,
+            verdict: true,
+            summary: true,
+            criteria: true,
+            createdAt: true,
+          },
+        })
+
+        if (!report) {
+          return "No eligibility report found for this case."
+        }
+
+        return JSON.stringify(report)
+      },
+    }),
+
+    get_existing_drafts: tool({
+      description:
+        "Retrieve all drafts for a case. Returns draft type, status, title, recommender info, and timestamps.",
+      inputSchema: z.object({
+        clientId: z.string().describe("The client ID to fetch drafts for"),
+      }),
+      execute: async ({ clientId }) => {
+        const assignment = await prisma.caseAssignment.findFirst({
+          where: { lawyerId, clientId },
+          select: { id: true },
+        })
+        if (!assignment) {
+          return "You are not assigned to this case."
+        }
+
+        const drafts = await prisma.caseDraft.findMany({
+          where: { clientId },
+          select: {
+            id: true,
+            documentType: true,
+            title: true,
+            status: true,
+            recommenderId: true,
+            recommender: {
+              select: { name: true },
+            },
+            createdAt: true,
+            updatedAt: true,
+          },
+          orderBy: { updatedAt: "desc" },
+        })
+
+        if (drafts.length === 0) {
+          return "No drafts found for this case."
+        }
+
+        return JSON.stringify(
+          drafts.map((d) => ({
+            id: d.id,
+            documentType: d.documentType,
+            title: d.title,
+            status: d.status,
+            recommenderName: d.recommender?.name ?? null,
+            createdAt: d.createdAt,
+            updatedAt: d.updatedAt,
+          }))
+        )
+      },
+    }),
+
     get_all_cases: tool({
       description:
         "Retrieve all cases assigned to the lawyer with summary fields including client name, status, visa type, verdict, and update timestamps. Use to answer questions about the lawyer's caseload.",

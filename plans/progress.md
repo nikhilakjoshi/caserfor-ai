@@ -1,5 +1,19 @@
 # Progress Log
 
+## 2026-02-02: D5-4 - gap_analysis + eligibility + drafts tools
+
+### Completed
+- D5-4: Added `get_gap_analysis`, `get_eligibility_report`, `get_existing_drafts` tools to `lib/dashboard-agent-tools.ts`. All verify lawyer assignment before returning data.
+
+### Notes for next dev
+- D5-5 (dashboard assistant API route) is now unblocked - all tool deps (D5-1 thru D5-4) done
+- get_gap_analysis returns latest only (orderBy createdAt desc, findFirst)
+- get_eligibility_report uses findUnique on clientId (unique constraint)
+- get_existing_drafts includes recommender name via relation join
+- No rawOutput returned from gap analysis or eligibility (keeps token usage down)
+
+---
+
 ## 2026-02-02: D5-3 - search_vault dashboard agent tool
 
 ### Completed
