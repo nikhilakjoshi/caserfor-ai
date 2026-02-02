@@ -2853,3 +2853,14 @@
 - D5-2/3/4 add more tools to `createDashboardTools`: `get_case_detail`, `search_vault`, `gap_analysis`/`eligibility`/`drafts`
 - Many of these tools overlap with `createDraftingTools` - consider reusing or sharing
 - D5-5 creates the API route, D5-6 wires the chat UI
+
+## 2026-02-02: D5-6 - wire dashboard chat to assistant API
+
+### Completed
+- D5-6: Rewrote `components/lawyer/dashboard-chat.tsx` to use `useChat` + `DefaultChatTransport` targeting `/api/lawyer/assistant`. Messages render in scrollable container above input. Quick action buttons still prefill input via parent state.
+
+### Notes for next dev
+- ALL PRD items (D1-D5) are now complete
+- useChat in ai SDK v6 has no `input`/`setInput` - managed manually via useState
+- Prefill sync uses setState-during-render pattern (not useEffect) to satisfy react-hooks/set-state-in-effect lint rule
+- Dashboard chat is ephemeral (no DB persistence) per D5-5 assumption

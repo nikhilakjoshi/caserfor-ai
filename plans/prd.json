@@ -276,7 +276,7 @@
     "section": "D5",
     "title": "Wire dashboard chat to assistant API",
     "description": "Update dashboard-chat.tsx to use useChat with /api/lawyer/assistant. Render messages below input. Quick action buttons prepopulate input text.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D4-3", "D4-4", "D5-5"]
   }
 ]

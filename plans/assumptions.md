@@ -260,3 +260,8 @@
 - Uses defaultModel (gemini-2.5-flash) not analysisModel - dashboard queries are quick lookups, not deep analysis
 - Route accepts UIMessage[] directly (useChat-compatible) not custom inputText format
 - Admin role allowed alongside lawyer (consistent with other lawyer routes)
+
+## Dashboard Chat Wiring (D5-6)
+- useChat v6 has no input/setInput helpers - input state managed manually via useState
+- Prefill from quick action buttons uses setState-during-render (not useEffect) to avoid react-hooks/set-state-in-effect lint error
+- Messages rendered as simple text extraction from parts array - tool call parts not displayed (kept simple for dashboard context)
