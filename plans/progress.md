@@ -1,5 +1,21 @@
 # Progress Log
 
+## 2026-02-02: RecommenderList UI component
+
+### Completed
+- Created `components/recommender/recommender-list.tsx`
+- Table layout with name, title/org, color-coded status badge, criteria tags, edit/delete dropdown
+- Uses shadcn Table + Badge + DropdownMenu
+- Accepts recommenders array + onEdit/onDelete callbacks as props
+- Empty state included
+- Typecheck and lint pass (0 errors)
+
+### Notes for next dev
+- All remaining PRD items are UI. Next priority: RecommenderForm (needed for add/edit flow), then RecommenderDetail, then wire them into the Recommenders tab on case detail page.
+- `components/recommender/` directory now exists.
+
+---
+
 ## 2026-02-02: Per-section regeneration + regenerate API route
 
 ### Completed

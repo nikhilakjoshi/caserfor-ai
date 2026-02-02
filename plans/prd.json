@@ -363,7 +363,7 @@
       "Criteria shown as tag badges",
       "Edit and delete action buttons present"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
