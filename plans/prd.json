@@ -271,7 +271,7 @@
       "Badge updates when gap analysis refreshes",
       "Show 'Not analyzed' when no analysis exists"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

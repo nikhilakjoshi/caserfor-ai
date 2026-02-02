@@ -102,6 +102,13 @@ const verdictColors: Record<string, string> = {
   insufficient: "bg-red-100 text-red-800",
 }
 
+const strengthColors: Record<string, string> = {
+  strong: "bg-green-100 text-green-800",
+  moderate: "bg-yellow-100 text-yellow-800",
+  weak: "bg-orange-100 text-orange-800",
+  insufficient: "bg-red-100 text-red-800",
+}
+
 const statusLabels: Record<string, string> = {
   submitted: "Submitted",
   under_review: "Under Review",
@@ -343,6 +350,15 @@ export default function CaseDetailPage() {
           {caseData.eligibilityReport && (
             <Badge variant="outline" className={verdictColors[caseData.eligibilityReport.verdict] || ""}>
               {caseData.eligibilityReport.verdict}
+            </Badge>
+          )}
+          {gapData ? (
+            <Badge variant="outline" className={strengthColors[gapData.overallStrength] || ""}>
+              {gapData.overallStrength}
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-muted-foreground">
+              Not analyzed
             </Badge>
           )}
         </div>

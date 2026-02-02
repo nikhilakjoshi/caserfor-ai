@@ -1,5 +1,19 @@
 # Progress Log
 
+## 2026-02-02: Case detail header strength badge (PRD 26)
+
+### Completed
+- Added gap analysis overallStrength badge to case detail header, visible on all tabs
+- Badge shows color-coded strength (strong/moderate/weak/insufficient) or "Not analyzed" when no gap analysis exists
+- Badge updates reactively when gapData state changes (including after refresh)
+- Added strengthColors map (separate from verdictColors for eligibility)
+
+### Notes for next dev
+- strengthColors intentionally duplicates verdictColors - gap analysis strength vs eligibility verdict are different concepts
+- Badge uses existing gapData state (already fetched on mount) - no extra API call needed
+
+---
+
 ## 2026-02-02: Case list page at /cases (PRD 20-22)
 
 ### Completed
