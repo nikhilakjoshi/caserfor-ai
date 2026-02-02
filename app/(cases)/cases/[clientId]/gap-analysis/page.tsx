@@ -30,11 +30,20 @@ export default function GapAnalysisPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
+  const [hasVault, setHasVault] = useState<boolean | null>(null)
 
   const fetchGap = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
+      // Check if client has a vault
+      const caseRes = await fetch(`/api/cases/${clientId}`)
+      if (caseRes.ok) {
+        const caseData = await caseRes.json()
+        setHasVault(!!caseData.vault)
+        if (!caseData.vault) { setLoading(false); return }
+      }
+
       const res = await fetch(`/api/lawyer/cases/${clientId}/gap-analysis`)
       if (res.status === 404) { setData(null); return }
       if (!res.ok) throw new Error("Failed to fetch gap analysis")
@@ -77,6 +86,16 @@ export default function GapAnalysisPage() {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (hasVault === false) {
+    return (
+      <div className="py-12 text-center">
+        <p className="text-sm text-muted-foreground">
+          No vault associated with this case. Gap analysis requires documents to analyze.
+        </p>
       </div>
     )
   }

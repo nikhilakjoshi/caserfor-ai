@@ -1,5 +1,20 @@
 # Progress Log
 
+## 2026-02-02: No-vault edge case handling (PRD 37, 38)
+
+### Completed
+- Case detail gap-analysis tab: shows "no vault" message when client has no vault, disables analysis button
+- Gap analysis sub-page: fetches case data to check vault existence, early-returns with message if no vault
+- Documents tab and assistant tab already had no-vault guards (no changes needed)
+- PRD 38 (draft generation failure revert) was already implemented in generate route.ts lines 79-86 - marked passes:true
+
+### Notes for next dev
+- Gap analysis sub-page makes extra fetch to /api/cases/[clientId] to check vault - could use shared context later
+- Vault sub-page already handled no-vault (line 40-46)
+- Remaining passes:false items: PRD 27 (auto-trigger gap analysis), 28 (debounce), 29-35 (E2E draft agent verification)
+
+---
+
 ## 2026-02-02: Case detail header strength badge (PRD 26)
 
 ### Completed

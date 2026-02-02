@@ -290,3 +290,7 @@
 - Cases list uses CaseTable (table view) not CaseCard grid - table is more appropriate for browsable list, cards for dashboard preview
 - No (cases)/layout.tsx created - cases/page.tsx has inline SidebarProvider to avoid double-nesting with [clientId]/layout.tsx which has its own SidebarProvider
 - CaseTable tab prop defaults to "all" for backward compatibility with dashboard usage
+
+## No-Vault Edge Case (PRD 37)
+- Gap analysis sub-page fetches /api/cases/[clientId] to check vault existence - extra API call per page load
+- PRD 38 (draft failure revert) was already implemented before this session - marked passes:true without code changes

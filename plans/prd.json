@@ -389,7 +389,7 @@
       "Document upload section shows 'no vault' message",
       "No errors thrown when vault is null"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -399,7 +399,7 @@
       "Draft not stuck in generating state",
       "User can click generate again after failure"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

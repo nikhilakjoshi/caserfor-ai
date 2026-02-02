@@ -393,6 +393,13 @@ export default function CaseDetailPage() {
       )}
 
       {activeTab === "gap-analysis" && (
+          !caseData.vault ? (
+            <div className="py-12 text-center">
+              <p className="text-sm text-muted-foreground">
+                No vault associated with this case. Gap analysis requires documents to analyze.
+              </p>
+            </div>
+          ) : (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-medium">Gap Analysis</h3>
@@ -445,6 +452,7 @@ export default function CaseDetailPage() {
 
             {gapData && <GapAnalysisView data={gapData} />}
           </div>
+          )
       )}
 
       {activeTab === "recommenders" && (
