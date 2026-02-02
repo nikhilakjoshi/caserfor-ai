@@ -1,5 +1,23 @@
 # Progress Log
 
+## 2026-02-02: Recommender suggestion agent + API route
+
+### Completed
+- `lib/recommender-suggester.ts`: AI agent that suggests 5-8 recommender role types per client
+  - Two-phase pattern (same as eb1a-evaluator): agentic tool loop then structured output
+  - Tools: get_client_profile, search_vault, get_gap_analysis, get_eligibility_report
+  - Uses analysisModel (gemini-2.5-pro) for both phases
+  - Saves results as Recommender records w/ status=suggested, sourceType=ai_suggested
+  - Stores idealQualifications + sampleTalkingPoints in notes field
+- `app/api/cases/[clientId]/recommenders/suggest/route.ts`: POST endpoint
+  - Lawyer/admin only auth via authorizeCaseAccess
+  - Fire-and-forget pattern (same as gap-analysis refresh)
+  - Returns 202 immediately
+
+### Notes for next dev
+- Suggestion agent stores role types in `name` field (not actual person names) since these are role suggestions
+- No polling mechanism yet; UI will need to poll GET /recommenders or use SWR revalidation to see results
+
 ## 2026-02-02: Recommender CRUD API routes
 
 ### Completed

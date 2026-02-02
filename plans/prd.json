@@ -149,7 +149,7 @@
       "Produces structured output matching the specified schema",
       "Creates Recommender records with status=suggested, sourceType=ai_suggested"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -159,7 +159,7 @@
       "Returns 202 status immediately",
       "Agent results saved as Recommender records"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
