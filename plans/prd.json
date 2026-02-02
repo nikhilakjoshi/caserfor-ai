@@ -482,7 +482,7 @@
       "Shows compact card grid of document types with status",
       "Cards link to /cases/[clientId]/drafts/[id]"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

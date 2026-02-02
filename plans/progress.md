@@ -1,5 +1,19 @@
 # Progress Log
 
+## 2026-02-02: Drafts tab on case detail page
+
+### Completed
+- Added Drafts tab to lawyer case detail page (`app/(lawyer)/cases/[clientId]/page.tsx`)
+- Compact card grid showing all drafts with status badges, document type labels, recommender names
+- Cards link to `/cases/[clientId]/drafts/[id]`
+- "Full Drafts View" button links to DraftsIndex page
+- Empty state with "Create Drafts" link
+- Fetches drafts from GET `/api/cases/[clientId]/drafts` on mount
+
+### Notes for next dev
+- Remaining UI items: drafting workspace page, AI panel, TipTap editor, version history, applicant recommenders/drafts sections
+- Drafting workspace (passes:false) is next highest priority - it's the core editing experience
+
 ## 2026-02-02: DraftsIndex page
 
 ### Completed

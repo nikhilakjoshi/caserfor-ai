@@ -11,6 +11,7 @@ import {
   AlertCircle,
   ArrowLeft,
   ExternalLink,
+  FileText,
   Loader2,
   Plus,
   RefreshCw,
@@ -59,6 +60,42 @@ interface GapAnalysisData {
   createdAt: string
 }
 
+interface DraftSummary {
+  id: string
+  documentType: string
+  title: string | null
+  status: string
+  recommenderId: string | null
+  updatedAt: string
+  recommender: { name: string } | null
+}
+
+const DRAFT_TYPE_LABELS: Record<string, string> = {
+  petition_letter: "Petition Letter",
+  personal_statement: "Personal Statement",
+  recommendation_letter: "Recommendation Letter",
+  cover_letter: "Cover Letter",
+  exhibit_list: "Exhibit List",
+  table_of_contents: "Table of Contents",
+  rfe_response: "RFE Response",
+}
+
+const draftStatusColors: Record<string, string> = {
+  not_started: "bg-gray-100 text-gray-700",
+  generating: "bg-blue-100 text-blue-700",
+  draft: "bg-yellow-100 text-yellow-700",
+  in_review: "bg-purple-100 text-purple-700",
+  final: "bg-green-100 text-green-700",
+}
+
+const draftStatusLabels: Record<string, string> = {
+  not_started: "Not Started",
+  generating: "Generating",
+  draft: "Draft",
+  in_review: "In Review",
+  final: "Final",
+}
+
 const verdictColors: Record<string, string> = {
   strong: "bg-green-100 text-green-800",
   moderate: "bg-yellow-100 text-yellow-800",
@@ -96,6 +133,10 @@ export default function CaseDetailPage() {
   const [recDetailOpen, setRecDetailOpen] = useState(false)
   const [recDetailTarget, setRecDetailTarget] = useState<Recommender | null>(null)
   const [recAttachments, setRecAttachments] = useState<RecommenderAttachment[]>([])
+
+  // Drafts state
+  const [drafts, setDrafts] = useState<DraftSummary[]>([])
+  const [draftsLoading, setDraftsLoading] = useState(false)
 
   const fetchCase = useCallback(async () => {
     setLoading(true)
@@ -142,6 +183,18 @@ export default function CaseDetailPage() {
       // silent
     } finally {
       setRecLoading(false)
+    }
+  }, [clientId])
+
+  const fetchDrafts = useCallback(async () => {
+    setDraftsLoading(true)
+    try {
+      const res = await fetch(`/api/cases/${clientId}/drafts`)
+      if (res.ok) setDrafts(await res.json())
+    } catch {
+      // silent
+    } finally {
+      setDraftsLoading(false)
     }
   }, [clientId])
 
@@ -201,7 +254,8 @@ export default function CaseDetailPage() {
     fetchCase()
     fetchGapAnalysis()
     fetchRecommenders()
-  }, [fetchCase, fetchGapAnalysis, fetchRecommenders])
+    fetchDrafts()
+  }, [fetchCase, fetchGapAnalysis, fetchRecommenders, fetchDrafts])
 
   // Poll for gap analysis when refreshing
   useEffect(() => {
@@ -299,6 +353,7 @@ export default function CaseDetailPage() {
           <TabsTrigger value="vault">Vault</TabsTrigger>
           <TabsTrigger value="gap-analysis">Gap Analysis</TabsTrigger>
           <TabsTrigger value="recommenders">Recommenders</TabsTrigger>
+          <TabsTrigger value="drafts">Drafts</TabsTrigger>
           <TabsTrigger value="assistant">Assistant</TabsTrigger>
         </TabsList>
 
@@ -452,6 +507,74 @@ export default function CaseDetailPage() {
               onAttachmentUploaded={fetchRecommenders}
               onAttachmentDeleted={() => fetchRecommenders()}
             />
+          </div>
+        </TabsContent>
+
+        {/* Drafts tab */}
+        <TabsContent value="drafts" className="mt-4">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium">Document Drafts</h3>
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/cases/${clientId}/drafts`}>
+                  <ExternalLink className="mr-1 h-3 w-3" />
+                  Full Drafts View
+                </Link>
+              </Button>
+            </div>
+
+            {draftsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : drafts.length === 0 ? (
+              <div className="py-8 text-center">
+                <p className="text-sm text-muted-foreground mb-3">
+                  No drafts created yet.
+                </p>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={`/cases/${clientId}/drafts`}>
+                    <Plus className="mr-1 h-3 w-3" />
+                    Create Drafts
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {drafts.map((draft) => (
+                  <Link
+                    key={draft.id}
+                    href={`/cases/${clientId}/drafts/${draft.id}`}
+                    className="block rounded-lg border p-3 hover:bg-accent/50 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                          <span className="text-sm font-medium truncate">
+                            {DRAFT_TYPE_LABELS[draft.documentType] || draft.documentType}
+                          </span>
+                        </div>
+                        {draft.recommender && (
+                          <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                            {draft.recommender.name}
+                          </p>
+                        )}
+                      </div>
+                      <Badge
+                        variant="secondary"
+                        className={`shrink-0 text-xs ${draftStatusColors[draft.status] || ""}`}
+                      >
+                        {draftStatusLabels[draft.status] || draft.status}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Updated {new Date(draft.updatedAt).toLocaleDateString()}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </TabsContent>
 
