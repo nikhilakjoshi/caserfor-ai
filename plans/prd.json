@@ -1,414 +1,292 @@
 [
   {
-    "category": "auth",
-    "description": "Remove CaseAssignment lookup for lawyer role in lib/case-auth.ts (lines 37-49). Lawyers/admins access any non-draft case without assignment.",
+    "category": "ui",
+    "description": "Add 'Draft Letter' action to recommender list row dropdown. Clicking triggers draft creation and switches parent state to workspace view.",
     "steps": [
-      "Remove CaseAssignment.findFirst block for lawyer role in lib/case-auth.ts lines 37-49",
-      "Lawyer role falls through to return { user, client } like admin",
-      "Verify applicant ownership check (lines 51-56) unchanged",
-      "GET /api/lawyer/cases/[clientId] succeeds for lawyer without assignment"
-    ],
-    "passes": true
-  },
-  {
-    "category": "auth",
-    "description": "Remove inline CaseAssignment check in app/api/lawyer/cases/[clientId]/route.ts",
-    "steps": [
-      "Remove any CaseAssignment query in the route handler",
-      "Rely on updated authorizeCaseAccess from lib/case-auth.ts",
-      "Verify route still returns 403 for non-lawyer/admin roles"
-    ],
-    "passes": true
-  },
-  {
-    "category": "auth",
-    "description": "Remove CaseAssignment check in gap-analysis routes so lawyers access without assignment",
-    "steps": [
-      "Update GET /api/lawyer/cases/[clientId]/gap-analysis/route.ts auth",
-      "Update POST /api/lawyer/cases/[clientId]/gap-analysis/refresh/route.ts auth",
-      "Verify both endpoints accessible by any lawyer"
-    ],
-    "passes": true
-  },
-  {
-    "category": "data",
-    "description": "Seed lawyer user: email=lawyer@demo.com, role=lawyer, bcrypt-hashed password",
-    "steps": [
-      "Add lawyer user creation to prisma/seed.ts",
-      "Hash password with bcrypt",
-      "Log password to console",
-      "Run prisma db seed and confirm lawyer user created"
-    ],
-    "passes": true
-  },
-  {
-    "category": "data",
-    "description": "Seed applicant user: email=applicant@demo.com, role=applicant, bcrypt-hashed password",
-    "steps": [
-      "Add applicant user creation to prisma/seed.ts",
-      "Hash password with bcrypt",
-      "Log password to console",
-      "Run prisma db seed and confirm applicant user created"
-    ],
-    "passes": true
-  },
-  {
-    "category": "data",
-    "description": "Seed Client record: ML researcher profile, status=submitted, currentStep=10, linked to applicant user",
-    "steps": [
-      "Create Client record in seed.ts with ML researcher data",
-      "Set status=submitted, currentStep=10",
-      "Link to seed applicant user via userId",
-      "Verify record created after seeding"
-    ],
-    "passes": true
-  },
-  {
-    "category": "data",
-    "description": "Seed Vault (knowledge_base type) linked to applicant's client record",
-    "steps": [
-      "Create Vault record in seed.ts with type=knowledge_base",
-      "Link to seed client",
-      "Verify vault accessible via API after seeding"
-    ],
-    "passes": true
-  },
-  {
-    "category": "data",
-    "description": "Seed CriterionResponse records for all 10 EB-1A criteria with realistic ML researcher responses",
-    "steps": [
-      "Create 10 CriterionResponse records in seed.ts",
-      "Each maps to one EB-1A criterion",
-      "Content is realistic for ML researcher profile",
-      "All linked to seed client"
-    ],
-    "passes": true
-  },
-  {
-    "category": "data",
-    "description": "Seed EligibilityReport with verdict=moderate for the client",
-    "steps": [
-      "Create EligibilityReport in seed.ts with verdict=moderate",
-      "Link to seed client",
-      "Verify report shows on evaluation page"
-    ],
-    "passes": true
-  },
-  {
-    "category": "data",
-    "description": "Seed 2-3 Recommender records at various statuses for the client",
-    "steps": [
-      "Create 2-3 Recommender records in seed.ts",
-      "Use different statuses (pending, contacted, confirmed)",
-      "Link all to seed client",
-      "Verify recommenders show on case detail recommenders tab"
+      "In components/recommender/recommender-list.tsx, add 'Draft Letter' menu item to each recommender row's dropdown (next to Edit/Delete)",
+      "Only show for recommenders with status confirmed or later",
+      "On click, call POST /api/cases/[clientId]/drafts with { documentType: 'recommendation_letter', recommenderId: rec.id }",
+      "If draft already exists (409), fetch existing draft via GET /api/cases/[clientId]/drafts filtering by recommenderId",
+      "Call parent callback (e.g. onDraftLetter(draft, recommender)) to switch to workspace view"
     ],
     "passes": true
   },
   {
     "category": "ui",
-    "description": "Fix LawyerSidebar active state: / always active because every path starts with /. Special-case / to exact match.",
+    "description": "Add 'Draft Letter' button to recommender detail sheet panel. Same behavior as list action.",
     "steps": [
-      "In components/lawyer-sidebar.tsx ~line 52, change isActive check for / to exact match",
-      "Dashboard item only highlighted when pathname === '/'",
-      "/cases highlights Cases nav item, not Dashboard"
+      "In components/recommender/recommender-detail.tsx, add 'Draft Letter' button in the detail sheet header or actions area",
+      "Only show for recommenders with status confirmed or later",
+      "Same POST /api/cases/[clientId]/drafts logic as list action",
+      "Call parent callback to switch to workspace view with draft + recommender data"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Create rec-letter-workspace.tsx -- the 3-panel layout component that replaces recommenders list inline.",
+    "steps": [
+      "Create components/recommender/rec-letter-workspace.tsx",
+      "Props: draft (CaseDraft), recommender, clientId, onBack (returns to recommender list)",
+      "Header row: back button ('Back to Recommenders'), title 'Drafting: {recommender.name}', status badge (draft.status)",
+      "Body: flex layout with 3 panels -- w-1/4 (chat), w-2/4 (editor), w-1/4 (actions)",
+      "Each panel independently scrollable (overflow-y-auto)",
+      "Wire up state: editorContent (string), isStreaming (bool), messages (ephemeral chat array)"
     ],
     "passes": true
   },
   {
     "category": "ui",
-    "description": "Change CaseSidebar from side=right to side=left",
+    "description": "Integrate workspace into recommenders tab. Toggle between recommender list and workspace based on parent state.",
     "steps": [
-      "In components/case-sidebar.tsx, change side='right' to side='left'",
-      "Verify CaseSidebar renders on the left"
+      "In app/(cases)/cases/[clientId]/page.tsx, add state: activeDraft + activeRecommender (null when showing list)",
+      "In the recommenders tab section, conditionally render RecLetterWorkspace when activeDraft is set, else render existing recommender list/detail/form",
+      "Pass onDraftLetter callback to RecommenderList and RecommenderDetail to set activeDraft state",
+      "Pass onBack callback to RecLetterWorkspace to clear activeDraft state and return to list"
     ],
     "passes": true
   },
   {
     "category": "ui",
-    "description": "Restructure case detail layout for two left sidebars: collapsed LawyerSidebar + full CaseSidebar",
+    "description": "Create editor panel within workspace -- reuse DocumentEditor with streaming support and auto-save.",
     "steps": [
-      "Update app/(cases)/cases/[clientId]/layout.tsx",
-      "Both LawyerSidebar and CaseSidebar render on the left",
-      "LawyerSidebar defaults to collapsed/icon mode when CaseSidebar present",
-      "On non-case routes, LawyerSidebar stays full width"
+      "In rec-letter-workspace.tsx center panel, render DocumentEditor from components/editor/document-editor.tsx",
+      "Pass content={editorContent}, isStreaming={isStreaming}, editable={!isStreaming}",
+      "Implement auto-save with 2s debounce: on onChange, PATCH /api/cases/[clientId]/drafts/[id] with { content, plainText }",
+      "Clone prose styling from existing draft workspace (app/(cases)/cases/[clientId]/drafts/[id]/page.tsx)",
+      "Track dirty state to prevent save during streaming"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Ensure CaseSidebar nav items match PRD: Overview, Documents, Recommenders, Gap Analysis, Timeline, Assistant, Drafts (collapsible with 7 types)",
+    "description": "Create rec-letter-actions.tsx -- right panel with recommender context card, generate button, section list, version history, add-to-vault.",
     "steps": [
-      "Verify all nav items present in components/case-sidebar.tsx",
-      "Drafts section is collapsible",
-      "Sub-items: All Drafts, Petition Letter, Personal Statement, Rec Letters, Cover Letter, Exhibit List, TOC, RFE Response"
+      "Create components/recommender/rec-letter-actions.tsx",
+      "Props: draft, recommender, clientId, onGenerate, onRegenSection, sections, isStreaming, editorContent",
+      "Top section: read-only recommender context card (name, title, org, relationship, criteriaRelevance tags, aiReasoning snippet)",
+      "Render all sub-sections vertically with dividers"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "CaseSidebar links update ?tab= param instead of navigating to sub-routes",
+    "description": "Add 'Generate Full Letter' button to actions panel. Triggers fire-and-forget generation endpoint and polls for completion.",
     "steps": [
-      "CaseSidebar links use ?tab=overview, ?tab=documents, etc.",
-      "No navigation to separate sub-route pages",
-      "CaseSidebar highlights active item based on current ?tab value"
+      "In rec-letter-actions.tsx, add 'Generate Full Letter' button below context card",
+      "On click: POST /api/cases/[clientId]/drafts/[id]/generate (existing endpoint)",
+      "Set isStreaming=true in parent, disable button during generation",
+      "Poll GET /api/cases/[clientId]/drafts/[id] every 2s until status changes from 'generating' to 'draft'",
+      "On completion: update editorContent with returned content, set isStreaming=false",
+      "Handle error: show toast, revert status"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Case detail page reads ?tab= search param to render correct tab content",
+    "description": "Add section list with per-section regenerate to actions panel.",
     "steps": [
-      "Read ?tab from URL in app/(cases)/cases/[clientId]/page.tsx",
-      "Activate matching tab content",
-      "Default to overview when no ?tab param",
-      "All tabs work: overview, documents, recommenders, gap-analysis, timeline, assistant, drafts"
+      "In rec-letter-actions.tsx, render clickable section list from draft.sections array",
+      "Each section: title + small regenerate icon button",
+      "On regenerate click: show optional instruction input (small textarea + submit)",
+      "Call POST /api/cases/[clientId]/drafts/[id]/regenerate with { sectionId, instruction }",
+      "Poll for completion, update editor content on done",
+      "Disable regenerate buttons during any active generation"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Create lawyer dashboard page with role guard redirecting non-lawyers to /assistant",
+    "description": "Add version history controls to actions panel -- save version button + version list dropdown.",
     "steps": [
-      "Create page in appropriate route group (resolve conflict with (dashboard)/page.tsx and root page.tsx)",
-      "Fetch session, check role",
-      "Redirect non-lawyers to /assistant",
-      "Lawyer sees dashboard content"
+      "In rec-letter-actions.tsx, add 'Save Version' button with optional version note input",
+      "On click: POST /api/cases/[clientId]/drafts/[id]/versions with { content: current editor content, versionNote }",
+      "Fetch version list via GET /api/cases/[clientId]/drafts/[id]/versions",
+      "Render as dropdown or collapsible list (timestamp + note)",
+      "On version click: restore that version's content into editor (confirm dialog first)"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Lawyer dashboard: 4 stats cards fetching /api/lawyer/dashboard/stats",
+    "description": "Add 'Add to Vault' button to actions panel. Converts draft to PDF, uploads to vault, triggers processing.",
     "steps": [
-      "Fetch /api/lawyer/dashboard/stats on mount",
-      "Render 4 cards: active cases, pending review, drafts in progress, unassigned",
-      "Show loading state while fetching"
+      "In rec-letter-actions.tsx, add 'Add to Vault' button at bottom",
+      "Disable when draft content is empty or status is 'not_started' or 'generating'",
+      "On click: POST /api/cases/[clientId]/recommenders/[id]/add-to-vault",
+      "Show loading state during upload",
+      "On success: show toast with link to vault document, update recommender status badge",
+      "On error: show error toast"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Lawyer dashboard: recent cases grid using CaseCard + 'View All Cases' link to /cases",
+    "description": "Create rec-letter-chat.tsx -- left panel with ephemeral chat messages and input.",
     "steps": [
-      "Fetch recent cases from API",
-      "Render CaseCard grid",
-      "'View All Cases' link navigates to /cases",
-      "Empty state when no cases"
+      "Create components/recommender/rec-letter-chat.tsx",
+      "Props: messages (array), onSendMessage, isStreaming, clientId, recommenderId",
+      "Message list: scrollable, auto-scroll to bottom on new messages",
+      "Each message: role (user/assistant) with appropriate styling",
+      "Input: textarea at bottom with send button, disabled during streaming",
+      "Suggestion chips above input: 'Make more formal', 'Strengthen criteria sections', 'Add more specific examples'"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Create case list page at app/(cases)/cases/page.tsx with tabs: All / My Cases / Unassigned",
+    "description": "Wire chat panel to API -- send messages, stream responses, update editor from AI edits.",
     "steps": [
-      "Create app/(cases)/cases/page.tsx",
-      "Render 3 tabs: All, My Cases, Unassigned",
-      "Tab selection calls /api/lawyer/cases?tab=X",
-      "Cases displayed as CaseCard grid"
+      "In rec-letter-workspace.tsx, use useChat + DefaultChatTransport (from existing assistant/query pattern) to connect to draft-chat endpoint",
+      "Configure DefaultChatTransport with POST /api/cases/[clientId]/recommenders/[id]/draft-chat, passing currentContent as extra body param",
+      "Chat text streams automatically via useChat; editor updates arrive via tool calls (update_draft_section, update_full_draft) handled in onStepFinish callback",
+      "Append assistant response to ephemeral messages array",
+      "If AI returns editor update (update_draft_section or update_full_draft tool calls via onStepFinish), apply to editorContent",
+      "Set isStreaming during response, clear on completion"
     ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Case list page: debounced search input filtering cases",
-    "steps": [
-      "Add search input to case list page",
-      "Debounce input (300-500ms)",
-      "Search calls /api/lawyer/cases?search=Y",
-      "Results update in grid"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Case list page: pagination with page controls",
-    "steps": [
-      "Add pagination controls (next/prev)",
-      "API called with ?page=Z",
-      "Page state updates grid content"
-    ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "api",
-    "description": "Update /api/lawyer/cases GET to support tab, search, and page query params",
+    "description": "Create chat API route for rec-letter conversational agent at /api/cases/[clientId]/recommenders/[id]/draft-chat.",
     "steps": [
-      "?tab=all returns all non-draft cases",
-      "?tab=mine returns cases assigned to current lawyer",
-      "?tab=unassigned returns cases with no CaseAssignment",
-      "?search=Y filters by client name/email",
-      "?page=Z returns paginated results"
+      "Create app/api/cases/[clientId]/recommenders/[id]/draft-chat/route.ts",
+      "POST handler: parse body { messages: Message[], currentContent: string }",
+      "Auth: use authorizeCaseAccess(clientId) pattern from existing draft routes",
+      "Validate recommender belongs to client",
+      "Invoke rec-letter-chat-agent via ToolLoopAgent, return createAgentUIStreamResponse (matches /api/assistant/query pattern)",
+      "Return streaming response via createAgentUIStreamResponse"
     ],
-    "passes": true
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Create rec-letter-chat-agent.ts -- conversational agent for iterative letter refinement via chat.",
+    "steps": [
+      "Create lib/drafting-agents/rec-letter-chat-agent.ts",
+      "System prompt: EB-1A recommendation letter legal writing expert, conversational mode",
+      "Use ToolLoopAgent class (not raw generateText) with streaming via createAgentUIStreamResponse",
+      "Extend createDraftingTools(clientId) with additional tools",
+      "Add get_current_draft tool: returns currentContent passed from request (no DB fetch needed)",
+      "Add update_draft_section tool: takes { heading: string, newContent: string }, returns structured replacement",
+      "Add update_full_draft tool: returns full document markdown replacement",
+      "Use defaultModel (gemini-2.5-flash) for chat responses",
+      "Accept messages array for conversation context, stream output"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Define streaming response format for chat agent -- separate chat text from editor operations in the stream.",
+    "steps": [
+      "Use AI SDK's ToolLoopAgent + createAgentUIStreamResponse as streaming protocol (no custom JSON lines needed)",
+      "Chat text streams natively via AI SDK stream protocol to useChat on frontend",
+      "Editor updates delivered as tool calls (update_draft_section, update_full_draft) -- frontend handles via onStepFinish callback",
+      "Implement tool call handling in rec-letter-chat-agent.ts via ToolLoopAgent onStepFinish",
+      "Frontend uses useChat + DefaultChatTransport to consume stream, no manual parsing needed"
+    ],
+    "passes": false
   },
   {
     "category": "api",
-    "description": "Include latest GapAnalysis overallStrength per case in /api/lawyer/cases response",
+    "description": "Create add-to-vault API route at /api/cases/[clientId]/recommenders/[id]/add-to-vault.",
     "steps": [
-      "Join GapAnalysis in the cases query (latest per client)",
-      "Each case object includes overallStrength field (or null)",
-      "Verify on frontend CaseCard receives the field"
+      "Create app/api/cases/[clientId]/recommenders/[id]/add-to-vault/route.ts",
+      "POST handler, no body needed",
+      "Auth: authorizeCaseAccess(clientId), validate recommender belongs to client",
+      "Fetch CaseDraft where clientId + documentType=recommendation_letter + recommenderId=id",
+      "If no draft or empty content, return 400"
     ],
-    "passes": true
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement HTML-to-PDF conversion for draft content in add-to-vault flow.",
+    "steps": [
+      "Install pdfkit as PDF generation library (add to package.json)",
+      "Create lib/pdf-generator.ts utility using pdfkit",
+      "Accept HTML string (from draft.content TipTap JSON -> HTML), return Buffer",
+      "Style PDF to match professional recommendation letter format (letterhead-style, proper margins, fonts)",
+      "Use in add-to-vault route to convert draft content to PDF buffer"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Complete add-to-vault flow: upload PDF to S3, create VaultDocument, trigger processing pipeline.",
+    "steps": [
+      "In add-to-vault route, after PDF generation:",
+      "Upload PDF buffer to S3 with key: vaults/{vaultId}/{uuid}.pdf",
+      "Get client's vault ID (client.vaultId or find via prisma)",
+      "Create Document record: name='Recommendation Letter - {recommender.name}.pdf', fileType='application/pdf', storageKey, embeddingStatus='pending', vaultId",
+      "Trigger processing: POST /api/vaults/{vaultId}/documents/process with { documentId }",
+      "Update recommender status to 'letter_finalized' via prisma update",
+      "Return created document metadata in response"
+    ],
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "CaseCard: show gap analysis strength badge from overallStrength field",
+    "description": "Handle workspace open when draft is already in 'generating' state -- show loading/polling UI.",
     "steps": [
-      "Add overallStrength to CaseCard props (CaseData type)",
-      "Render strength badge with color coding (strong=green, moderate=yellow, weak=orange, insufficient=red)",
-      "Show 'Not analyzed' when overallStrength is null"
+      "In rec-letter-workspace.tsx, check draft.status on mount",
+      "If status is 'generating': set isStreaming=true, start polling GET /api/cases/[clientId]/drafts/[id] every 2s",
+      "On poll completion (status changes to 'draft'): update editorContent, set isStreaming=false",
+      "Show skeleton or spinner overlay on editor during generation"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Case detail header: persistent gap analysis strength indicator visible regardless of active tab",
+    "description": "Handle empty draft state in workspace -- show helpful empty state in editor and disable vault button.",
     "steps": [
-      "Fetch latest gap analysis overallStrength for the client",
-      "Display badge in case detail header area",
-      "Badge updates when gap analysis refreshes",
-      "Show 'Not analyzed' when no analysis exists"
+      "In editor panel: if draft content is empty, show placeholder text 'Click Generate Full Letter to get started'",
+      "Disable 'Add to Vault' button with tooltip 'Generate a letter first' when content is empty",
+      "Disable section list and regenerate when no sections exist"
     ],
-    "passes": true
-  },
-  {
-    "category": "functional",
-    "description": "Auto-trigger gap analysis refresh after document processing completes (embedding -> completed)",
-    "steps": [
-      "In /api/vaults/[id]/documents/process, after embeddingStatus set to completed",
-      "Identify the client owning the vault",
-      "POST to /api/lawyer/cases/[clientId]/gap-analysis/refresh",
-      "Do not trigger on processing failure"
-    ],
-    "passes": true
-  },
-  {
-    "category": "functional",
-    "description": "Debounce concurrent gap analysis refreshes from multiple simultaneous doc uploads",
-    "steps": [
-      "Multiple docs processing simultaneously don't trigger redundant analyses",
-      "Use debounce or last-write-wins approach",
-      "Final gap analysis reflects all processed documents"
-    ],
-    "passes": true
-  },
-  {
-    "category": "functional",
-    "description": "Verify petition_letter drafting agent E2E: create -> generate -> poll until status=draft",
-    "steps": [
-      "Create petition_letter draft via API",
-      "Trigger generation",
-      "Poll until status=draft",
-      "Verify generated content is valid"
-    ],
-    "passes": true
-  },
-  {
-    "category": "functional",
-    "description": "Verify personal_statement drafting agent E2E",
-    "steps": [
-      "Create personal_statement draft via API",
-      "Trigger generation",
-      "Poll until status=draft",
-      "Verify generated content"
-    ],
-    "passes": true
-  },
-  {
-    "category": "functional",
-    "description": "Verify recommendation_letter drafting agent E2E",
-    "steps": [
-      "Create recommendation_letter draft via API",
-      "Trigger generation",
-      "Poll until status=draft",
-      "Verify generated content"
-    ],
-    "passes": true
-  },
-  {
-    "category": "functional",
-    "description": "Verify cover_letter drafting agent E2E",
-    "steps": [
-      "Create cover_letter draft via API",
-      "Trigger generation",
-      "Poll until status=draft",
-      "Verify generated content"
-    ],
-    "passes": true
-  },
-  {
-    "category": "functional",
-    "description": "Verify exhibit_list drafting agent E2E",
-    "steps": [
-      "Create exhibit_list draft via API",
-      "Trigger generation",
-      "Poll until status=draft",
-      "Verify generated content"
-    ],
-    "passes": true
-  },
-  {
-    "category": "functional",
-    "description": "Verify table_of_contents drafting agent E2E",
-    "steps": [
-      "Create table_of_contents draft via API",
-      "Trigger generation",
-      "Poll until status=draft",
-      "Verify generated content"
-    ],
-    "passes": true
-  },
-  {
-    "category": "functional",
-    "description": "Verify rfe_response drafting agent E2E",
-    "steps": [
-      "Create rfe_response draft via API",
-      "Trigger generation",
-      "Poll until status=draft",
-      "Verify generated content"
-    ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Dashboard empty state when zero cases exist",
+    "description": "Add suggestion chips to chat panel for common refinement actions.",
     "steps": [
-      "When no cases returned, show empty state message",
-      "Message suggests what to do next",
-      "No blank/broken grid"
+      "In rec-letter-chat.tsx, render chip buttons above the input textarea",
+      "Chips: 'Make more formal', 'Strengthen [criterion] section' (dynamic per recommender criteria), 'Add more specific examples', 'Shorten letter'",
+      "On chip click: populate input with chip text and auto-send",
+      "Hide chips after first message exchange (they're just conversation starters)"
     ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Handle no-vault edge case: disable gap analysis and vault features on case detail",
-    "steps": [
-      "When client has no vault, gap analysis tab/button disabled",
-      "Document upload section shows 'no vault' message",
-      "No errors thrown when vault is null"
-    ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "functional",
-    "description": "Draft generation failure: revert status to not_started for retry",
+    "description": "Ensure recommendation-letter agent in generate endpoint passes recommenderId correctly.",
     "steps": [
-      "If generation throws error, set draft status to not_started",
-      "Draft not stuck in generating state",
-      "User can click generate again after failure"
+      "In app/api/cases/[clientId]/drafts/[id]/generate/route.ts, verify that when documentType is recommendation_letter, recommenderId from the draft is passed to the agent",
+      "Check lib/drafting-agents/recommendation-letter.ts accepts and uses recommenderId param",
+      "Verify get_recommender tool is called with correct ID during generation"
     ],
-    "passes": true
+    "passes": false
   },
   {
     "category": "ui",
-    "description": "Show 'Not analyzed' indicator when no GapAnalysis exists yet",
+    "description": "Version restore: replace editor content with selected version without clearing chat messages.",
     "steps": [
-      "CaseCard shows 'Not analyzed' when overallStrength is null",
-      "Case detail header shows 'Not analyzed' when no gap analysis exists",
-      "Distinct from other strength levels visually"
+      "In version history dropdown click handler, show confirmation dialog",
+      "On confirm: set editorContent to selected version's content",
+      "Do NOT clear messages array (chat is independent of version state)",
+      "Auto-save the restored content via the standard debounced PATCH"
     ],
-    "passes": true
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Cap chat messages at 20. Truncate oldest user/assistant pairs beyond limit before sending to draft-chat API.",
+    "steps": [
+      "In rec-letter-workspace.tsx (or useChat config), before sending messages to API, truncate to most recent 20 messages",
+      "Always keep the system message (if any) and drop oldest user/assistant pairs first",
+      "Apply truncation client-side before POST to /api/cases/[clientId]/recommenders/[id]/draft-chat",
+      "Also enforce server-side: in draft-chat route.ts, slice messages to last 20 if exceeding limit"
+    ],
+    "passes": false
   }
 ]

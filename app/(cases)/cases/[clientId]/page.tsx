@@ -21,6 +21,7 @@ import { AISuggestionsPanel } from "@/components/recommender/ai-suggestions-pane
 import { RecommenderList, type Recommender } from "@/components/recommender/recommender-list"
 import { RecommenderForm } from "@/components/recommender/recommender-form"
 import { RecommenderDetail, type RecommenderAttachment } from "@/components/recommender/recommender-detail"
+import { RecLetterWorkspace } from "@/components/recommender/rec-letter-workspace"
 
 interface CaseDetail {
   id: string
@@ -146,6 +147,16 @@ export default function CaseDetailPage() {
   const [drafts, setDrafts] = useState<DraftSummary[]>([])
   const [draftsLoading, setDraftsLoading] = useState(false)
 
+  // Rec-letter workspace state
+  const [activeDraft, setActiveDraft] = useState<{
+    id: string
+    status: string
+    content: unknown
+    plainText: string | null
+    sections: unknown
+  } | null>(null)
+  const [activeRecommender, setActiveRecommender] = useState<Recommender | null>(null)
+
   const fetchCase = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -258,6 +269,51 @@ export default function CaseDetailPage() {
     fetchRecommenders()
   }
 
+  const handleDraftLetter = async (rec: Recommender) => {
+    try {
+      // Try to create draft
+      const res = await fetch(`/api/cases/${clientId}/drafts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          documentType: "recommendation_letter",
+          recommenderId: rec.id,
+        }),
+      })
+      if (res.ok) {
+        const draft = await res.json()
+        setActiveDraft(draft)
+        setActiveRecommender(rec)
+        return
+      }
+      if (res.status === 409) {
+        // Draft already exists, fetch it
+        const listRes = await fetch(`/api/cases/${clientId}/drafts`)
+        if (listRes.ok) {
+          const allDrafts = await listRes.json()
+          const existing = allDrafts.find(
+            (d: DraftSummary) =>
+              d.documentType === "recommendation_letter" &&
+              d.recommenderId === rec.id
+          )
+          if (existing) {
+            // Fetch full draft
+            const fullRes = await fetch(
+              `/api/cases/${clientId}/drafts/${existing.id}`
+            )
+            if (fullRes.ok) {
+              const draft = await fullRes.json()
+              setActiveDraft(draft)
+              setActiveRecommender(rec)
+            }
+          }
+        }
+      }
+    } catch {
+      // silent
+    }
+  }
+
   useEffect(() => {
     fetchCase()
     fetchGapAnalysis()
@@ -311,7 +367,7 @@ export default function CaseDetailPage() {
             <RefreshCw className="mr-1 h-3 w-3" />
             Retry
           </Button>
-          <Button variant="outline" size="sm" onClick={() => router.push("/")}>
+          <Button variant="outline" size="sm" onClick={() => router.push("/cases")}>
             <ArrowLeft className="mr-1 h-3 w-3" />
             Back
           </Button>
@@ -327,7 +383,7 @@ export default function CaseDetailPage() {
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/">
+          <Link href="/cases">
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
@@ -456,6 +512,17 @@ export default function CaseDetailPage() {
       )}
 
       {activeTab === "recommenders" && (
+        activeDraft && activeRecommender ? (
+          <RecLetterWorkspace
+            draft={activeDraft}
+            recommender={activeRecommender}
+            clientId={clientId}
+            onBack={() => {
+              setActiveDraft(null)
+              setActiveRecommender(null)
+            }}
+          />
+        ) : (
           <div className="space-y-6">
             <StatusPipeline recommenders={recommenders} />
 
@@ -497,6 +564,7 @@ export default function CaseDetailPage() {
                   setRecFormOpen(true)
                 }}
                 onDelete={handleRecDelete}
+                onDraftLetter={handleDraftLetter}
               />
             )}
 
@@ -522,6 +590,7 @@ export default function CaseDetailPage() {
               onAttachmentDeleted={() => fetchRecommenders()}
             />
           </div>
+        )
       )}
 
       {activeTab === "drafts" && (

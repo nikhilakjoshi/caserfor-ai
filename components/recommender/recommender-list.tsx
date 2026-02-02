@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react"
+import { FileText, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 
 export type RecommenderStatus =
   | "suggested"
@@ -56,13 +56,20 @@ const statusConfig: Record<RecommenderStatus, { label: string; className: string
   letter_finalized: { label: "Finalized", className: "bg-emerald-100 text-emerald-800" },
 }
 
+const DRAFT_ELIGIBLE_STATUSES: RecommenderStatus[] = [
+  "confirmed",
+  "letter_drafted",
+  "letter_finalized",
+]
+
 interface RecommenderListProps {
   recommenders: Recommender[]
   onEdit?: (recommender: Recommender) => void
   onDelete?: (recommender: Recommender) => void
+  onDraftLetter?: (recommender: Recommender) => void
 }
 
-export function RecommenderList({ recommenders, onEdit, onDelete }: RecommenderListProps) {
+export function RecommenderList({ recommenders, onEdit, onDelete, onDraftLetter }: RecommenderListProps) {
   if (recommenders.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -121,6 +128,12 @@ export function RecommenderList({ recommenders, onEdit, onDelete }: RecommenderL
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    {onDraftLetter && DRAFT_ELIGIBLE_STATUSES.includes(rec.status) && (
+                      <DropdownMenuItem onClick={() => onDraftLetter(rec)}>
+                        <FileText className="mr-2 h-4 w-4" />
+                        Draft Letter
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={() => onEdit?.(rec)}>
                       <Pencil className="mr-2 h-4 w-4" />
                       Edit

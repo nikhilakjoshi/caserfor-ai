@@ -1,5 +1,22 @@
 # Progress Log
 
+## 2026-02-02: Rec-letter workspace shell + integration (PRD 1, 3, 4)
+
+### Completed
+- Created components/recommender/rec-letter-workspace.tsx -- 3-panel layout (chat/editor/actions) with header (back btn, title, status badge)
+- Added "Draft Letter" dropdown action to RecommenderList (only for confirmed+ status)
+- handleDraftLetter in case detail page: creates draft via POST, handles 409 (existing draft), fetches full draft data
+- Integrated workspace toggle in recommenders tab: activeDraft/activeRecommender state controls list vs workspace view
+- onBack clears state and returns to recommender list
+
+### Notes for next dev
+- Workspace panels are placeholder shells -- editor (PRD 5), actions (PRD 6-10), chat (PRD 11-12) need wiring
+- PRD 2 (Draft Letter button on recommender detail sheet) not done yet
+- handleDraftLetter lives in case detail page, not RecommenderList -- draft creation logic is parent-level
+- editorContent/isStreaming/messages state scaffolded but unused (eslint-disabled) -- will be consumed by child panels
+
+---
+
 ## 2026-02-02: Drafting agent E2E verification (PRD 29-35)
 
 ### Completed

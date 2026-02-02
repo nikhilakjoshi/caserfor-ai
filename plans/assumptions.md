@@ -305,3 +305,10 @@
 - Verified via code review, not runtime E2E test - all 7 agents implemented, routes wired, error handling in place
 - Runtime verification requires seeded DB + GOOGLE_GENERATIVE_AI_API_KEY - left to manual QA
 - markdownToTiptapParagraphs remains duplicated across 7 agent files + regenerate-section.ts (8 total) - shared extraction deferred
+
+## Rec-Letter Workspace (PRD 1, 3, 4)
+- Workspace uses inline state toggle (not URL routing) -- activeDraft/activeRecommender in case detail page controls list vs workspace view
+- Draft creation + 409 handling lives in case detail page (parent), passed as onDraftLetter callback to RecommenderList
+- "Draft Letter" action only shown for confirmed/letter_drafted/letter_finalized status (matches PRD "confirmed or later")
+- Workspace height calc uses `h-[calc(100vh-180px)]` -- may need adjustment depending on sidebar/header heights
+- Chat/editor/actions panels are placeholder shells with scaffold state -- wired in subsequent PRD items
