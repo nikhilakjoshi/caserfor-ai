@@ -240,7 +240,7 @@
       "?search=Y filters by client name/email",
       "?page=Z returns paginated results"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -250,7 +250,7 @@
       "Each case object includes overallStrength field (or null)",
       "Verify on frontend CaseCard receives the field"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -260,7 +260,7 @@
       "Render strength badge with color coding (strong=green, moderate=yellow, weak=orange, insufficient=red)",
       "Show 'Not analyzed' when overallStrength is null"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -409,6 +409,6 @@
       "Case detail header shows 'Not analyzed' when no gap analysis exists",
       "Distinct from other strength levels visually"
     ],
-    "passes": false
+    "passes": true
   }
 ]

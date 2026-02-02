@@ -21,12 +21,20 @@ export interface CaseData {
   status: string
   verdict: string | null
   criteriaCount: number
+  overallStrength: string | null
   assignedTo: { lawyerId: string; lawyerName: string | null }[]
   createdAt: string
   updatedAt: string
 }
 
 const verdictColors: Record<string, string> = {
+  strong: "bg-green-100 text-green-800",
+  moderate: "bg-yellow-100 text-yellow-800",
+  weak: "bg-orange-100 text-orange-800",
+  insufficient: "bg-red-100 text-red-800",
+}
+
+const strengthColors: Record<string, string> = {
   strong: "bg-green-100 text-green-800",
   moderate: "bg-yellow-100 text-yellow-800",
   weak: "bg-orange-100 text-orange-800",
@@ -61,7 +69,7 @@ export function CaseCard({
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-base leading-tight">
             <Link
-              href={`/lawyer/cases/${data.id}`}
+              href={`/cases/${data.id}`}
               className="hover:underline"
             >
               {name}
@@ -83,6 +91,16 @@ export function CaseCard({
           </Badge>
           {data.criteriaCount > 0 && (
             <span className="text-xs">{data.criteriaCount} criteria</span>
+          )}
+        </div>
+        <div className="flex items-center gap-1 pt-1">
+          <span className="text-xs">Strength:</span>
+          {data.overallStrength ? (
+            <Badge variant="outline" className={`text-xs ${strengthColors[data.overallStrength] || ""}`}>
+              {data.overallStrength}
+            </Badge>
+          ) : (
+            <span className="text-xs italic text-muted-foreground">Not analyzed</span>
           )}
         </div>
         {data.assignedTo.length > 0 && (

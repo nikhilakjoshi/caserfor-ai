@@ -1,5 +1,20 @@
 # Progress Log
 
+## 2026-02-02: CaseCard gap analysis strength badge (PRD 23-25, 37)
+
+### Completed
+- /api/lawyer/cases GET already had tab/search/page support - marked PRD 23 as passed
+- Added latest GapAnalysis overallStrength join to cases API response (take 1, desc by createdAt)
+- Added overallStrength to CaseData type in case-card.tsx
+- CaseCard renders strength badge with color coding (strong=green, moderate=yellow, weak=orange, insufficient=red)
+- Shows italic "Not analyzed" when overallStrength is null
+
+### Notes for next dev
+- strengthColors map duplicates verdictColors intentionally - verdict=eligibility report, strength=gap analysis (different concepts, may diverge)
+- Case detail header strength indicator (PRD 26) not done yet - separate item
+
+---
+
 ## 2026-02-02: CaseSidebar left + ?tab= routing (PRD items 12-16)
 
 ### Completed

@@ -53,6 +53,11 @@ export async function GET(request: NextRequest) {
             },
           },
           criterionResponses: { select: { id: true } },
+          gapAnalyses: {
+            select: { overallStrength: true },
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
         },
         orderBy: { updatedAt: "desc" },
         skip: (page - 1) * pageSize,
@@ -70,6 +75,7 @@ export async function GET(request: NextRequest) {
       status: c.status,
       verdict: c.eligibilityReport?.verdict ?? null,
       criteriaCount: c.criterionResponses.length,
+      overallStrength: c.gapAnalyses[0]?.overallStrength ?? null,
       assignedTo: c.caseAssignments.map((a) => ({
         lawyerId: a.lawyerId,
         lawyerName: a.lawyer.name,
