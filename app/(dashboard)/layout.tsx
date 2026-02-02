@@ -1,6 +1,7 @@
 "use client"
 
 import { AppSidebar } from "@/components/app-sidebar"
+import { DevRoleToggle } from "@/components/dev-role-toggle"
 import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
@@ -24,6 +25,9 @@ export default function DashboardLayout({
             className="mr-2 data-[orientation=vertical]:h-4"
           />
           <div id="page-header" />
+          <div className="ml-auto">
+            <DevRoleToggle />
+          </div>
         </header>
         <main className="flex-1 p-4">
           {children}

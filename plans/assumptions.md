@@ -219,3 +219,9 @@
 - `/api/my-case` resolves client via `findFirst({ userId, status: { not: "draft" } })` - assumes one active case per user
 - Applicant status limitations enforced by UI omission (no AI suggest button, no status dropdown) not API-level role checks on status field
 - "My Case" added to AppSidebar (shared by all roles) - lawyers also see this nav item but will get 404 since they have no Client record owned by them
+
+## RoleProvider (D1)
+- RoleProvider wraps at root layout level (not per-layout) so useRole is available everywhere
+- DevRoleToggle only changes client-side context, not JWT/session - middleware still enforces real role
+- RoleProvider returns null (no children) until session fetch completes - prevents FOUC but adds small delay
+- clientId is fetched from /api/my-case for all users - lawyers will get a silent 404 (clientId stays null)

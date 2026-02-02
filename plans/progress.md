@@ -1,5 +1,20 @@
 # Progress Log
 
+## 2026-02-02: D1 - RoleProvider + DevRoleToggle
+
+### Completed
+- D1-1: `components/role-provider.tsx` - RoleContext with {role, setRole, clientId}, useRole hook. Fetches session + /api/my-case on mount. Dev override via localStorage `dev-role-override`.
+- D1-2: `components/dev-role-toggle.tsx` - Badge that cycles applicant/lawyer/admin on click. Only renders in development.
+- D1-3: Root layout wraps children with `<RoleProvider>`. DevRoleToggle added to both dashboard and lawyer layout headers (ml-auto positioned).
+
+### Notes for next dev
+- RoleProvider renders null until session fetch completes (avoids flash). On unauthenticated pages (login, landing) role will be null.
+- DevRoleToggle only affects client-side role context, NOT the actual session/JWT. Middleware still enforces real role. Toggle is for UI testing only.
+- clientId fetch via /api/my-case will 401 for unauthenticated users - silently caught.
+- D2 items (cases route group) are now unblocked.
+
+---
+
 ## 2026-02-02: Applicant drafts section on My Case page
 
 ### Completed

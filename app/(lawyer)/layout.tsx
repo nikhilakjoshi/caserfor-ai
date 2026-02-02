@@ -1,5 +1,6 @@
 "use client"
 
+import { DevRoleToggle } from "@/components/dev-role-toggle"
 import { LawyerSidebar } from "@/components/lawyer-sidebar"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -24,6 +25,9 @@ export default function LawyerLayout({
             className="mr-2 data-[orientation=vertical]:h-4"
           />
           <div id="page-header" />
+          <div className="ml-auto">
+            <DevRoleToggle />
+          </div>
         </header>
         <main className="flex-1 p-4">
           {children}
