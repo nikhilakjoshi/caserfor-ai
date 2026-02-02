@@ -1,5 +1,21 @@
 # Progress Log
 
+## 2026-02-02: RecommenderForm UI component
+
+### Completed
+- Created `components/recommender/recommender-form.tsx`
+- Sheet-based form with all fields: name, title, org, relationship, LinkedIn URL, email, phone, notes
+- react-hook-form + zod validation (name required, email/URL format validated)
+- Create mode (empty form) and edit mode (pre-filled via `values`)
+- onSubmit callback, isSubmitting prop for loading state
+- Reuses Recommender type from recommender-list.tsx
+
+### Notes for next dev
+- Next priority: RecommenderDetail (slide-over with attachments, status change), then StatusPipeline, then AISuggestionsPanel, then wire into Recommenders tab on case detail page.
+- Form resets on create-mode submit; edit mode keeps values synced via `values` prop.
+
+---
+
 ## 2026-02-02: RecommenderList UI component
 
 ### Completed

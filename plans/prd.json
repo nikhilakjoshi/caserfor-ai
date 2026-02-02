@@ -374,7 +374,7 @@
       "Works in create mode (empty) and edit mode (pre-filled)",
       "Calls onSubmit callback with form data"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
