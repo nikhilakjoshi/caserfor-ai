@@ -268,7 +268,7 @@
       "Generates document with labeled sections",
       "Returns TipTap-compatible JSON structure"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

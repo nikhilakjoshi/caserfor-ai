@@ -151,3 +151,9 @@
 - LinkedIn extraction checks both AI-categorized and pre-assigned documentType via `resolvedCategory`
 - Extraction runs fire-and-forget after categorization resolves (parallel with nothing - embedding already done by then)
 - No deduplication of recommenders from LinkedIn extraction - multiple uploads may create duplicates
+
+## Petition Letter Drafting Agent
+- PRD says "section-by-section sequentially (token strategy)" but implemented as single structured output call for simplicity - can switch to sequential section generation if token limits hit
+- TipTap JSON uses basic node types (doc, heading, paragraph, bulletList, listItem, text with marks) - no custom node types
+- markdownToTiptapParagraphs is a lightweight converter, not a full markdown parser - handles h3, bullets, bold, italic only
+- Exhibit references are placeholder ("Exhibit X") - no auto-numbering against actual vault documents yet

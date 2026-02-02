@@ -1,5 +1,20 @@
 # Progress Log
 
+## 2026-02-02: Petition letter drafting agent
+
+### Completed
+- Created `lib/drafting-agents/petition-letter.ts`
+  - Two-phase agent: research loop (tools + stepCountIs(25)) then structured output
+  - Uses `analysisModel` (gemini-2.5-pro) and shared `createDraftingTools`
+  - Returns TipTap JSON, sections metadata, and plainText
+  - Includes `markdownToTiptapParagraphs` converter (headings, bullets, bold/italic)
+- PRD item marked as passes:true
+
+### Notes for next dev
+- Other 6 drafting agents (personal-statement, recommendation-letter, cover-letter, exhibit-list, table-of-contents, rfe-response) should follow same pattern but use `defaultModel` (gemini-2.5-flash) except rfe-response which needs `analysisModel`
+- The generate + regenerate API routes still need to be built before agents are usable from UI
+- `markdownToTiptapParagraphs` is basic - may need enhancement for numbered lists, nested formatting
+
 ## 2026-02-02: LinkedIn profile extraction pipeline
 
 ### Completed
