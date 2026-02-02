@@ -17,16 +17,6 @@ export async function GET(
 
     const { clientId } = await params
 
-    if (user.role === "lawyer") {
-      const assignment = await prisma.caseAssignment.findFirst({
-        where: { lawyerId: user.id, clientId },
-        select: { id: true },
-      })
-      if (!assignment) {
-        return NextResponse.json({ error: "Not assigned to this case" }, { status: 403 })
-      }
-    }
-
     const analysis = await prisma.gapAnalysis.findFirst({
       where: { clientId },
       orderBy: { createdAt: "desc" },

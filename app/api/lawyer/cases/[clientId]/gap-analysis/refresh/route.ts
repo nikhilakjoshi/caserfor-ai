@@ -18,16 +18,6 @@ export async function POST(
 
     const { clientId } = await params
 
-    if (user.role === "lawyer") {
-      const assignment = await prisma.caseAssignment.findFirst({
-        where: { lawyerId: user.id, clientId },
-        select: { id: true },
-      })
-      if (!assignment) {
-        return NextResponse.json({ error: "Not assigned to this case" }, { status: 403 })
-      }
-    }
-
     // Verify client exists
     const client = await prisma.client.findUnique({
       where: { id: clientId },

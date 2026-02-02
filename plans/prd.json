@@ -1,282 +1,414 @@
 [
   {
-    "id": "D1-1",
-    "section": "D1",
-    "title": "Create RoleProvider context",
-    "description": "components/role-provider.tsx - React context {role, setRole, clientId}. Read role from NextAuth session, dev override from localStorage key 'dev-role-override'. Export useRole hook.",
-    "status": "done",
-    "dependencies": []
+    "category": "auth",
+    "description": "Remove CaseAssignment lookup for lawyer role in lib/case-auth.ts (lines 37-49). Lawyers/admins access any non-draft case without assignment.",
+    "steps": [
+      "Remove CaseAssignment.findFirst block for lawyer role in lib/case-auth.ts lines 37-49",
+      "Lawyer role falls through to return { user, client } like admin",
+      "Verify applicant ownership check (lines 51-56) unchanged",
+      "GET /api/lawyer/cases/[clientId] succeeds for lawyer without assignment"
+    ],
+    "passes": true
   },
   {
-    "id": "D1-2",
-    "section": "D1",
-    "title": "Create DevRoleToggle component",
-    "description": "components/dev-role-toggle.tsx - pill/switch in header, only renders when NODE_ENV=development. Toggles between lawyer/applicant, persists to localStorage.",
-    "status": "done",
-    "dependencies": ["D1-1"]
+    "category": "auth",
+    "description": "Remove inline CaseAssignment check in app/api/lawyer/cases/[clientId]/route.ts",
+    "steps": [
+      "Remove any CaseAssignment query in the route handler",
+      "Rely on updated authorizeCaseAccess from lib/case-auth.ts",
+      "Verify route still returns 403 for non-lawyer/admin roles"
+    ],
+    "passes": true
   },
   {
-    "id": "D1-3",
-    "section": "D1",
-    "title": "Wrap root layout with RoleProvider",
-    "description": "app/layout.tsx - wrap children with <RoleProvider>. Add DevRoleToggle to header area.",
-    "status": "done",
-    "dependencies": ["D1-1", "D1-2"]
+    "category": "auth",
+    "description": "Remove CaseAssignment check in gap-analysis routes so lawyers access without assignment",
+    "steps": [
+      "Update GET /api/lawyer/cases/[clientId]/gap-analysis/route.ts auth",
+      "Update POST /api/lawyer/cases/[clientId]/gap-analysis/refresh/route.ts auth",
+      "Verify both endpoints accessible by any lawyer"
+    ],
+    "passes": true
   },
   {
-    "id": "D2-1",
-    "section": "D2",
-    "title": "Create (cases) route group layout",
-    "description": "app/(cases)/cases/[clientId]/layout.tsx - role-aware layout. Lawyer: dual sidebar (AppSidebar collapsed + CaseSidebar). Applicant: AppSidebar only. Use useRole() to determine.",
-    "status": "done",
-    "dependencies": ["D1-1"]
+    "category": "data",
+    "description": "Seed lawyer user: email=lawyer@demo.com, role=lawyer, bcrypt-hashed password",
+    "steps": [
+      "Add lawyer user creation to prisma/seed.ts",
+      "Hash password with bcrypt",
+      "Log password to console",
+      "Run prisma db seed and confirm lawyer user created"
+    ],
+    "passes": false
   },
   {
-    "id": "D2-2",
-    "section": "D2",
-    "title": "Create case overview page",
-    "description": "app/(cases)/cases/[clientId]/page.tsx - case header + summary. Fetch case data by clientId. Reuse existing case detail components where possible.",
-    "status": "done",
-    "dependencies": ["D2-1"]
+    "category": "data",
+    "description": "Seed applicant user: email=applicant@demo.com, role=applicant, bcrypt-hashed password",
+    "steps": [
+      "Add applicant user creation to prisma/seed.ts",
+      "Hash password with bcrypt",
+      "Log password to console",
+      "Run prisma db seed and confirm applicant user created"
+    ],
+    "passes": false
   },
   {
-    "id": "D2-3",
-    "section": "D2",
-    "title": "Convert /my-case to redirect",
-    "description": "app/(dashboard)/my-case/page.tsx - server redirect to /cases/{clientId}. Fetch clientId from session, redirect().",
-    "status": "done",
-    "dependencies": ["D2-1"]
+    "category": "data",
+    "description": "Seed Client record: ML researcher profile, status=submitted, currentStep=10, linked to applicant user",
+    "steps": [
+      "Create Client record in seed.ts with ML researcher data",
+      "Set status=submitted, currentStep=10",
+      "Link to seed applicant user via userId",
+      "Verify record created after seeding"
+    ],
+    "passes": false
   },
   {
-    "id": "D2-4",
-    "section": "D2",
-    "title": "Update AppSidebar My Case link",
-    "description": "Update AppSidebar 'My Case' nav item href to resolve to /cases/[clientId] using RoleProvider clientId.",
-    "status": "done",
-    "dependencies": ["D1-1", "D2-1"]
+    "category": "data",
+    "description": "Seed Vault (knowledge_base type) linked to applicant's client record",
+    "steps": [
+      "Create Vault record in seed.ts with type=knowledge_base",
+      "Link to seed client",
+      "Verify vault accessible via API after seeding"
+    ],
+    "passes": false
   },
   {
-    "id": "D2-5",
-    "section": "D2",
-    "title": "Move drafts routes to (cases) group",
-    "description": "Move drafts routes from (lawyer)/cases/[clientId]/drafts/ to (cases)/cases/[clientId]/drafts/. Update imports.",
-    "status": "done",
-    "dependencies": ["D2-1"]
+    "category": "data",
+    "description": "Seed CriterionResponse records for all 10 EB-1A criteria with realistic ML researcher responses",
+    "steps": [
+      "Create 10 CriterionResponse records in seed.ts",
+      "Each maps to one EB-1A criterion",
+      "Content is realistic for ML researcher profile",
+      "All linked to seed client"
+    ],
+    "passes": false
   },
   {
-    "id": "D2-6",
-    "section": "D2",
-    "title": "Update middleware for /cases/* access",
-    "description": "middleware.ts - allow both lawyer and applicant roles on /cases/* routes.",
-    "status": "done",
-    "dependencies": ["D2-1"]
+    "category": "data",
+    "description": "Seed EligibilityReport with verdict=moderate for the client",
+    "steps": [
+      "Create EligibilityReport in seed.ts with verdict=moderate",
+      "Link to seed client",
+      "Verify report shows on evaluation page"
+    ],
+    "passes": false
   },
   {
-    "id": "D2-7",
-    "section": "D2",
-    "title": "Create case-level auth utility",
-    "description": "lib/case-auth.ts - authorization checks: lawyer can access any case, applicant only their own. Export canAccessCase(session, clientId).",
-    "status": "done",
-    "dependencies": []
+    "category": "data",
+    "description": "Seed 2-3 Recommender records at various statuses for the client",
+    "steps": [
+      "Create 2-3 Recommender records in seed.ts",
+      "Use different statuses (pending, contacted, confirmed)",
+      "Link all to seed client",
+      "Verify recommenders show on case detail recommenders tab"
+    ],
+    "passes": false
   },
   {
-    "id": "D3-1",
-    "section": "D3",
-    "title": "Create CaseSidebar component",
-    "description": "components/case-sidebar.tsx - shadcn Sidebar (side='right' or second sidebar). Takes clientId prop. Nav items: Overview, Documents, Recommenders, Drafts (collapsible), Timeline, Gap Analysis, Assistant.",
-    "status": "done",
-    "dependencies": ["D2-1"]
+    "category": "ui",
+    "description": "Fix LawyerSidebar active state: / always active because every path starts with /. Special-case / to exact match.",
+    "steps": [
+      "In components/lawyer-sidebar.tsx ~line 52, change isActive check for / to exact match",
+      "Dashboard item only highlighted when pathname === '/'",
+      "/cases highlights Cases nav item, not Dashboard"
+    ],
+    "passes": false
   },
   {
-    "id": "D3-2",
-    "section": "D3",
-    "title": "CaseSidebar: Overview nav item",
-    "description": "Link to /cases/[clientId]",
-    "status": "done",
-    "dependencies": ["D3-1"]
+    "category": "ui",
+    "description": "Change CaseSidebar from side=right to side=left",
+    "steps": [
+      "In components/case-sidebar.tsx, change side='right' to side='left'",
+      "Verify CaseSidebar renders on the left"
+    ],
+    "passes": false
   },
   {
-    "id": "D3-3",
-    "section": "D3",
-    "title": "CaseSidebar: Documents nav item",
-    "description": "Link to /cases/[clientId]/vault",
-    "status": "done",
-    "dependencies": ["D3-1"]
+    "category": "ui",
+    "description": "Restructure case detail layout for two left sidebars: collapsed LawyerSidebar + full CaseSidebar",
+    "steps": [
+      "Update app/(cases)/cases/[clientId]/layout.tsx",
+      "Both LawyerSidebar and CaseSidebar render on the left",
+      "LawyerSidebar defaults to collapsed/icon mode when CaseSidebar present",
+      "On non-case routes, LawyerSidebar stays full width"
+    ],
+    "passes": false
   },
   {
-    "id": "D3-4",
-    "section": "D3",
-    "title": "CaseSidebar: Recommenders nav item",
-    "description": "Link to /cases/[clientId]/recommenders",
-    "status": "done",
-    "dependencies": ["D3-1"]
+    "category": "ui",
+    "description": "Ensure CaseSidebar nav items match PRD: Overview, Documents, Recommenders, Gap Analysis, Timeline, Assistant, Drafts (collapsible with 7 types)",
+    "steps": [
+      "Verify all nav items present in components/case-sidebar.tsx",
+      "Drafts section is collapsible",
+      "Sub-items: All Drafts, Petition Letter, Personal Statement, Rec Letters, Cover Letter, Exhibit List, TOC, RFE Response"
+    ],
+    "passes": false
   },
   {
-    "id": "D3-5",
-    "section": "D3",
-    "title": "CaseSidebar: Drafts collapsible with 7 doc types",
-    "description": "Collapsible nav group linking to /cases/[clientId]/drafts with sub-items for each doc type (personal-statement, research-summary, etc.)",
-    "status": "done",
-    "dependencies": ["D3-1"]
+    "category": "ui",
+    "description": "CaseSidebar links update ?tab= param instead of navigating to sub-routes",
+    "steps": [
+      "CaseSidebar links use ?tab=overview, ?tab=documents, etc.",
+      "No navigation to separate sub-route pages",
+      "CaseSidebar highlights active item based on current ?tab value"
+    ],
+    "passes": false
   },
   {
-    "id": "D3-6",
-    "section": "D3",
-    "title": "CaseSidebar: Timeline, Gap Analysis, Assistant nav items",
-    "description": "Links to /cases/[clientId]/timeline, /gap-analysis, /assistant",
-    "status": "done",
-    "dependencies": ["D3-1"]
+    "category": "ui",
+    "description": "Case detail page reads ?tab= search param to render correct tab content",
+    "steps": [
+      "Read ?tab from URL in app/(cases)/cases/[clientId]/page.tsx",
+      "Activate matching tab content",
+      "Default to overview when no ?tab param",
+      "All tabs work: overview, documents, recommenders, gap-analysis, timeline, assistant, drafts"
+    ],
+    "passes": false
   },
   {
-    "id": "D3-7",
-    "section": "D3",
-    "title": "Create vault sub-page",
-    "description": "app/(cases)/cases/[clientId]/vault/page.tsx - extract documents tab content into standalone page.",
-    "status": "done",
-    "dependencies": ["D2-1"]
+    "category": "ui",
+    "description": "Create lawyer dashboard page with role guard redirecting non-lawyers to /assistant",
+    "steps": [
+      "Create page in appropriate route group (resolve conflict with (dashboard)/page.tsx and root page.tsx)",
+      "Fetch session, check role",
+      "Redirect non-lawyers to /assistant",
+      "Lawyer sees dashboard content"
+    ],
+    "passes": false
   },
   {
-    "id": "D3-8",
-    "section": "D3",
-    "title": "Create recommenders sub-page",
-    "description": "app/(cases)/cases/[clientId]/recommenders/page.tsx - extract recommenders tab content into standalone page.",
-    "status": "done",
-    "dependencies": ["D2-1"]
+    "category": "ui",
+    "description": "Lawyer dashboard: 4 stats cards fetching /api/lawyer/dashboard/stats",
+    "steps": [
+      "Fetch /api/lawyer/dashboard/stats on mount",
+      "Render 4 cards: active cases, pending review, drafts in progress, unassigned",
+      "Show loading state while fetching"
+    ],
+    "passes": false
   },
   {
-    "id": "D3-9",
-    "section": "D3",
-    "title": "Create gap-analysis sub-page",
-    "description": "app/(cases)/cases/[clientId]/gap-analysis/page.tsx - extract gap analysis tab content into standalone page.",
-    "status": "done",
-    "dependencies": ["D2-1"]
+    "category": "ui",
+    "description": "Lawyer dashboard: recent cases grid using CaseCard + 'View All Cases' link to /cases",
+    "steps": [
+      "Fetch recent cases from API",
+      "Render CaseCard grid",
+      "'View All Cases' link navigates to /cases",
+      "Empty state when no cases"
+    ],
+    "passes": false
   },
   {
-    "id": "D3-10",
-    "section": "D3",
-    "title": "Create assistant sub-page",
-    "description": "app/(cases)/cases/[clientId]/assistant/page.tsx - extract AI assistant tab content into standalone page.",
-    "status": "done",
-    "dependencies": ["D2-1"]
+    "category": "ui",
+    "description": "Create case list page at app/(cases)/cases/page.tsx with tabs: All / My Cases / Unassigned",
+    "steps": [
+      "Create app/(cases)/cases/page.tsx",
+      "Render 3 tabs: All, My Cases, Unassigned",
+      "Tab selection calls /api/lawyer/cases?tab=X",
+      "Cases displayed as CaseCard grid"
+    ],
+    "passes": false
   },
   {
-    "id": "D3-11",
-    "section": "D3",
-    "title": "Create timeline placeholder page",
-    "description": "app/(cases)/cases/[clientId]/timeline/page.tsx - placeholder with 'coming soon' toast.",
-    "status": "done",
-    "dependencies": ["D2-1"]
+    "category": "ui",
+    "description": "Case list page: debounced search input filtering cases",
+    "steps": [
+      "Add search input to case list page",
+      "Debounce input (300-500ms)",
+      "Search calls /api/lawyer/cases?search=Y",
+      "Results update in grid"
+    ],
+    "passes": false
   },
   {
-    "id": "D4-1",
-    "section": "D4",
-    "title": "Create dashboard stats API",
-    "description": "app/api/lawyer/dashboard/stats/route.ts - returns {activeCases, pendingReview, draftsInProgress, unassigned} counts from DB.",
-    "status": "done",
-    "dependencies": []
+    "category": "ui",
+    "description": "Case list page: pagination with page controls",
+    "steps": [
+      "Add pagination controls (next/prev)",
+      "API called with ?page=Z",
+      "Page state updates grid content"
+    ],
+    "passes": false
   },
   {
-    "id": "D4-2",
-    "section": "D4",
-    "title": "Create greeting component",
-    "description": "Time-of-day greeting (Good morning/afternoon/evening) + lawyer name from session.",
-    "status": "done",
-    "dependencies": []
+    "category": "api",
+    "description": "Update /api/lawyer/cases GET to support tab, search, and page query params",
+    "steps": [
+      "?tab=all returns all non-draft cases",
+      "?tab=mine returns cases assigned to current lawyer",
+      "?tab=unassigned returns cases with no CaseAssignment",
+      "?search=Y filters by client name/email",
+      "?page=Z returns paginated results"
+    ],
+    "passes": false
   },
   {
-    "id": "D4-3",
-    "section": "D4",
-    "title": "Create dashboard chat input component",
-    "description": "components/lawyer/dashboard-chat.tsx - centered text input for assistant queries. Accepts optional prefilled text prop.",
-    "status": "done",
-    "dependencies": []
+    "category": "api",
+    "description": "Include latest GapAnalysis overallStrength per case in /api/lawyer/cases response",
+    "steps": [
+      "Join GapAnalysis in the cases query (latest per client)",
+      "Each case object includes overallStrength field (or null)",
+      "Verify on frontend CaseCard receives the field"
+    ],
+    "passes": false
   },
   {
-    "id": "D4-4",
-    "section": "D4",
-    "title": "Create quick action buttons component",
-    "description": "Row of 4 buttons that prepopulate dashboard chat input with predefined queries.",
-    "status": "done",
-    "dependencies": ["D4-3"]
+    "category": "ui",
+    "description": "CaseCard: show gap analysis strength badge from overallStrength field",
+    "steps": [
+      "Add overallStrength to CaseCard props (CaseData type)",
+      "Render strength badge with color coding (strong=green, moderate=yellow, weak=orange, insufficient=red)",
+      "Show 'Not analyzed' when overallStrength is null"
+    ],
+    "passes": false
   },
   {
-    "id": "D4-5",
-    "section": "D4",
-    "title": "Create stat cards row component",
-    "description": "4 stat cards fetching from /api/lawyer/dashboard/stats. Active cases, pending review, drafts in progress, unassigned.",
-    "status": "done",
-    "dependencies": ["D4-1"]
+    "category": "ui",
+    "description": "Case detail header: persistent gap analysis strength indicator visible regardless of active tab",
+    "steps": [
+      "Fetch latest gap analysis overallStrength for the client",
+      "Display badge in case detail header area",
+      "Badge updates when gap analysis refreshes",
+      "Show 'Not analyzed' when no analysis exists"
+    ],
+    "passes": false
   },
   {
-    "id": "D4-6",
-    "section": "D4",
-    "title": "Create case table component",
-    "description": "components/lawyer/case-table.tsx - shadcn Table with search. Columns: Name, Status, Updated, Visa Type (fieldOfExpertise), Case Files count.",
-    "status": "done",
-    "dependencies": []
+    "category": "functional",
+    "description": "Auto-trigger gap analysis refresh after document processing completes (embedding -> completed)",
+    "steps": [
+      "In /api/vaults/[id]/documents/process, after embeddingStatus set to completed",
+      "Identify the client owning the vault",
+      "POST to /api/lawyer/cases/[clientId]/gap-analysis/refresh",
+      "Do not trigger on processing failure"
+    ],
+    "passes": false
   },
   {
-    "id": "D4-7",
-    "section": "D4",
-    "title": "Add Create Case + Upload Files stub buttons",
-    "description": "Buttons above case table that show 'coming soon' toast on click.",
-    "status": "done",
-    "dependencies": ["D4-6"]
+    "category": "functional",
+    "description": "Debounce concurrent gap analysis refreshes from multiple simultaneous doc uploads",
+    "steps": [
+      "Multiple docs processing simultaneously don't trigger redundant analyses",
+      "Use debounce or last-write-wins approach",
+      "Final gap analysis reflects all processed documents"
+    ],
+    "passes": false
   },
   {
-    "id": "D4-8",
-    "section": "D4",
-    "title": "Assemble lawyer dashboard page",
-    "description": "app/(lawyer)/dashboard/page.tsx - compose greeting + chat + quick actions + stats + table.",
-    "status": "done",
-    "dependencies": ["D4-2", "D4-3", "D4-4", "D4-5", "D4-6", "D4-7"]
+    "category": "functional",
+    "description": "Verify petition_letter drafting agent E2E: create -> generate -> poll until status=draft",
+    "steps": [
+      "Create petition_letter draft via API",
+      "Trigger generation",
+      "Poll until status=draft",
+      "Verify generated content is valid"
+    ],
+    "passes": false
   },
   {
-    "id": "D5-1",
-    "section": "D5",
-    "title": "Create get_all_cases tool",
-    "description": "lib/dashboard-agent-tools.ts - tool returning all cases for the lawyer with summary fields.",
-    "status": "done",
-    "dependencies": []
+    "category": "functional",
+    "description": "Verify personal_statement drafting agent E2E",
+    "steps": [
+      "Create personal_statement draft via API",
+      "Trigger generation",
+      "Poll until status=draft",
+      "Verify generated content"
+    ],
+    "passes": false
   },
   {
-    "id": "D5-2",
-    "section": "D5",
-    "title": "Add get_case_detail tool",
-    "description": "Tool returning full case detail for a given clientId.",
-    "status": "done",
-    "dependencies": ["D5-1"]
+    "category": "functional",
+    "description": "Verify recommendation_letter drafting agent E2E",
+    "steps": [
+      "Create recommendation_letter draft via API",
+      "Trigger generation",
+      "Poll until status=draft",
+      "Verify generated content"
+    ],
+    "passes": false
   },
   {
-    "id": "D5-3",
-    "section": "D5",
-    "title": "Add search_vault tool",
-    "description": "Tool wrapping queryRelevantChunks for RAG search within a case's vault.",
-    "status": "done",
-    "dependencies": ["D5-1"]
+    "category": "functional",
+    "description": "Verify cover_letter drafting agent E2E",
+    "steps": [
+      "Create cover_letter draft via API",
+      "Trigger generation",
+      "Poll until status=draft",
+      "Verify generated content"
+    ],
+    "passes": false
   },
   {
-    "id": "D5-4",
-    "section": "D5",
-    "title": "Add gap_analysis + eligibility + drafts tools",
-    "description": "get_gap_analysis(clientId), get_eligibility_report(clientId), get_existing_drafts(clientId) tools.",
-    "status": "done",
-    "dependencies": ["D5-1"]
+    "category": "functional",
+    "description": "Verify exhibit_list drafting agent E2E",
+    "steps": [
+      "Create exhibit_list draft via API",
+      "Trigger generation",
+      "Poll until status=draft",
+      "Verify generated content"
+    ],
+    "passes": false
   },
   {
-    "id": "D5-5",
-    "section": "D5",
-    "title": "Create dashboard assistant API route",
-    "description": "app/api/lawyer/assistant/route.ts - ToolLoopAgent with dashboard tools, streaming response.",
-    "status": "done",
-    "dependencies": ["D5-1", "D5-2", "D5-3", "D5-4"]
+    "category": "functional",
+    "description": "Verify table_of_contents drafting agent E2E",
+    "steps": [
+      "Create table_of_contents draft via API",
+      "Trigger generation",
+      "Poll until status=draft",
+      "Verify generated content"
+    ],
+    "passes": false
   },
   {
-    "id": "D5-6",
-    "section": "D5",
-    "title": "Wire dashboard chat to assistant API",
-    "description": "Update dashboard-chat.tsx to use useChat with /api/lawyer/assistant. Render messages below input. Quick action buttons prepopulate input text.",
-    "status": "done",
-    "dependencies": ["D4-3", "D4-4", "D5-5"]
+    "category": "functional",
+    "description": "Verify rfe_response drafting agent E2E",
+    "steps": [
+      "Create rfe_response draft via API",
+      "Trigger generation",
+      "Poll until status=draft",
+      "Verify generated content"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Dashboard empty state when zero cases exist",
+    "steps": [
+      "When no cases returned, show empty state message",
+      "Message suggests what to do next",
+      "No blank/broken grid"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Handle no-vault edge case: disable gap analysis and vault features on case detail",
+    "steps": [
+      "When client has no vault, gap analysis tab/button disabled",
+      "Document upload section shows 'no vault' message",
+      "No errors thrown when vault is null"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Draft generation failure: revert status to not_started for retry",
+    "steps": [
+      "If generation throws error, set draft status to not_started",
+      "Draft not stuck in generating state",
+      "User can click generate again after failure"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Show 'Not analyzed' indicator when no GapAnalysis exists yet",
+    "steps": [
+      "CaseCard shows 'Not analyzed' when overallStrength is null",
+      "Case detail header shows 'Not analyzed' when no gap analysis exists",
+      "Distinct from other strength levels visually"
+    ],
+    "passes": false
   }
 ]

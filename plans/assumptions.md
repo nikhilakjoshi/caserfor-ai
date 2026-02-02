@@ -265,3 +265,8 @@
 - useChat v6 has no input/setInput helpers - input state managed manually via useState
 - Prefill from quick action buttons uses setState-during-render (not useEffect) to avoid react-hooks/set-state-in-effect lint error
 - Messages rendered as simple text extraction from parts array - tool call parts not displayed (kept simple for dashboard context)
+
+## Lawyer Auth (CaseAssignment Removal)
+- CaseAssignment no longer required for lawyer access to case routes - lawyers access any non-draft case like admin
+- Dashboard agent tools still verify CaseAssignment (not updated) - may need updating if dashboard should match route behavior
+- CaseAssignment model retained for data display (assignedTo) not auth gating

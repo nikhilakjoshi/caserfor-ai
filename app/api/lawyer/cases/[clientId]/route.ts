@@ -17,17 +17,6 @@ export async function GET(
 
     const { clientId } = await params
 
-    // Verify lawyer has access (assigned or admin)
-    if (user.role === "lawyer") {
-      const assignment = await prisma.caseAssignment.findFirst({
-        where: { lawyerId: user.id, clientId },
-        select: { id: true },
-      })
-      if (!assignment) {
-        return NextResponse.json({ error: "Not assigned to this case" }, { status: 403 })
-      }
-    }
-
     const client = await prisma.client.findUnique({
       where: { id: clientId },
       include: {

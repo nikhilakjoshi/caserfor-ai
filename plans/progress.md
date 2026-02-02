@@ -1,5 +1,22 @@
 # Progress Log
 
+## 2026-02-02: Auth - remove CaseAssignment requirement for lawyers
+
+### Completed
+- Removed CaseAssignment lookup for lawyer role in `lib/case-auth.ts` - lawyers now fall through like admin
+- Removed inline CaseAssignment check in `app/api/lawyer/cases/[clientId]/route.ts`
+- Removed CaseAssignment check in `app/api/lawyer/cases/[clientId]/gap-analysis/route.ts`
+- Removed CaseAssignment check in `app/api/lawyer/cases/[clientId]/gap-analysis/refresh/route.ts`
+
+### Notes for next dev
+- Lawyers/admins can now access any non-draft case without CaseAssignment
+- Applicant ownership check unchanged
+- Role guard (lawyer/admin only) still enforced in each route handler
+- CaseAssignment model still used for data (assignedTo in response) - just not for auth gating
+- Dashboard agent tools (`lib/dashboard-agent-tools.ts`) still check CaseAssignment - consider updating if dashboard should also be ungated
+
+---
+
 ## 2026-02-02: D5-5 - dashboard assistant API route
 
 ### Completed
