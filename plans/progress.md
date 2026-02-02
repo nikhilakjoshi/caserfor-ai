@@ -1,5 +1,22 @@
 # Progress Log
 
+## 2026-02-02: Personal statement drafting agent
+
+### Completed
+- Created `lib/drafting-agents/personal-statement.ts`
+  - Same two-phase pattern as petition-letter: research loop then structured output
+  - Uses `defaultModel` (gemini-2.5-flash) per PRD
+  - Research phase capped at stepCountIs(15) (simpler doc, less research needed)
+  - First-person narrative style, 7 sections (opening through closing)
+  - Returns TipTap JSON, sections metadata, plainText
+- PRD item marked as passes:true
+
+### Notes for next dev
+- Remaining drafting agents: recommendation-letter, cover-letter, exhibit-list, table-of-contents, rfe-response
+- recommendation-letter needs recommenderId param + get_recommender tool
+- generate/regenerate API routes still needed before any agent is usable from UI
+- markdownToTiptapParagraphs duplicated from petition-letter - consider extracting to shared util if more agents added
+
 ## 2026-02-02: Petition letter drafting agent
 
 ### Completed

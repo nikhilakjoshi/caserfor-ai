@@ -278,7 +278,7 @@
       "Uses gemini-2.5-flash",
       "Returns TipTap-compatible JSON"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

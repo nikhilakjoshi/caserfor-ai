@@ -157,3 +157,8 @@
 - TipTap JSON uses basic node types (doc, heading, paragraph, bulletList, listItem, text with marks) - no custom node types
 - markdownToTiptapParagraphs is a lightweight converter, not a full markdown parser - handles h3, bullets, bold, italic only
 - Exhibit references are placeholder ("Exhibit X") - no auto-numbering against actual vault documents yet
+
+## Personal Statement Drafting Agent
+- PRD says "single generation call" but implemented as two-phase (research + generate) like petition-letter for better context gathering
+- Research phase uses stepCountIs(15) vs petition-letter's 25 - personal statement needs less evidence mining
+- markdownToTiptapParagraphs duplicated from petition-letter rather than extracted to shared util - acceptable until 3+ agents share it
