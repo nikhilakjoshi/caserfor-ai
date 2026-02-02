@@ -244,7 +244,7 @@
     "section": "D5",
     "title": "Add get_case_detail tool",
     "description": "Tool returning full case detail for a given clientId.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D5-1"]
   },
   {

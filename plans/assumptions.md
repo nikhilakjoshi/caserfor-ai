@@ -249,3 +249,8 @@
 - Stub buttons use alert() instead of toast - no toast/sonner library installed in project
 - Case table drops tab filtering (all/mine/unassigned) from old dashboard - PRD shows single table with search only
 - Stats API counts "active cases" as CaseAssignment count for lawyer, not distinct client count - one client with multiple assignments still counts once (unique constraint prevents duplicates anyway)
+
+## Dashboard Agent Tools (D5)
+- get_case_detail verifies CaseAssignment before returning data (same auth pattern as API route) - no admin bypass in tool context
+- get_case_detail returns eligibility report summary + verdict only (not full raw output) to keep token usage reasonable
+- Latest gap analysis returned (take:1 desc) rather than all - agent can request specific one if needed

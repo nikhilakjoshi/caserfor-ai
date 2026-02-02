@@ -1,5 +1,18 @@
 # Progress Log
 
+## 2026-02-02: D5-2 - get_case_detail dashboard agent tool
+
+### Completed
+- D5-2: Added `get_case_detail` tool to `lib/dashboard-agent-tools.ts`. Takes clientId, verifies lawyer assignment, returns full client profile w/ eligibility report, criterion responses, recommenders, drafts, latest gap analysis, vault docs, and assignments.
+
+### Notes for next dev
+- D5-3 (search_vault) and D5-4 (gap_analysis + eligibility + drafts tools) are unblocked and can be done in parallel
+- GapAnalysis model has no `status` field - use `overallStrength` instead
+- Document model uses `name` not `title`
+- CriterionResponse uses `responses` (plural Json field) not `response`
+
+---
+
 ## 2026-02-02: D4 - Lawyer Dashboard Redesign
 
 ### Completed
