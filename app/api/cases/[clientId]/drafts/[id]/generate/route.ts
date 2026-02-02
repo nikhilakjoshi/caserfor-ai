@@ -4,6 +4,7 @@ import { authorizeCaseAccess, isAuthError } from "@/lib/case-auth"
 import { generatePetitionLetter } from "@/lib/drafting-agents/petition-letter"
 import { generatePersonalStatement } from "@/lib/drafting-agents/personal-statement"
 import { generateRecommendationLetter } from "@/lib/drafting-agents/recommendation-letter"
+import { generateCoverLetter } from "@/lib/drafting-agents/cover-letter"
 import type { DraftDocumentType } from "@prisma/client"
 
 type Params = { params: Promise<{ clientId: string; id: string }> }
@@ -19,6 +20,7 @@ const agentMap: Partial<
   personal_statement: (clientId) => generatePersonalStatement(clientId),
   recommendation_letter: (clientId, recommenderId) =>
     generateRecommendationLetter(clientId, recommenderId!),
+  cover_letter: (clientId) => generateCoverLetter(clientId),
 }
 
 export async function POST(_request: NextRequest, { params }: Params) {

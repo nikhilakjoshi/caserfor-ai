@@ -1,5 +1,22 @@
 # Progress Log
 
+## 2026-02-02: Cover letter drafting agent
+
+### Completed
+- Created `lib/drafting-agents/cover-letter.ts`
+  - Same two-phase pattern: research loop (stepCountIs(15)) then structured output
+  - Uses defaultModel (gemini-2.5-flash) per PRD
+  - 6 sections: header, intro, eligibility overview, criteria summary, exhibit list reference, conclusion
+  - Legal correspondence tone with INA/CFR citations
+  - Returns TipTap JSON, sections metadata, plainText
+- Wired into generate route (`app/api/cases/[clientId]/drafts/[id]/generate/route.ts`)
+- PRD item marked passes:true
+
+### Notes for next dev
+- Remaining drafting agents: exhibit-list, table-of-contents, rfe-response
+- markdownToTiptapParagraphs duplicated in 4 files now - extract to shared util with next agent
+- Exhibit references use "Exhibit X" placeholders - no auto-numbering yet
+
 ## 2026-02-02: Draft generation API route
 
 ### Completed

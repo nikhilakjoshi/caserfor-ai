@@ -296,7 +296,7 @@
     "acceptanceCriteria": [
       "Agent function exported, uses gemini-2.5-flash, returns TipTap JSON"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

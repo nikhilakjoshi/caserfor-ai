@@ -172,3 +172,8 @@
 - PRD says "streams response" but agents return complete results (research loop + structured output) - used fire-and-forget async pattern instead (matches gap-analysis refresh)
 - On generation failure, status reverts to not_started so user can retry
 - JSON.parse(JSON.stringify()) used for tiptap/sections to satisfy Prisma's InputJsonValue type
+
+## Cover Letter Drafting Agent
+- Uses stepCountIs(15) like personal-statement - cover letter is a summary doc, less research needed than petition letter
+- markdownToTiptapParagraphs duplicated (now in 4 files) - acceptable until extracted to shared util
+- PRD says "System prompt for petition package cover letter" - implemented with full legal correspondence structure including INA/CFR citations
