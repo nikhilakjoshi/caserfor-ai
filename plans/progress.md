@@ -1,5 +1,21 @@
 # Progress Log
 
+## 2026-02-02: Recommender CRUD API routes
+
+### Completed
+- GET+POST /api/cases/[clientId]/recommenders (list w/ attachment count, create w/ zod)
+- PATCH+DELETE /api/cases/[clientId]/recommenders/[id] (partial update w/ zod, delete w/ cascade)
+- POST /api/cases/[clientId]/recommenders/[id]/attachments (multipart upload to S3)
+- DELETE /api/cases/[clientId]/recommenders/[id]/attachments/[attachmentId] (S3 + DB delete)
+- All routes use authorizeCaseAccess for role-based auth (marks recommender auth PRD item done)
+- Typecheck clean, lint 0 errors
+
+### Notes for next dev
+- Routes at /api/cases/ (not /api/lawyer/cases/) since applicants also need access
+- No middleware route additions needed - /api/cases/* not in public list so auth enforced
+- Next priority: drafts CRUD API routes, then AI agents (recommender-suggester, drafting agents)
+- Attachment upload uses storageKey pattern: recommenders/{id}/{uuid}.{ext}
+
 ## 2026-02-02: Case auth helper (lib/case-auth.ts)
 
 ### Completed

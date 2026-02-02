@@ -89,7 +89,7 @@
       "Returns JSON array of recommenders with attachment counts",
       "401 if unauthenticated, 403 if unauthorized"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -99,7 +99,7 @@
       "Zod validation on request body",
       "Returns created recommender with 201 status"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -109,7 +109,7 @@
       "Partial update works for any Recommender field",
       "Returns updated recommender"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -118,7 +118,7 @@
       "DELETE handler returns 204 on success",
       "Attachments cascade-deleted"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -128,7 +128,7 @@
       "RecommenderAttachment record created",
       "Returns attachment metadata with 201"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -138,7 +138,7 @@
       "S3 object deleted",
       "Returns 204"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -514,7 +514,7 @@
       "Applicant accessing other client's recommenders gets 403",
       "Admin can access any client's recommenders"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "auth",
