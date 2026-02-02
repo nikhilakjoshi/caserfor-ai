@@ -84,7 +84,7 @@
     "section": "D3",
     "title": "Create CaseSidebar component",
     "description": "components/case-sidebar.tsx - shadcn Sidebar (side='right' or second sidebar). Takes clientId prop. Nav items: Overview, Documents, Recommenders, Drafts (collapsible), Timeline, Gap Analysis, Assistant.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D2-1"]
   },
   {
@@ -92,7 +92,7 @@
     "section": "D3",
     "title": "CaseSidebar: Overview nav item",
     "description": "Link to /cases/[clientId]",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D3-1"]
   },
   {
@@ -100,7 +100,7 @@
     "section": "D3",
     "title": "CaseSidebar: Documents nav item",
     "description": "Link to /cases/[clientId]/vault",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D3-1"]
   },
   {
@@ -108,7 +108,7 @@
     "section": "D3",
     "title": "CaseSidebar: Recommenders nav item",
     "description": "Link to /cases/[clientId]/recommenders",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D3-1"]
   },
   {
@@ -116,7 +116,7 @@
     "section": "D3",
     "title": "CaseSidebar: Drafts collapsible with 7 doc types",
     "description": "Collapsible nav group linking to /cases/[clientId]/drafts with sub-items for each doc type (personal-statement, research-summary, etc.)",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D3-1"]
   },
   {
@@ -124,7 +124,7 @@
     "section": "D3",
     "title": "CaseSidebar: Timeline, Gap Analysis, Assistant nav items",
     "description": "Links to /cases/[clientId]/timeline, /gap-analysis, /assistant",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D3-1"]
   },
   {
@@ -132,7 +132,7 @@
     "section": "D3",
     "title": "Create vault sub-page",
     "description": "app/(cases)/cases/[clientId]/vault/page.tsx - extract documents tab content into standalone page.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D2-1"]
   },
   {
@@ -140,7 +140,7 @@
     "section": "D3",
     "title": "Create recommenders sub-page",
     "description": "app/(cases)/cases/[clientId]/recommenders/page.tsx - extract recommenders tab content into standalone page.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D2-1"]
   },
   {
@@ -148,7 +148,7 @@
     "section": "D3",
     "title": "Create gap-analysis sub-page",
     "description": "app/(cases)/cases/[clientId]/gap-analysis/page.tsx - extract gap analysis tab content into standalone page.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D2-1"]
   },
   {
@@ -156,7 +156,7 @@
     "section": "D3",
     "title": "Create assistant sub-page",
     "description": "app/(cases)/cases/[clientId]/assistant/page.tsx - extract AI assistant tab content into standalone page.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D2-1"]
   },
   {
@@ -164,7 +164,7 @@
     "section": "D3",
     "title": "Create timeline placeholder page",
     "description": "app/(cases)/cases/[clientId]/timeline/page.tsx - placeholder with 'coming soon' toast.",
-    "status": "pending",
+    "status": "done",
     "dependencies": ["D2-1"]
   },
   {

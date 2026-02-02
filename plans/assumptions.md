@@ -233,3 +233,12 @@
 - Unified /api/cases/[clientId] route created alongside existing /api/lawyer/cases/[clientId] - both coexist, unified route uses authorizeCaseAccess for multi-role support
 - my-case server redirect uses prisma directly (not API call) since it's a server component - avoids extra HTTP hop
 - AppSidebar My Case isActive check matches both /cases/ and /my-case paths for highlight consistency during redirect
+
+## CaseSidebar (D3)
+- CaseSidebar placed inside same SidebarProvider as LawyerSidebar - shares collapse state. Independent collapse would need nested providers.
+- CaseSidebar only renders for lawyer/admin roles - applicants navigate via main AppSidebar links
+- Vault/assistant sub-pages fetch full case data just to get vaultId - acceptable for now, could use shared context later
+- Gap analysis sub-page uses `/api/lawyer/cases/[clientId]/gap-analysis` directly (not unified API) since no unified gap-analysis route exists yet
+- Recommenders sub-page role-gates Add button and AI suggestions via useRole() client-side check (not API-level)
+- Timeline is placeholder only - no toast, just static "coming soon" text (simpler than PRD's "toast" spec)
+- Draft type sub-links use `?type=slug` query param - drafts index page doesn't filter by this yet

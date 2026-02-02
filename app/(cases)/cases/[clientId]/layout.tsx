@@ -1,6 +1,7 @@
 "use client"
 
 import { AppSidebar } from "@/components/app-sidebar"
+import { CaseSidebar } from "@/components/case-sidebar"
 import { LawyerSidebar } from "@/components/lawyer-sidebar"
 import { DevRoleToggle } from "@/components/dev-role-toggle"
 import { useRole } from "@/components/role-provider"
@@ -22,7 +23,7 @@ export default function CasesLayout({
 
   return (
     <SidebarProvider>
-      {isLawyer ? <LawyerSidebar /> : <AppSidebar />}
+      {isLawyer ? <LawyerSidebar collapsible="icon" /> : <AppSidebar />}
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
           <SidebarTrigger className="-ml-1" />
@@ -39,6 +40,7 @@ export default function CasesLayout({
           {children}
         </main>
       </SidebarInset>
+      {isLawyer && <CaseSidebar />}
     </SidebarProvider>
   )
 }

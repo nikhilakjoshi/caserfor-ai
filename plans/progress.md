@@ -1,5 +1,27 @@
 # Progress Log
 
+## 2026-02-02: D3 - CaseSidebar + Case Sub-Pages
+
+### Completed
+- D3-1: `components/case-sidebar.tsx` - right-side sidebar with nav items for case sections. Uses shadcn Sidebar with `side="right"`.
+- D3-2 thru D3-6: All nav items in CaseSidebar - Overview, Documents, Recommenders, Drafts (collapsible w/ 7 doc type sub-items), Gap Analysis, Timeline, Assistant.
+- D3-7: `app/(cases)/cases/[clientId]/vault/page.tsx` - vault documents page using ClientVaultDocuments component.
+- D3-8: `app/(cases)/cases/[clientId]/recommenders/page.tsx` - full recommender management (list, form, detail, AI suggestions, status pipeline). Role-aware: applicants see read-only view.
+- D3-9: `app/(cases)/cases/[clientId]/gap-analysis/page.tsx` - gap analysis with refresh/polling, uses GapAnalysisView component.
+- D3-10: `app/(cases)/cases/[clientId]/assistant/page.tsx` - link to AI assistant scoped to case vault.
+- D3-11: `app/(cases)/cases/[clientId]/timeline/page.tsx` - placeholder "coming soon" page.
+- Updated `(cases)/cases/[clientId]/layout.tsx` to render CaseSidebar on right side for lawyer/admin roles.
+
+### Notes for next dev
+- CaseSidebar renders inside same SidebarProvider as LawyerSidebar - both sidebars share the same collapse state. If independent collapse is needed, would need nested SidebarProviders.
+- Vault and assistant sub-pages fetch case data to get vaultId - could be optimized with shared case context if latency is an issue.
+- Gap analysis API is still under `/api/lawyer/cases/[clientId]/gap-analysis` - not yet unified. Sub-page uses this directly.
+- Recommenders sub-page hides Add button and AI suggestions for non-lawyer roles.
+- Draft type sub-links in CaseSidebar use query param `?type=slug` - drafts index page would need to read this param for filtering.
+- D4 (lawyer dashboard) and D5 (dashboard assistant) are next.
+
+---
+
 ## 2026-02-02: D2 - Cases Route Group + Unified Case Layout
 
 ### Completed
