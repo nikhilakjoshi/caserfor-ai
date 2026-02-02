@@ -534,6 +534,6 @@
       "Returns { user, client } or throws appropriate HTTP error",
       "Used by recommender and draft API routes"
     ],
-    "passes": false
+    "passes": true
   }
 ]

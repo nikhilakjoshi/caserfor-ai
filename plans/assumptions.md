@@ -140,3 +140,8 @@
 - Onboarding form still sends field as "recommenders" in request body; API maps to recommenderNotes
 - prisma db push not run during implementation - dev runs when DB available
 - CaseDraft unique constraint [clientId, documentType, recommenderId] allows null recommenderId (Postgres treats nulls as distinct)
+
+## Case Auth Helper
+- authorizeCaseAccess returns NextResponse on error (not throw) - callers use isAuthError() type guard
+- PRD says "throws appropriate HTTP error" but return pattern matches existing codebase style (gap-analysis route etc)
+- Helper also fetches and returns client record to avoid redundant DB query in route handlers

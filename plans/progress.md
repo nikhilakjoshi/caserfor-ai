@@ -1,5 +1,19 @@
 # Progress Log
 
+## 2026-02-02: Case auth helper (lib/case-auth.ts)
+
+### Completed
+- Created lib/case-auth.ts with authorizeCaseAccess() and isAuthError() helper
+- Handles lawyer (CaseAssignment check), applicant (ownership check), admin (full access)
+- Returns { user, client } on success or NextResponse error (401/403/404)
+- Typecheck clean, lint clean (0 errors)
+
+### Notes for next dev
+- Use `authorizeCaseAccess(clientId)` + `isAuthError(result)` in all case-scoped routes
+- Returns NextResponse directly (not throw) - check with isAuthError() type guard
+- Next priority: recommender API routes (GET/POST/PATCH/DELETE), then drafts API routes
+- Third acceptance criterion ("Used by recommender and draft API routes") met when those routes are built
+
 ## 2026-02-02: Data layer for recommenders + drafting system
 
 ### Completed
