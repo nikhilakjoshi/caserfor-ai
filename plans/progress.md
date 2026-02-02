@@ -1,5 +1,18 @@
 # Progress Log
 
+## 2026-02-02: RFE response drafting agent
+
+### Completed
+- Created `lib/drafting-agents/rfe-response.ts` - two-phase agent (research + structured output) using gemini-2.5-pro
+- Wired into generate route dispatch map in `app/api/cases/[clientId]/drafts/[id]/generate/route.ts`
+- System prompt specialized for USCIS RFE responses: point-by-point issue addressing, Kazarian two-step analysis, case law citations
+- Uses stepCountIs(25) for research phase (same as petition letter - RFE is equally complex)
+- markdownToTiptapParagraphs duplicated (now in 7 files) - extraction to shared util increasingly urgent
+
+### Notes for next dev
+- Remaining incomplete PRD items: per-section regeneration function, regenerate API route, all UI components
+- markdownToTiptapParagraphs should be extracted to a shared util before any more agents are added
+
 ## 2026-02-02: Exhibit list drafting agent
 
 ### Completed

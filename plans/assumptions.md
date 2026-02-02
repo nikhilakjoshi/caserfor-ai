@@ -188,3 +188,9 @@
 - Uses stepCountIs(15) - similar to cover letter since TOC is a summary/organizational doc, not heavy research
 - PRD says "Uses get_existing_drafts to reference all other drafts" - research phase calls this plus vault searches
 - markdownToTiptapParagraphs duplicated (now in 6 files) - critical to extract to shared util
+
+## RFE Response Drafting Agent
+- Uses analysisModel (gemini-2.5-pro) matching PRD spec for complex/long documents
+- Uses stepCountIs(25) same as petition letter - RFE responses require equally thorough evidence gathering
+- Research phase includes searching for RFE notice/USCIS correspondence in vault (may not exist yet)
+- markdownToTiptapParagraphs duplicated (now in 7 files) - must extract before next agent

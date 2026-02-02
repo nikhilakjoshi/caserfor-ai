@@ -7,6 +7,7 @@ import { generateRecommendationLetter } from "@/lib/drafting-agents/recommendati
 import { generateCoverLetter } from "@/lib/drafting-agents/cover-letter"
 import { generateExhibitList } from "@/lib/drafting-agents/exhibit-list"
 import { generateTableOfContents } from "@/lib/drafting-agents/table-of-contents"
+import { generateRfeResponse } from "@/lib/drafting-agents/rfe-response"
 import type { DraftDocumentType } from "@prisma/client"
 
 type Params = { params: Promise<{ clientId: string; id: string }> }
@@ -25,6 +26,7 @@ const agentMap: Partial<
   cover_letter: (clientId) => generateCoverLetter(clientId),
   exhibit_list: (clientId) => generateExhibitList(clientId),
   table_of_contents: (clientId) => generateTableOfContents(clientId),
+  rfe_response: (clientId) => generateRfeResponse(clientId),
 }
 
 export async function POST(_request: NextRequest, { params }: Params) {
