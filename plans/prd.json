@@ -236,7 +236,7 @@
     "section": "D5",
     "title": "Create get_all_cases tool",
     "description": "lib/dashboard-agent-tools.ts - tool returning all cases for the lawyer with summary fields.",
-    "status": "pending",
+    "status": "done",
     "dependencies": []
   },
   {

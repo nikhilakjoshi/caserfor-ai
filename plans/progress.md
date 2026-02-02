@@ -2793,3 +2793,15 @@
 - markdownToTiptapParagraphs now duplicated in 6 files - extract to shared util
 - RFE response agent is next functional item
 - After that: per-section regeneration + its API route, then all UI work
+
+## 2026-02-02: D5-1 - Dashboard Assistant get_all_cases Tool
+
+### Completed
+- Created `lib/dashboard-agent-tools.ts` with `createDashboardTools(lawyerId)` factory
+- `get_all_cases` tool returns all assigned cases with summary fields (name, status, verdict, criteria/draft/doc counts, timestamps)
+- Follows same factory pattern as `createDraftingTools` in `lib/drafting-tools.ts`
+
+### Notes for next dev
+- D5-2/3/4 add more tools to `createDashboardTools`: `get_case_detail`, `search_vault`, `gap_analysis`/`eligibility`/`drafts`
+- Many of these tools overlap with `createDraftingTools` - consider reusing or sharing
+- D5-5 creates the API route, D5-6 wires the chat UI
