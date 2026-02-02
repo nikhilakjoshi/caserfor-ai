@@ -336,3 +336,9 @@
 - Regen route doesn't update draft status -- polling detects completion by comparing HTML content before/after
 - 30-poll timeout (~60s) before showing error -- regenerateSection typically completes in 10-20s
 - Instruction textarea is inline per-section (not a modal) -- simpler UX, collapses on submit or X click
+
+## Version History (PRD 9, 22)
+- Version restore uses confirm() dialog (browser native) not a custom modal -- keeps it simple
+- GET /versions/[versionId] returns full CaseDraftVersion record (content, plainText, sections)
+- Restored content immediately auto-saved via saveDraft (no debounce) to ensure DB consistency
+- No version deletion endpoint -- versions are append-only

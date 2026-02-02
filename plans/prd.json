@@ -105,7 +105,7 @@
       "Render as dropdown or collapsible list (timestamp + note)",
       "On version click: restore that version's content into editor (confirm dialog first)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -276,7 +276,7 @@
       "Do NOT clear messages array (chat is independent of version state)",
       "Auto-save the restored content via the standard debounced PATCH"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

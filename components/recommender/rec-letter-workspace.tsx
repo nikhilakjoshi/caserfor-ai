@@ -135,6 +135,8 @@ export function RecLetterWorkspace({
     Array<{ role: "user" | "assistant"; content: string }>
   >([])
   const [draftStatus, setDraftStatus] = useState(draft.status)
+  const [versions, setVersions] = useState<Array<{ id: string; versionNote: string | null; createdAt: string }>>([])
+  const [isSavingVersion, setIsSavingVersion] = useState(false)
 
   // Extract sections from draft.sections or draft.content
   const initialSections = useMemo(() => {
@@ -242,6 +244,73 @@ export function RecLetterWorkspace({
       saveDraft(html)
     }, 2000)
   }, [saveDraft])
+
+  // Fetch versions on mount
+  const fetchVersions = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/cases/${clientId}/drafts/${draft.id}/versions`)
+      if (res.ok) {
+        const data = await res.json()
+        setVersions(data)
+      }
+    } catch {
+      // non-critical
+    }
+  }, [clientId, draft.id])
+
+  useEffect(() => {
+    fetchVersions()
+  }, [fetchVersions])
+
+  // Save version
+  const handleSaveVersion = useCallback(async (note?: string) => {
+    setIsSavingVersion(true)
+    try {
+      const res = await fetch(`/api/cases/${clientId}/drafts/${draft.id}/versions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ versionNote: note }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: "Failed to save version" }))
+        toast.error(data.error || "Failed to save version")
+        return
+      }
+      toast.success("Version saved")
+      fetchVersions()
+    } catch {
+      toast.error("Network error saving version")
+    } finally {
+      setIsSavingVersion(false)
+    }
+  }, [clientId, draft.id, fetchVersions])
+
+  // Restore version
+  const handleRestoreVersion = useCallback(async (versionId: string) => {
+    if (!confirm("Restore this version? Current editor content will be replaced.")) return
+    try {
+      const res = await fetch(`/api/cases/${clientId}/drafts/${draft.id}/versions/${versionId}`)
+      if (!res.ok) {
+        toast.error("Failed to fetch version")
+        return
+      }
+      const data = await res.json()
+      const html = tiptapToHtml(data.content) || data.plainText || ""
+      setEditorContent(html)
+      if (data.sections && Array.isArray(data.sections)) {
+        setSections(
+          (data.sections as Array<{ id: string; heading: string; title?: string }>).map(
+            (s) => ({ id: s.id || s.heading || s.title || "", heading: s.heading || s.title || "" })
+          )
+        )
+      }
+      toast.success("Version restored")
+      // Auto-save the restored content
+      saveDraft(html)
+    } catch {
+      toast.error("Network error restoring version")
+    }
+  }, [clientId, draft.id, saveDraft])
 
   // Cleanup timers
   useEffect(() => {
@@ -393,6 +462,10 @@ export function RecLetterWorkspace({
             sections={sections}
             isStreaming={isStreaming}
             editorContent={editorContent}
+            onSaveVersion={handleSaveVersion}
+            onRestoreVersion={handleRestoreVersion}
+            versions={versions}
+            isSavingVersion={isSavingVersion}
           />
         </div>
       </div>

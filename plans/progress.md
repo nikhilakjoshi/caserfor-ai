@@ -1,5 +1,23 @@
 # Progress Log
 
+## 2026-02-02: Version history controls in actions panel (PRD 9, 22)
+
+### Completed
+- Save Version button w/ optional note input in rec-letter-actions.tsx
+- Collapsible version list (timestamp + note) below save button
+- Version restore via confirm dialog + GET /versions/[versionId] endpoint
+- Created GET /api/cases/[clientId]/drafts/[id]/versions/[versionId]/route.ts for full version content fetch
+- Versions fetched on workspace mount, refreshed after save
+- Restored content auto-saved via existing debounced PATCH
+- Chat messages NOT cleared on restore (independent of version state)
+
+### Notes for next dev
+- Version list capped at max-h-40 with overflow scroll
+- No version deletion UI -- versions accumulate indefinitely
+- PRD 22 (version restore) also completed as part of this work
+
+---
+
 ## 2026-02-02: Per-section regenerate in actions panel (PRD 8)
 
 ### Completed

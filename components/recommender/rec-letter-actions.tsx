@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { Sparkles, RotateCcw, Save, Upload, X, Send } from "lucide-react"
+import { Sparkles, RotateCcw, Save, Upload, X, Send, Clock, ChevronDown } from "lucide-react"
 
 interface Draft {
   id: string
@@ -29,6 +29,12 @@ interface Section {
   heading: string
 }
 
+interface VersionEntry {
+  id: string
+  versionNote: string | null
+  createdAt: string
+}
+
 interface RecLetterActionsProps {
   draft: Draft
   recommender: ActionsRecommender
@@ -38,6 +44,10 @@ interface RecLetterActionsProps {
   sections: Section[]
   isStreaming: boolean
   editorContent: string
+  onSaveVersion: (note?: string) => Promise<void>
+  onRestoreVersion: (versionId: string) => void
+  versions: VersionEntry[]
+  isSavingVersion: boolean
 }
 
 export function RecLetterActions({
@@ -49,11 +59,18 @@ export function RecLetterActions({
   sections,
   isStreaming,
   editorContent,
+  onSaveVersion,
+  onRestoreVersion,
+  versions,
+  isSavingVersion,
 }: RecLetterActionsProps) {
   const hasContent = editorContent.length > 0
   const isGenerating = draft.status === "generating" || isStreaming
   const [regenSectionId, setRegenSectionId] = useState<string | null>(null)
   const [regenInstruction, setRegenInstruction] = useState("")
+  const [showVersions, setShowVersions] = useState(false)
+  const [versionNote, setVersionNote] = useState("")
+  const [showNoteInput, setShowNoteInput] = useState(false)
 
   return (
     <div className="space-y-3">
@@ -169,20 +186,96 @@ export function RecLetterActions({
 
       <Separator />
 
-      {/* Version history placeholder */}
+      {/* Version history */}
       <div>
         <h4 className="text-xs font-medium text-muted-foreground mb-2">
           Versions
         </h4>
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full"
-          disabled={!hasContent || isGenerating}
-        >
-          <Save className="h-3.5 w-3.5 mr-1.5" />
-          Save Version
-        </Button>
+        {showNoteInput ? (
+          <div className="space-y-1.5">
+            <input
+              className="w-full text-xs border rounded px-2 py-1.5 bg-background"
+              placeholder="Version note (optional)"
+              value={versionNote}
+              onChange={(e) => setVersionNote(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  onSaveVersion(versionNote || undefined)
+                  setVersionNote("")
+                  setShowNoteInput(false)
+                }
+              }}
+            />
+            <div className="flex gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 h-6 text-xs"
+                disabled={isSavingVersion}
+                onClick={() => {
+                  onSaveVersion(versionNote || undefined)
+                  setVersionNote("")
+                  setShowNoteInput(false)
+                }}
+              >
+                {isSavingVersion ? "Saving..." : "Save"}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 text-xs"
+                onClick={() => {
+                  setShowNoteInput(false)
+                  setVersionNote("")
+                }}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            disabled={!hasContent || isGenerating || isSavingVersion}
+            onClick={() => setShowNoteInput(true)}
+          >
+            <Save className="h-3.5 w-3.5 mr-1.5" />
+            Save Version
+          </Button>
+        )}
+
+        {versions.length > 0 && (
+          <div className="mt-2">
+            <button
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground w-full"
+              onClick={() => setShowVersions(!showVersions)}
+            >
+              <Clock className="h-3 w-3" />
+              <span>{versions.length} version{versions.length !== 1 ? "s" : ""}</span>
+              <ChevronDown className={`h-3 w-3 ml-auto transition-transform ${showVersions ? "rotate-180" : ""}`} />
+            </button>
+            {showVersions && (
+              <div className="mt-1 space-y-1 max-h-40 overflow-y-auto">
+                {versions.map((v) => (
+                  <button
+                    key={v.id}
+                    className="w-full text-left text-xs rounded px-2 py-1.5 hover:bg-muted"
+                    onClick={() => onRestoreVersion(v.id)}
+                  >
+                    <div className="text-foreground">
+                      {v.versionNote || "Untitled version"}
+                    </div>
+                    <div className="text-muted-foreground text-[10px]">
+                      {new Date(v.createdAt).toLocaleString()}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <Separator />
