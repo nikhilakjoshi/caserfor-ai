@@ -254,3 +254,9 @@
 - get_case_detail verifies CaseAssignment before returning data (same auth pattern as API route) - no admin bypass in tool context
 - get_case_detail returns eligibility report summary + verdict only (not full raw output) to keep token usage reasonable
 - Latest gap analysis returned (take:1 desc) rather than all - agent can request specific one if needed
+
+## Dashboard Assistant API (D5-5)
+- No DB persistence of dashboard chat messages - ephemeral conversation (unlike /api/assistant/query which persists to AssistantQuery)
+- Uses defaultModel (gemini-2.5-flash) not analysisModel - dashboard queries are quick lookups, not deep analysis
+- Route accepts UIMessage[] directly (useChat-compatible) not custom inputText format
+- Admin role allowed alongside lawyer (consistent with other lawyer routes)

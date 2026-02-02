@@ -1,5 +1,16 @@
 # Progress Log
 
+## 2026-02-02: D5-5 - dashboard assistant API route
+
+### Completed
+- D5-5: Created `app/api/lawyer/assistant/route.ts`. ToolLoopAgent w/ dashboard tools, streaming via createAgentUIStreamResponse. Auth-gated to lawyer/admin roles. Accepts UIMessage[] (useChat-compatible).
+
+### Notes for next dev
+- D5-6 (wire dashboard chat to API) is now unblocked
+- Route accepts `{ messages: UIMessage[] }` body - compatible with useChat's default format
+- No DB persistence of chat messages (unlike /api/assistant/query) - dashboard chat is ephemeral
+- System prompt instructs agent to use get_all_cases for caseload questions, get_case_detail for specific clients, search_vault for evidence
+
 ## 2026-02-02: D5-4 - gap_analysis + eligibility + drafts tools
 
 ### Completed
