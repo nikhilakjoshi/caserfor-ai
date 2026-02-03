@@ -1,0 +1,414 @@
+[
+  {
+    "category": "auth",
+    "description": "Remove CaseAssignment lookup for lawyer role in lib/case-auth.ts (lines 37-49). Lawyers/admins access any non-draft case without assignment.",
+    "steps": [
+      "Remove CaseAssignment.findFirst block for lawyer role in lib/case-auth.ts lines 37-49",
+      "Lawyer role falls through to return { user, client } like admin",
+      "Verify applicant ownership check (lines 51-56) unchanged",
+      "GET /api/lawyer/cases/[clientId] succeeds for lawyer without assignment"
+    ],
+    "passes": true
+  },
+  {
+    "category": "auth",
+    "description": "Remove inline CaseAssignment check in app/api/lawyer/cases/[clientId]/route.ts",
+    "steps": [
+      "Remove any CaseAssignment query in the route handler",
+      "Rely on updated authorizeCaseAccess from lib/case-auth.ts",
+      "Verify route still returns 403 for non-lawyer/admin roles"
+    ],
+    "passes": true
+  },
+  {
+    "category": "auth",
+    "description": "Remove CaseAssignment check in gap-analysis routes so lawyers access without assignment",
+    "steps": [
+      "Update GET /api/lawyer/cases/[clientId]/gap-analysis/route.ts auth",
+      "Update POST /api/lawyer/cases/[clientId]/gap-analysis/refresh/route.ts auth",
+      "Verify both endpoints accessible by any lawyer"
+    ],
+    "passes": true
+  },
+  {
+    "category": "data",
+    "description": "Seed lawyer user: email=lawyer@demo.com, role=lawyer, bcrypt-hashed password",
+    "steps": [
+      "Add lawyer user creation to prisma/seed.ts",
+      "Hash password with bcrypt",
+      "Log password to console",
+      "Run prisma db seed and confirm lawyer user created"
+    ],
+    "passes": true
+  },
+  {
+    "category": "data",
+    "description": "Seed applicant user: email=applicant@demo.com, role=applicant, bcrypt-hashed password",
+    "steps": [
+      "Add applicant user creation to prisma/seed.ts",
+      "Hash password with bcrypt",
+      "Log password to console",
+      "Run prisma db seed and confirm applicant user created"
+    ],
+    "passes": true
+  },
+  {
+    "category": "data",
+    "description": "Seed Client record: ML researcher profile, status=submitted, currentStep=10, linked to applicant user",
+    "steps": [
+      "Create Client record in seed.ts with ML researcher data",
+      "Set status=submitted, currentStep=10",
+      "Link to seed applicant user via userId",
+      "Verify record created after seeding"
+    ],
+    "passes": true
+  },
+  {
+    "category": "data",
+    "description": "Seed Vault (knowledge_base type) linked to applicant's client record",
+    "steps": [
+      "Create Vault record in seed.ts with type=knowledge_base",
+      "Link to seed client",
+      "Verify vault accessible via API after seeding"
+    ],
+    "passes": true
+  },
+  {
+    "category": "data",
+    "description": "Seed CriterionResponse records for all 10 EB-1A criteria with realistic ML researcher responses",
+    "steps": [
+      "Create 10 CriterionResponse records in seed.ts",
+      "Each maps to one EB-1A criterion",
+      "Content is realistic for ML researcher profile",
+      "All linked to seed client"
+    ],
+    "passes": true
+  },
+  {
+    "category": "data",
+    "description": "Seed EligibilityReport with verdict=moderate for the client",
+    "steps": [
+      "Create EligibilityReport in seed.ts with verdict=moderate",
+      "Link to seed client",
+      "Verify report shows on evaluation page"
+    ],
+    "passes": true
+  },
+  {
+    "category": "data",
+    "description": "Seed 2-3 Recommender records at various statuses for the client",
+    "steps": [
+      "Create 2-3 Recommender records in seed.ts",
+      "Use different statuses (pending, contacted, confirmed)",
+      "Link all to seed client",
+      "Verify recommenders show on case detail recommenders tab"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Fix LawyerSidebar active state: / always active because every path starts with /. Special-case / to exact match.",
+    "steps": [
+      "In components/lawyer-sidebar.tsx ~line 52, change isActive check for / to exact match",
+      "Dashboard item only highlighted when pathname === '/'",
+      "/cases highlights Cases nav item, not Dashboard"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Change CaseSidebar from side=right to side=left",
+    "steps": [
+      "In components/case-sidebar.tsx, change side='right' to side='left'",
+      "Verify CaseSidebar renders on the left"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Restructure case detail layout for two left sidebars: collapsed LawyerSidebar + full CaseSidebar",
+    "steps": [
+      "Update app/(cases)/cases/[clientId]/layout.tsx",
+      "Both LawyerSidebar and CaseSidebar render on the left",
+      "LawyerSidebar defaults to collapsed/icon mode when CaseSidebar present",
+      "On non-case routes, LawyerSidebar stays full width"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Ensure CaseSidebar nav items match PRD: Overview, Documents, Recommenders, Gap Analysis, Timeline, Assistant, Drafts (collapsible with 7 types)",
+    "steps": [
+      "Verify all nav items present in components/case-sidebar.tsx",
+      "Drafts section is collapsible",
+      "Sub-items: All Drafts, Petition Letter, Personal Statement, Rec Letters, Cover Letter, Exhibit List, TOC, RFE Response"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "CaseSidebar links update ?tab= param instead of navigating to sub-routes",
+    "steps": [
+      "CaseSidebar links use ?tab=overview, ?tab=documents, etc.",
+      "No navigation to separate sub-route pages",
+      "CaseSidebar highlights active item based on current ?tab value"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Case detail page reads ?tab= search param to render correct tab content",
+    "steps": [
+      "Read ?tab from URL in app/(cases)/cases/[clientId]/page.tsx",
+      "Activate matching tab content",
+      "Default to overview when no ?tab param",
+      "All tabs work: overview, documents, recommenders, gap-analysis, timeline, assistant, drafts"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create lawyer dashboard page with role guard redirecting non-lawyers to /assistant",
+    "steps": [
+      "Create page in appropriate route group (resolve conflict with (dashboard)/page.tsx and root page.tsx)",
+      "Fetch session, check role",
+      "Redirect non-lawyers to /assistant",
+      "Lawyer sees dashboard content"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Lawyer dashboard: 4 stats cards fetching /api/lawyer/dashboard/stats",
+    "steps": [
+      "Fetch /api/lawyer/dashboard/stats on mount",
+      "Render 4 cards: active cases, pending review, drafts in progress, unassigned",
+      "Show loading state while fetching"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Lawyer dashboard: recent cases grid using CaseCard + 'View All Cases' link to /cases",
+    "steps": [
+      "Fetch recent cases from API",
+      "Render CaseCard grid",
+      "'View All Cases' link navigates to /cases",
+      "Empty state when no cases"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create case list page at app/(cases)/cases/page.tsx with tabs: All / My Cases / Unassigned",
+    "steps": [
+      "Create app/(cases)/cases/page.tsx",
+      "Render 3 tabs: All, My Cases, Unassigned",
+      "Tab selection calls /api/lawyer/cases?tab=X",
+      "Cases displayed as CaseCard grid"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Case list page: debounced search input filtering cases",
+    "steps": [
+      "Add search input to case list page",
+      "Debounce input (300-500ms)",
+      "Search calls /api/lawyer/cases?search=Y",
+      "Results update in grid"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Case list page: pagination with page controls",
+    "steps": [
+      "Add pagination controls (next/prev)",
+      "API called with ?page=Z",
+      "Page state updates grid content"
+    ],
+    "passes": true
+  },
+  {
+    "category": "api",
+    "description": "Update /api/lawyer/cases GET to support tab, search, and page query params",
+    "steps": [
+      "?tab=all returns all non-draft cases",
+      "?tab=mine returns cases assigned to current lawyer",
+      "?tab=unassigned returns cases with no CaseAssignment",
+      "?search=Y filters by client name/email",
+      "?page=Z returns paginated results"
+    ],
+    "passes": true
+  },
+  {
+    "category": "api",
+    "description": "Include latest GapAnalysis overallStrength per case in /api/lawyer/cases response",
+    "steps": [
+      "Join GapAnalysis in the cases query (latest per client)",
+      "Each case object includes overallStrength field (or null)",
+      "Verify on frontend CaseCard receives the field"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "CaseCard: show gap analysis strength badge from overallStrength field",
+    "steps": [
+      "Add overallStrength to CaseCard props (CaseData type)",
+      "Render strength badge with color coding (strong=green, moderate=yellow, weak=orange, insufficient=red)",
+      "Show 'Not analyzed' when overallStrength is null"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Case detail header: persistent gap analysis strength indicator visible regardless of active tab",
+    "steps": [
+      "Fetch latest gap analysis overallStrength for the client",
+      "Display badge in case detail header area",
+      "Badge updates when gap analysis refreshes",
+      "Show 'Not analyzed' when no analysis exists"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Auto-trigger gap analysis refresh after document processing completes (embedding -> completed)",
+    "steps": [
+      "In /api/vaults/[id]/documents/process, after embeddingStatus set to completed",
+      "Identify the client owning the vault",
+      "POST to /api/lawyer/cases/[clientId]/gap-analysis/refresh",
+      "Do not trigger on processing failure"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Debounce concurrent gap analysis refreshes from multiple simultaneous doc uploads",
+    "steps": [
+      "Multiple docs processing simultaneously don't trigger redundant analyses",
+      "Use debounce or last-write-wins approach",
+      "Final gap analysis reflects all processed documents"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Verify petition_letter drafting agent E2E: create -> generate -> poll until status=draft",
+    "steps": [
+      "Create petition_letter draft via API",
+      "Trigger generation",
+      "Poll until status=draft",
+      "Verify generated content is valid"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Verify personal_statement drafting agent E2E",
+    "steps": [
+      "Create personal_statement draft via API",
+      "Trigger generation",
+      "Poll until status=draft",
+      "Verify generated content"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Verify recommendation_letter drafting agent E2E",
+    "steps": [
+      "Create recommendation_letter draft via API",
+      "Trigger generation",
+      "Poll until status=draft",
+      "Verify generated content"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Verify cover_letter drafting agent E2E",
+    "steps": [
+      "Create cover_letter draft via API",
+      "Trigger generation",
+      "Poll until status=draft",
+      "Verify generated content"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Verify exhibit_list drafting agent E2E",
+    "steps": [
+      "Create exhibit_list draft via API",
+      "Trigger generation",
+      "Poll until status=draft",
+      "Verify generated content"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Verify table_of_contents drafting agent E2E",
+    "steps": [
+      "Create table_of_contents draft via API",
+      "Trigger generation",
+      "Poll until status=draft",
+      "Verify generated content"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Verify rfe_response drafting agent E2E",
+    "steps": [
+      "Create rfe_response draft via API",
+      "Trigger generation",
+      "Poll until status=draft",
+      "Verify generated content"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Dashboard empty state when zero cases exist",
+    "steps": [
+      "When no cases returned, show empty state message",
+      "Message suggests what to do next",
+      "No blank/broken grid"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Handle no-vault edge case: disable gap analysis and vault features on case detail",
+    "steps": [
+      "When client has no vault, gap analysis tab/button disabled",
+      "Document upload section shows 'no vault' message",
+      "No errors thrown when vault is null"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Draft generation failure: revert status to not_started for retry",
+    "steps": [
+      "If generation throws error, set draft status to not_started",
+      "Draft not stuck in generating state",
+      "User can click generate again after failure"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Show 'Not analyzed' indicator when no GapAnalysis exists yet",
+    "steps": [
+      "CaseCard shows 'Not analyzed' when overallStrength is null",
+      "Case detail header shows 'Not analyzed' when no gap analysis exists",
+      "Distinct from other strength levels visually"
+    ],
+    "passes": true
+  }
+]

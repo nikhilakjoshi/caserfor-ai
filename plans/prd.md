@@ -1,387 +1,159 @@
-# PRD: Recommender Management, Smart Ingestion & Document Drafting
+# PRD: Recommendation Letter Drafting Workspace
 
 ## Overview
 
-Three interconnected features that take a case from evaluated to petition-ready: (A) manage recommenders with AI-powered suggestions, (B) silently classify every uploaded doc and extract recommender candidates from LinkedIn PDFs, (C) dedicated two-panel drafting workspace for all 7 EB1A document types with specialized AI agents.
-
-**Depends on:** Existing Client model, Vault/RAG pipeline, Gap Analysis, EligibilityReport, document processing endpoint.
-
----
+Add an inline 3-panel drafting workspace to the recommenders tab in the lawyer case view. When a lawyer clicks "Draft Letter" on a recommender, the recommenders list is replaced with a dedicated workspace: chat (left 1/4), Tiptap editor (center 2/4), actions (right 1/4). A new conversational AI agent handles initial generation and iterative refinement via chat. The editor supports real-time streaming, manual editing, versioning, per-section regeneration, and exporting the final letter back to the case vault as a PDF.
 
 ## Goals
 
-- Let lawyers and applicants build a recommender roster with AI-suggested candidates based on profile + evidence
-- Silently classify every uploaded document; auto-extract recommender candidates from LinkedIn PDFs
-- Provide a structured drafting workspace for all 7 petition document types with AI generation, per-section regeneration, and version history
-- Keep all new features scoped to existing client/case context
+- Lawyer can draft a recommendation letter for any recommender without leaving the recommenders tab
+- AI-assisted generation with streaming into a full Tiptap editor
+- Chat-based iterative refinement: edit sections, change tone, add detail
+- Version history for tracking changes
+- Add-to-vault export: PDF conversion + vault upload triggering embedding + gap analysis refresh
+- Reuse existing DocumentEditor, versioning APIs, and drafting tool infrastructure
 
-## Non-goals
+## Non-Goals
 
-- E-signature or recommender portal (recommenders don't log in)
-- Real-time co-editing between lawyer and applicant on drafts
-- Automated USCIS filing or e-filing integration
-- Email/SMS notifications to recommenders (future)
-- Template marketplace
-
----
+- Persisted chat history (ephemeral only)
+- Multi-user collaborative editing
+- Email sending to recommenders
+- Template library for recommendation letters
 
 ## User Stories
 
-**Applicant:**
-- View AI-suggested recommender roles based on my profile and evidence
-- Add recommenders I know, upload their CV/bio, track status
-- Access drafting workspace for personal statement
-- Review lawyer-generated drafts in editor
+1. Lawyer views recommenders list, clicks "Draft Letter" on a confirmed recommender
+2. Workspace opens inline: empty editor + actions panel + chat panel
+3. Lawyer clicks "Generate Full Letter" in actions panel -> AI streams letter into editor
+4. Lawyer reads letter, types in chat: "Make the second paragraph more specific about the ML contributions"
+5. AI edits that section in-place, streaming changes into editor
+6. Lawyer manually edits a sentence directly in the editor
+7. Lawyer saves a version snapshot with note "v1 after initial generation"
+8. Lawyer clicks "Add to Vault" -> PDF created, uploaded to vault, triggers embedding pipeline
+9. Lawyer clicks "Back to Recommenders" to return to list view
 
-**Lawyer:**
-- See AI-suggested recommender types with reasoning and criteria coverage
-- Manage full recommender pipeline: identify -> contact -> confirm -> draft letter -> finalize
-- Generate any of 7 document types using AI with full case context
-- Edit AI-generated drafts in rich text editor, regenerate individual sections
-- Track draft status and version history across all document types
+## Functional Requirements
 
----
+### F1: Draft Letter Entry Point
 
-## A. Recommender Management
+**Files:** `components/recommender/recommender-list.tsx`, `components/recommender/recommender-detail.tsx`
 
-### Data Models
+- Add "Draft Letter" action to recommender row dropdown and detail panel
+- On click: auto-create CaseDraft (type=recommendation_letter, recommenderId=X) if none exists, via existing POST `/api/cases/[clientId]/drafts`
+- Set parent state to show workspace view, passing draft + recommender data
 
-```prisma
-enum RecommenderStatus {
-  suggested
-  identified
-  contacted
-  confirmed
-  letter_drafted
-  letter_finalized
-}
+### F2: 3-Panel Workspace Layout
 
-enum RecommenderSourceType {
-  manual
-  ai_suggested
-  linkedin_extract
-}
+**Create:** `components/recommender/rec-letter-workspace.tsx`
 
-model Recommender {
-  id            String              @id @default(cuid())
-  clientId      String
-  client        Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  name          String
-  title         String?
-  organization  String?
-  relationship  String?
-  linkedinUrl   String?
-  email         String?
-  phone         String?
-  notes         String?             @db.Text
-  status        RecommenderStatus   @default(suggested)
-  sourceType    RecommenderSourceType @default(manual)
-  aiReasoning   String?             @db.Text
-  criteriaRelevance String[]        // which EB1A criteria this recommender covers
-  attachments   RecommenderAttachment[]
-  caseDrafts    CaseDraft[]         // rec letters linked to this recommender
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
-
-  @@index([clientId])
-}
-
-model RecommenderAttachment {
-  id              String       @id @default(cuid())
-  recommenderId   String
-  recommender     Recommender  @relation(fields: [recommenderId], references: [id], onDelete: Cascade)
-  name            String
-  fileType        String
-  storageKey      String
-  createdAt       DateTime     @default(now())
-}
-```
-
-### Status Flow
+- Replaces recommenders list inline (no route change, same tab)
+- Header: back button + "Drafting: {Recommender Name}" + status badge
+- Layout: `flex` with `w-1/4 | w-2/4 | w-1/4`
+- All panels scrollable independently
 
 ```
-suggested -> identified -> contacted -> confirmed -> letter_drafted -> letter_finalized
+[Back to Recommenders]  |  Drafting: {Recommender Name}  |  [status badge]
+---------------------------------------------------------------------------
+| Chat (1/4)       | Editor (2/4)         | Actions (1/4)                |
+| - ephemeral msgs | - DocumentEditor     | - Recommender context card   |
+| - AI responses   | - streaming support  | - Generate Full Letter       |
+| - input box      | - auto-save          | - Section list + regenerate  |
+|                  |                      | - Version history            |
+|                  |                      | - Add to Vault               |
+---------------------------------------------------------------------------
 ```
 
-Any status can revert to a previous state. `suggested` is set by AI agent or LinkedIn extraction. `identified` means lawyer/applicant confirmed this is a real person they want to pursue.
+### F3: Editor Panel (Center 2/4)
 
-### AI Suggestion Agent
+**Reuse:** `components/editor/document-editor.tsx`
 
-- Model: `gemini-2.5-pro`
-- Trigger: Manual "Suggest Recommenders" button on Recommenders tab
-- Approach: Agentic tool-use loop (same pattern as EB1A evaluator)
-- Tools available:
-  - `get_client_profile` - intake data, field of expertise, achievements
-  - `search_vault` - RAG search across client's vault
-  - `get_gap_analysis` - current gap analysis with weak criteria
-  - `get_eligibility_report` - criteria scores and evidence
-- Output: 5-8 suggested recommender *role types* (not specific people), each with:
-  - `roleType`: e.g. "Former PhD Advisor", "Industry CTO who adopted your research"
-  - `reasoning`: why this type of recommender strengthens the case
-  - `criteriaRelevance`: which EB1A criteria they'd address
-  - `idealQualifications`: what makes a strong pick for this role
-  - `sampleTalkingPoints`: 2-3 key points their letter should cover
-- Suggestions saved as `Recommender` records with `status=suggested`, `sourceType=ai_suggested`
+- Streaming support (existing `isStreaming` prop pattern from draft workspace)
+- Auto-save with 2s debounce via PATCH `/api/cases/[clientId]/drafts/[id]`
+- Read-only during generation, editable otherwise
+- Prose styling matching existing draft workspace
+- Clone patterns from `app/(cases)/cases/[clientId]/drafts/[id]/page.tsx`
 
-### API Endpoints
+### F4: Actions Panel (Right 1/4)
 
-```
-GET    /api/cases/[clientId]/recommenders          - list all
-POST   /api/cases/[clientId]/recommenders          - create one
-PATCH  /api/cases/[clientId]/recommenders/[id]     - update
-DELETE /api/cases/[clientId]/recommenders/[id]     - delete
-POST   /api/cases/[clientId]/recommenders/suggest  - trigger AI suggestion agent
-POST   /api/cases/[clientId]/recommenders/[id]/attachments - upload CV/bio
-DELETE /api/cases/[clientId]/recommenders/[id]/attachments/[attachmentId]
-```
+**Create:** `components/recommender/rec-letter-actions.tsx`
 
-All endpoints require auth. Lawyer must be assigned to case. Applicant can only access own case.
+- **Recommender Context** (top): name, title, org, relationship, criteria tags, AI reasoning -- read-only reference card
+- **Generate Full Letter**: POST `/api/cases/[clientId]/drafts/[id]/generate` (existing endpoint, uses recommendation_letter agent for initial gen). Disabled during generation
+- **Section List**: clickable sections with optional instruction input + regenerate button. Uses existing POST `/api/cases/[clientId]/drafts/[id]/regenerate`
+- **Version History**: save version button + version list dropdown. Uses existing version endpoints (POST/GET `/api/cases/[clientId]/drafts/[id]/versions`)
+- **Add to Vault**: convert draft to PDF, upload to vault, trigger processing pipeline. New endpoint (see F8)
 
-### UI Components
+### F5: Chat Panel (Left 1/4)
 
-- **Recommenders Tab** on case detail page (lawyer) + applicant dashboard section
-- **RecommenderList**: table/cards with name, title, org, status badge, criteria tags, actions
-- **RecommenderForm**: sheet/dialog for add/edit with fields: name, title, org, relationship, LinkedIn URL, email, phone, notes
-- **RecommenderDetail**: slide-over sheet showing full info, attachments, linked draft status
-- **AISuggestionsPanel**: triggered by button, shows streaming suggestions with accept/dismiss actions
-- **StatusPipeline**: visual pipeline showing count at each status stage
+**Create:** `components/recommender/rec-letter-chat.tsx`
 
----
+- Ephemeral message list (React state, resets on unmount)
+- Input at bottom (textarea with send button)
+- Streams AI responses inline
+- AI can: edit specific sections, refine tone, expand content, answer questions about the letter
+- Each chat turn sends current editor content as context so AI always works with latest state
+- Visible affordances: suggestion chips like "Make more formal", "Strengthen [criterion] section"
 
-## B. Smart Document Ingestion
+### F6: Conversational Agent
 
-### Enhanced Document Processing
+**Create:** `lib/drafting-agents/rec-letter-chat-agent.ts`
 
-Modify existing `POST /api/vaults/[id]/documents/process` pipeline:
+New pattern -- unlike existing fire-and-forget agents, this is conversational:
 
-1. **Silent classification** (already exists via `categorizeDocument`) - no changes needed, already runs in parallel with embedding
-2. **Add `linkedin-profile` category** to `DOCUMENT_CATEGORIES` in `lib/document-categories.ts`:
-   ```
-   { slug: "linkedin-profile", label: "LinkedIn Profile", description: "LinkedIn profile exports and professional network data" }
-   ```
-3. **LinkedIn PDF detection**: after categorization, if category is `linkedin-profile`:
-   - Run LinkedIn extraction agent to parse structured data
-   - Extract potential recommender candidates (people mentioned: managers, collaborators, endorsers)
-   - Auto-create `Recommender` records with `status=suggested`, `sourceType=linkedin_extract`
-   - Requires `clientId` passed to processing endpoint (currently only has `vaultId` - need to resolve client from vault)
+- System prompt: EB-1A recommendation letter legal writing expert
+- Tools (extends `createDraftingTools(clientId)`):
+  - All existing: `get_client_profile`, `search_vault`, `get_gap_analysis`, `get_eligibility_report`, `get_recommender`
+  - New: `get_current_draft` - reads current editor content passed in request
+  - New: `update_draft_section` - returns replacement for specific section (by heading)
+  - New: `update_full_draft` - returns full document replacement
+- Streaming output for both chat text and editor operations
+- Maintains conversation context per request (messages array passed from frontend)
 
-### LinkedIn Extraction Agent
+### F7: Chat API Route
 
-- Model: `gemini-2.5-flash` (fast, structured extraction)
-- Input: full text of LinkedIn PDF
-- Output schema:
-  ```ts
-  {
-    profileData: {
-      headline: string
-      currentRole: string
-      company: string
-      skills: string[]
-      recommendations: { recommenderName: string, recommenderTitle: string, text: string }[]
-    }
-    potentialRecommenders: {
-      name: string
-      title: string
-      organization: string
-      relationship: string  // inferred: "manager", "colleague", "endorser"
-      reasoning: string
-    }[]
-  }
-  ```
-- Only creates recommenders if client record exists (vault -> client lookup)
+**Create:** `app/api/cases/[clientId]/recommenders/[id]/draft-chat/route.ts`
 
-### Changes Required
+- POST with `{ messages: Message[], currentContent: string }`
+- Streaming response
+- Auth: `authorizeCaseAccess(clientId)`
+- Invokes rec-letter-chat-agent with full message history + current editor state
 
-- Add `linkedin-profile` to `DOCUMENT_CATEGORIES`
-- Add client lookup from vault in processing route
-- Add LinkedIn extraction function in `lib/linkedin-parser.ts` (enhance existing file)
-- Create recommender records from extraction results
-- No UI changes to upload flow - classification remains silent
+### F8: Add to Vault
 
----
+**Create:** `app/api/cases/[clientId]/recommenders/[id]/add-to-vault/route.ts`
 
-## C. Dedicated Document Drafting UI
+- POST (no body needed, reads draft from DB)
+- Flow:
+  1. Fetch CaseDraft for this recommender
+  2. Convert HTML content to PDF
+  3. Upload PDF to S3
+  4. Create VaultDocument record linked to client's vault
+  5. Trigger document processing pipeline (embedding)
+  6. Existing behavior: gap analysis auto-refreshes after embedding
+- Updates recommender status to `letter_drafted`
+- Returns: created document metadata
 
-### Document Types (7)
+## Technical Considerations
 
-| Type | Slug | Description |
-|------|------|-------------|
-| Petition Letter | `petition-letter` | Main I-140 petition letter arguing EB1A eligibility |
-| Personal Statement | `personal-statement` | Applicant's narrative of achievements and contributions |
-| Recommendation Letter | `recommendation-letter` | Letter from recommender (linked to Recommender record) |
-| Cover Letter | `cover-letter` | Cover letter for the petition package |
-| Exhibit List | `exhibit-list` | Numbered list of all exhibits with descriptions |
-| Table of Contents | `table-of-contents` | TOC for the petition package |
-| RFE Response | `rfe-response` | Response to Request for Evidence |
+- `DocumentEditor` already handles streaming with cursor preservation -- reuse as-is
+- Existing draft CRUD + versioning APIs cover generation, save, version snapshot
+- Chat agent is new pattern. Other agents are fire-and-forget background jobs. This one is request-scoped conversational with streaming
+- PDF conversion lib needed (puppeteer, html-pdf, or jspdf) -- TBD
+- Add-to-vault reuses existing vault document processing pipeline (`/api/vaults/[id]/documents/process`)
+- The `CaseDraft` model already has `recommenderId` FK and unique constraint on `[clientId, documentType, recommenderId]`
 
-### Data Models
+## Edge Cases
 
-```prisma
-enum DraftDocumentType {
-  petition_letter
-  personal_statement
-  recommendation_letter
-  cover_letter
-  exhibit_list
-  table_of_contents
-  rfe_response
-}
-
-enum DraftStatus {
-  not_started
-  generating
-  draft
-  in_review
-  final
-}
-
-model CaseDraft {
-  id             String            @id @default(cuid())
-  clientId       String
-  client         Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  documentType   DraftDocumentType
-  title          String
-  content        Json?             // TipTap JSON document
-  plainText      String?           @db.Text  // plain text mirror for AI context
-  sections       Json?             // section metadata: [{ id, title, status, order }]
-  status         DraftStatus       @default(not_started)
-  recommenderId  String?           // only for recommendation_letter type
-  recommender    Recommender?      @relation(fields: [recommenderId], references: [id])
-  versions       CaseDraftVersion[]
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-
-  @@index([clientId])
-  @@index([clientId, documentType])
-  @@unique([clientId, documentType, recommenderId]) // one draft per type per recommender
-}
-
-model CaseDraftVersion {
-  id          String    @id @default(cuid())
-  draftId     String
-  draft       CaseDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
-  content     Json      // TipTap JSON snapshot
-  plainText   String?   @db.Text
-  sections    Json?
-  versionNote String?
-  createdBy   String?   // userId
-  createdAt   DateTime  @default(now())
-
-  @@index([draftId])
-}
-```
-
-### AI Drafting Agents
-
-7 specialized agents, one per document type. All share the same tool set but have type-specific system prompts.
-
-**Shared tools:**
-- `get_client_profile` - full intake data
-- `search_vault` - RAG search with query
-- `get_gap_analysis` - current gap analysis
-- `get_eligibility_report` - criteria scores
-- `get_existing_drafts` - other drafts for cross-reference (e.g., petition letter references personal statement)
-- `get_recommender` - recommender details (for rec letter agent)
-
-**Generation approach - hybrid:**
-1. **Full generation**: agent generates complete document with section markers
-2. **Per-section regeneration**: user selects a section, provides optional instruction, agent regenerates just that section with full document context
-3. **Chat refinement**: user can chat with agent about the draft, agent suggests edits
-
-**Model selection:**
-- `gemini-2.5-pro` for petition letter and RFE response (complex, long)
-- `gemini-2.5-flash` for other document types
-
-**Token strategy for long documents:**
-- Petition letter: generate section-by-section sequentially, assembling into full document
-- Other docs: single generation call
-- All regeneration: single section at a time with full doc as context
-
-### API Endpoints
-
-```
-GET    /api/cases/[clientId]/drafts                     - list all drafts
-POST   /api/cases/[clientId]/drafts                     - create draft
-GET    /api/cases/[clientId]/drafts/[id]                - get draft with content
-PATCH  /api/cases/[clientId]/drafts/[id]                - update content/status
-DELETE /api/cases/[clientId]/drafts/[id]                - delete draft
-POST   /api/cases/[clientId]/drafts/[id]/generate       - trigger full AI generation (streaming)
-POST   /api/cases/[clientId]/drafts/[id]/regenerate     - regenerate specific section (streaming)
-POST   /api/cases/[clientId]/drafts/[id]/versions       - save version snapshot
-GET    /api/cases/[clientId]/drafts/[id]/versions       - list versions
-```
-
-### UI Pages
-
-#### Drafts Index: `/cases/[clientId]/drafts`
-
-- Grid of 7 document type cards
-- Each card shows: doc type name, status badge, last updated, action button (Create/Edit/View)
-- For recommendation letters: expandable section showing one card per recommender with `status >= confirmed`
-- Quick stats: X of 7 started, X finalized
-
-#### Drafting Workspace: `/cases/[clientId]/drafts/[id]`
-
-Two-panel layout:
-
-**Left panel - AI Panel (collapsible, ~40% width):**
-- "Generate" button (full document generation)
-- Section list with per-section "Regenerate" buttons
-- Optional instruction input per section
-- Chat interface for refinement questions
-- Generation status/progress indicator
-
-**Right panel - Editor (~60% width):**
-- TipTap rich text editor with toolbar
-- Section headings as navigable anchors
-- Real-time content from AI streams into editor
-- Manual editing always available
-- Version history dropdown in toolbar
-
-**Header:**
-- Document type title, status badge
-- Save button (auto-save on edit with debounce)
-- "Save Version" button (explicit snapshot)
-- Back to drafts index
-
-#### Case Detail Integration
-
-Add two new tabs to lawyer case detail page:
-- **Recommenders tab**: RecommenderList + AISuggestionsPanel
-- **Drafts tab**: mini drafts index (cards grid) with link to full drafts page
-
-Add to applicant dashboard:
-- Recommenders section (view + add own recommenders)
-- Drafts section (view + edit personal statement, review other drafts)
-
----
-
-## Data Model Summary
-
-New models: `Recommender`, `RecommenderAttachment`, `CaseDraft`, `CaseDraftVersion`
-
-New enums: `RecommenderStatus`, `RecommenderSourceType`, `DraftDocumentType`, `DraftStatus`
-
-Relations added to `Client`:
-```prisma
-model Client {
-  // ... existing fields
-  recommenders  Recommender[]
-  caseDrafts    CaseDraft[]
-}
-```
-
-### Migration Notes
-
-- Existing `Client.recommenders` Json field contains free-text recommender data from onboarding intake. Migration strategy: keep the Json field as `recommenderNotes` (rename), new structured data goes into `Recommender` model. Optionally parse existing Json into Recommender records post-migration.
-
----
+- No draft exists yet: auto-create on "Draft Letter" click
+- Draft already in "generating" state when workspace opens: show streaming/polling UI
+- Empty draft on "Add to Vault": disable button with tooltip
+- Chat + manual edit conflict: chat always reads latest editor state before each AI response
+- Recommender with minimal info (no criteria, no reasoning): agent works with whatever context is available
+- Version restore: replaces editor content, does not clear chat
+- Multiple recommenders with drafts: each gets independent workspace instance
 
 ## Open Questions
 
-- Migrate existing `Client.recommenders` JSON field to new model or keep as legacy notes?
-- Rec letter drafts: require linked recommender or allow generic?
-- Token strategy for 40-page petition letter: single call or section-by-section?
-- Draft export format: server-side (puppeteer/docx) or client-side?
-- Rate limiting on AI generation: per-user or per-case?
-- Single route for drafting page (role-based layout) or separate routes per role?
+- PDF conversion lib? (puppeteer vs html-pdf vs jspdf)
+- "Add to Vault" set status to `letter_drafted` or `letter_finalized`?
+- Max chat messages before truncating older messages from context?

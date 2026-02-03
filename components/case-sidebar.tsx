@@ -67,7 +67,7 @@ export function CaseSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
   )
 
   return (
-    <Sidebar side="left" collapsible="none" className="border-r" {...props}>
+    <Sidebar side="left" collapsible="none" className="border-r h-svh" {...props}>
       <SidebarHeader className="p-4">
         <span className="text-sm font-semibold">
           Case

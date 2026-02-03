@@ -1,0 +1,539 @@
+[
+  {
+    "category": "data",
+    "description": "Add RecommenderStatus and RecommenderSourceType enums to prisma/schema.prisma. Values: suggested/identified/contacted/confirmed/letter_drafted/letter_finalized and manual/ai_suggested/linkedin_extract.",
+    "acceptanceCriteria": [
+      "Both enums exist in prisma/schema.prisma",
+      "prisma db push succeeds without errors"
+    ],
+    "passes": true
+  },
+  {
+    "category": "data",
+    "description": "Add Recommender model to prisma/schema.prisma with fields: id, clientId (relation to Client), name, title, organization, relationship, linkedinUrl, email, phone, notes (@db.Text), status (RecommenderStatus default suggested), sourceType (RecommenderSourceType default manual), aiReasoning (@db.Text), criteriaRelevance (String[]), timestamps. Index on clientId.",
+    "acceptanceCriteria": [
+      "Recommender model exists in schema with all specified fields",
+      "@@index([clientId]) present",
+      "Relation to Client defined"
+    ],
+    "passes": true
+  },
+  {
+    "category": "data",
+    "description": "Add RecommenderAttachment model to prisma/schema.prisma with fields: id, recommenderId (relation to Recommender with onDelete Cascade), name, fileType, storageKey, createdAt.",
+    "acceptanceCriteria": [
+      "RecommenderAttachment model exists in schema",
+      "Cascade delete configured on recommender relation"
+    ],
+    "passes": true
+  },
+  {
+    "category": "data",
+    "description": "Add DraftDocumentType and DraftStatus enums to prisma/schema.prisma. DraftDocumentType: petition_letter/personal_statement/recommendation_letter/cover_letter/exhibit_list/table_of_contents/rfe_response. DraftStatus: not_started/generating/draft/in_review/final.",
+    "acceptanceCriteria": [
+      "Both enums exist in prisma/schema.prisma"
+    ],
+    "passes": true
+  },
+  {
+    "category": "data",
+    "description": "Add CaseDraft model to prisma/schema.prisma with fields: id, clientId (relation to Client), documentType (DraftDocumentType), title, content (Json?), plainText (@db.Text?), sections (Json?), status (DraftStatus default not_started), recommenderId (optional relation to Recommender), timestamps. Indexes on [clientId] and [clientId, documentType]. Unique constraint on [clientId, documentType, recommenderId].",
+    "acceptanceCriteria": [
+      "CaseDraft model exists with all fields, indexes, and unique constraint",
+      "Relations to Client and Recommender defined"
+    ],
+    "passes": true
+  },
+  {
+    "category": "data",
+    "description": "Add CaseDraftVersion model to prisma/schema.prisma with fields: id, draftId (relation to CaseDraft with onDelete Cascade), content (Json), plainText (@db.Text?), sections (Json?), versionNote, createdBy, createdAt. Index on [draftId].",
+    "acceptanceCriteria": [
+      "CaseDraftVersion model exists in schema",
+      "Cascade delete on draft relation"
+    ],
+    "passes": true
+  },
+  {
+    "category": "data",
+    "description": "Add recommenders and caseDrafts relations to existing Client model in prisma/schema.prisma. Rename existing Client.recommenders Json field to recommenderNotes to avoid conflict.",
+    "acceptanceCriteria": [
+      "Client model has recommenders Recommender[] and caseDrafts CaseDraft[] relations",
+      "Old Json field renamed to recommenderNotes",
+      "Existing onboarding code referencing Client.recommenders updated to use recommenderNotes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "data",
+    "description": "Add caseDrafts relation (CaseDraft[]) to Recommender model in prisma/schema.prisma.",
+    "acceptanceCriteria": [
+      "Recommender model has caseDrafts CaseDraft[] relation"
+    ],
+    "passes": true
+  },
+  {
+    "category": "data",
+    "description": "Run prisma db push or prisma migrate dev to apply all new models and enums to the database.",
+    "acceptanceCriteria": [
+      "Migration applies cleanly",
+      "prisma generate succeeds",
+      "All new tables exist in database"
+    ],
+    "passes": true
+  },
+  {
+    "category": "api",
+    "description": "Create GET /api/cases/[clientId]/recommenders route. Returns all Recommender records for clientId. Auth: require logged-in user. Lawyer must have CaseAssignment. Applicant must own the client record. Include RecommenderAttachment count.",
+    "acceptanceCriteria": [
+      "Route file exists at app/api/cases/[clientId]/recommenders/route.ts",
+      "Returns JSON array of recommenders with attachment counts",
+      "401 if unauthenticated, 403 if unauthorized"
+    ],
+    "passes": true
+  },
+  {
+    "category": "api",
+    "description": "Create POST /api/cases/[clientId]/recommenders route. Creates a new Recommender record. Body: name (required), title, organization, relationship, linkedinUrl, email, phone, notes. Validate with zod. Same auth as GET.",
+    "acceptanceCriteria": [
+      "POST handler in app/api/cases/[clientId]/recommenders/route.ts",
+      "Zod validation on request body",
+      "Returns created recommender with 201 status"
+    ],
+    "passes": true
+  },
+  {
+    "category": "api",
+    "description": "Create PATCH /api/cases/[clientId]/recommenders/[id]/route.ts. Updates Recommender fields including status transitions. Validate with zod partial schema. Same auth pattern.",
+    "acceptanceCriteria": [
+      "Route file exists at app/api/cases/[clientId]/recommenders/[id]/route.ts",
+      "Partial update works for any Recommender field",
+      "Returns updated recommender"
+    ],
+    "passes": true
+  },
+  {
+    "category": "api",
+    "description": "Create DELETE /api/cases/[clientId]/recommenders/[id]/route.ts. Deletes Recommender and cascades to attachments. Same auth pattern.",
+    "acceptanceCriteria": [
+      "DELETE handler returns 204 on success",
+      "Attachments cascade-deleted"
+    ],
+    "passes": true
+  },
+  {
+    "category": "api",
+    "description": "Create POST /api/cases/[clientId]/recommenders/[id]/attachments/route.ts. Uploads CV/bio file to S3 and creates RecommenderAttachment record. Accept multipart form data. Same auth.",
+    "acceptanceCriteria": [
+      "File uploaded to S3 with unique storageKey",
+      "RecommenderAttachment record created",
+      "Returns attachment metadata with 201"
+    ],
+    "passes": true
+  },
+  {
+    "category": "api",
+    "description": "Create DELETE /api/cases/[clientId]/recommenders/[id]/attachments/[attachmentId]/route.ts. Deletes attachment record and S3 object.",
+    "acceptanceCriteria": [
+      "Attachment record deleted from database",
+      "S3 object deleted",
+      "Returns 204"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create AI recommender suggestion agent in lib/recommender-suggester.ts. Model: gemini-2.5-pro. Agentic tool-use loop (same pattern as lib/eb1a-evaluator.ts). Tools: get_client_profile (intake data), search_vault (RAG via lib/rag.ts), get_gap_analysis (from GapAnalysis model), get_eligibility_report (from EligibilityReport model). Output: 5-8 role type suggestions each with roleType, reasoning, criteriaRelevance, idealQualifications, sampleTalkingPoints.",
+    "acceptanceCriteria": [
+      "lib/recommender-suggester.ts exports a function that runs the agent",
+      "Uses generateText with tool-use loop, stopWhen stepCount limit",
+      "Produces structured output matching the specified schema",
+      "Creates Recommender records with status=suggested, sourceType=ai_suggested"
+    ],
+    "passes": true
+  },
+  {
+    "category": "api",
+    "description": "Create POST /api/cases/[clientId]/recommenders/suggest/route.ts. Triggers recommender suggestion agent. Returns 202 with immediate response, runs agent async. Lawyer-only auth.",
+    "acceptanceCriteria": [
+      "Route calls recommender-suggester agent async (fire-and-forget pattern from gap-analysis)",
+      "Returns 202 status immediately",
+      "Agent results saved as Recommender records"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Add 'linkedin-profile' category to DOCUMENT_CATEGORIES in lib/document-categories.ts. Slug: linkedin-profile, label: LinkedIn Profile, description: LinkedIn profile exports and professional network data.",
+    "acceptanceCriteria": [
+      "New category object present in DOCUMENT_CATEGORIES array",
+      "Slug is 'linkedin-profile'"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create LinkedIn extraction agent function in lib/linkedin-parser.ts (enhance existing file). Model: gemini-2.5-flash. Input: full text of LinkedIn PDF. Output: { profileData: { headline, currentRole, company, skills[], recommendations[] }, potentialRecommenders: [{ name, title, organization, relationship, reasoning }] }. Use structured output with zod schema.",
+    "acceptanceCriteria": [
+      "Function exported from lib/linkedin-parser.ts",
+      "Uses gemini-2.5-flash via ai-sdk",
+      "Returns typed object matching the specified schema"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Add client lookup from vault in document processing route (app/api/vaults/[id]/documents/process). After categorization, if category is 'linkedin-profile', resolve clientId from Vault->Client relation and run LinkedIn extraction agent. Auto-create Recommender records with status=suggested, sourceType=linkedin_extract from potentialRecommenders output.",
+    "acceptanceCriteria": [
+      "Processing route checks category after categorization step",
+      "If linkedin-profile: looks up client via vault.client relation",
+      "Calls LinkedIn extraction agent",
+      "Creates Recommender records from extraction results",
+      "Non-blocking: extraction runs in parallel with embedding, doesn't block the response"
+    ],
+    "passes": true
+  },
+  {
+    "category": "api",
+    "description": "Create GET /api/cases/[clientId]/drafts route. Returns all CaseDraft records for clientId with status, documentType, title, updatedAt, recommender name (if recommendation_letter). Auth: same pattern as recommenders.",
+    "acceptanceCriteria": [
+      "Route file at app/api/cases/[clientId]/drafts/route.ts",
+      "Returns JSON array of drafts with recommender info included",
+      "Proper auth checks"
+    ],
+    "passes": true
+  },
+  {
+    "category": "api",
+    "description": "Create POST /api/cases/[clientId]/drafts route. Creates a new CaseDraft. Body: documentType (required), title, recommenderId (required if recommendation_letter). Enforce unique constraint [clientId, documentType, recommenderId]. Return 409 if duplicate.",
+    "acceptanceCriteria": [
+      "POST handler with zod validation",
+      "Enforces unique constraint, returns 409 on duplicate",
+      "Returns created draft with 201"
+    ],
+    "passes": true
+  },
+  {
+    "category": "api",
+    "description": "Create GET /api/cases/[clientId]/drafts/[id]/route.ts. Returns full CaseDraft including content (TipTap JSON), sections, and recommender info.",
+    "acceptanceCriteria": [
+      "Returns complete draft object with content field",
+      "404 if not found"
+    ],
+    "passes": true
+  },
+  {
+    "category": "api",
+    "description": "Create PATCH /api/cases/[clientId]/drafts/[id]/route.ts. Updates CaseDraft content, plainText, sections, status, title. Partial update with zod.",
+    "acceptanceCriteria": [
+      "Partial update works for content, plainText, sections, status, title",
+      "Returns updated draft"
+    ],
+    "passes": true
+  },
+  {
+    "category": "api",
+    "description": "Create DELETE /api/cases/[clientId]/drafts/[id]/route.ts. Deletes CaseDraft and cascades to versions.",
+    "acceptanceCriteria": [
+      "Returns 204 on success",
+      "Versions cascade-deleted"
+    ],
+    "passes": true
+  },
+  {
+    "category": "api",
+    "description": "Create POST /api/cases/[clientId]/drafts/[id]/versions/route.ts. Saves a CaseDraftVersion snapshot from current draft content. Body: optional versionNote. Also create GET handler to list versions (id, versionNote, createdBy, createdAt) ordered by createdAt desc.",
+    "acceptanceCriteria": [
+      "POST creates version snapshot with content copied from current draft",
+      "GET returns version list ordered by createdAt desc",
+      "Route file at app/api/cases/[clientId]/drafts/[id]/versions/route.ts"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create shared drafting agent tools module in lib/drafting-tools.ts. Export tool definitions for: get_client_profile (intake data from Client), search_vault (RAG via lib/rag.ts), get_gap_analysis (from GapAnalysis), get_eligibility_report (from EligibilityReport), get_existing_drafts (other CaseDrafts for same client), get_recommender (Recommender details by id). Follow same tool pattern as lib/eb1a-evaluator.ts.",
+    "acceptanceCriteria": [
+      "lib/drafting-tools.ts exports all 6 tool definitions",
+      "Each tool returns appropriate data from Prisma queries",
+      "Tools compatible with ai-sdk generateText tool format"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create petition letter drafting agent in lib/drafting-agents/petition-letter.ts. Model: gemini-2.5-pro. System prompt specialized for I-140 petition letters. Uses shared drafting tools. Generates section-by-section sequentially (token strategy for long docs). Output: TipTap-compatible JSON with section markers. Supports full generation mode.",
+    "acceptanceCriteria": [
+      "Agent function exported",
+      "Uses gemini-2.5-pro",
+      "Generates document with labeled sections",
+      "Returns TipTap-compatible JSON structure"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create personal statement drafting agent in lib/drafting-agents/personal-statement.ts. Model: gemini-2.5-flash. Specialized system prompt for applicant narrative. Uses shared drafting tools. Single generation call.",
+    "acceptanceCriteria": [
+      "Agent function exported",
+      "Uses gemini-2.5-flash",
+      "Returns TipTap-compatible JSON"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create recommendation letter drafting agent in lib/drafting-agents/recommendation-letter.ts. Model: gemini-2.5-flash. Requires recommenderId. Uses get_recommender tool for recommender context. System prompt specialized for EB1A recommendation letters.",
+    "acceptanceCriteria": [
+      "Agent function exported",
+      "Accepts recommenderId parameter",
+      "Uses recommender details in generation context"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create cover letter drafting agent in lib/drafting-agents/cover-letter.ts. Model: gemini-2.5-flash. System prompt for petition package cover letter.",
+    "acceptanceCriteria": [
+      "Agent function exported, uses gemini-2.5-flash, returns TipTap JSON"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create exhibit list drafting agent in lib/drafting-agents/exhibit-list.ts. Model: gemini-2.5-flash. System prompt for numbered exhibit list with descriptions. Should reference vault documents.",
+    "acceptanceCriteria": [
+      "Agent function exported, uses gemini-2.5-flash, returns TipTap JSON"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create table of contents drafting agent in lib/drafting-agents/table-of-contents.ts. Model: gemini-2.5-flash. Uses get_existing_drafts to reference all other drafts for TOC generation.",
+    "acceptanceCriteria": [
+      "Agent function exported, references existing drafts for structure"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create RFE response drafting agent in lib/drafting-agents/rfe-response.ts. Model: gemini-2.5-pro (complex, long). System prompt specialized for responding to USCIS Requests for Evidence.",
+    "acceptanceCriteria": [
+      "Agent function exported, uses gemini-2.5-pro, returns TipTap JSON"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create per-section regeneration function in lib/drafting-agents/regenerate-section.ts. Accepts: draftId, sectionId, optional instruction. Loads full document as context, regenerates only the specified section. Returns updated section content.",
+    "acceptanceCriteria": [
+      "Function accepts draftId, sectionId, instruction",
+      "Loads full document content for context",
+      "Returns only the regenerated section content"
+    ],
+    "passes": true
+  },
+  {
+    "category": "api",
+    "description": "Create POST /api/cases/[clientId]/drafts/[id]/generate/route.ts. Triggers full AI generation for a draft. Looks up documentType to select correct agent. Streams response (use ai-sdk streaming). Updates draft status to 'generating' then 'draft' on completion. Saves content to CaseDraft.",
+    "acceptanceCriteria": [
+      "Route dispatches to correct agent based on documentType",
+      "Streams response back to client",
+      "Updates draft status lifecycle: generating -> draft",
+      "Saves final content to CaseDraft record"
+    ],
+    "passes": true
+  },
+  {
+    "category": "api",
+    "description": "Create POST /api/cases/[clientId]/drafts/[id]/regenerate/route.ts. Regenerates a specific section. Body: sectionId, instruction (optional). Streams regenerated section content. Updates section in draft content.",
+    "acceptanceCriteria": [
+      "Route accepts sectionId and optional instruction",
+      "Calls regenerate-section function",
+      "Streams response",
+      "Updates only the specified section in draft content"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create RecommenderList component in components/recommender/recommender-list.tsx. Table/card layout showing: name, title, org, status badge (color-coded per RecommenderStatus), criteria tags, action buttons (edit/delete). Accept recommenders array and callbacks as props. Use shadcn Table + Badge components.",
+    "acceptanceCriteria": [
+      "Component renders list of recommenders with all specified fields",
+      "Status shown as color-coded Badge",
+      "Criteria shown as tag badges",
+      "Edit and delete action buttons present"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create RecommenderForm component in components/recommender/recommender-form.tsx. Sheet/dialog form with fields: name, title, organization, relationship, LinkedIn URL, email, phone, notes. Use react-hook-form + zod. Support create and edit modes.",
+    "acceptanceCriteria": [
+      "Form renders in Sheet with all specified fields",
+      "Zod validation on required fields (name)",
+      "Works in create mode (empty) and edit mode (pre-filled)",
+      "Calls onSubmit callback with form data"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create RecommenderDetail component in components/recommender/recommender-detail.tsx. Slide-over Sheet showing full recommender info, list of attachments with download links, linked draft status (if recommendation letter exists), status change dropdown.",
+    "acceptanceCriteria": [
+      "Sheet displays all recommender fields",
+      "Shows attachments with download action",
+      "Shows linked draft status if applicable",
+      "Status dropdown allows status transitions"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create AISuggestionsPanel component in components/recommender/ai-suggestions-panel.tsx. 'Suggest Recommenders' button triggers POST to /suggest endpoint. Shows loading state while agent runs. Displays returned suggestions with roleType, reasoning, criteriaRelevance, idealQualifications, sampleTalkingPoints. Accept/dismiss buttons per suggestion.",
+    "acceptanceCriteria": [
+      "Button triggers API call to suggest endpoint",
+      "Loading/polling state while agent processes",
+      "Each suggestion card shows all specified fields",
+      "Accept creates recommender (status=identified), dismiss removes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create StatusPipeline component in components/recommender/status-pipeline.tsx. Visual horizontal pipeline showing count at each RecommenderStatus stage (suggested -> identified -> contacted -> confirmed -> letter_drafted -> letter_finalized).",
+    "acceptanceCriteria": [
+      "Renders horizontal pipeline with 6 stages",
+      "Each stage shows count of recommenders at that status",
+      "Visual indicators (colors/progress) show pipeline flow"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add Recommenders tab to lawyer case detail page at app/(lawyer)/cases/[clientId]/page.tsx. New tab alongside existing Vault/Gap Analysis/Assistant tabs. Tab content: StatusPipeline at top, AISuggestionsPanel, RecommenderList. Fetch recommenders via GET /api/cases/[clientId]/recommenders.",
+    "acceptanceCriteria": [
+      "Recommenders tab visible on case detail page",
+      "Tab loads and displays StatusPipeline, AISuggestionsPanel, RecommenderList",
+      "Data fetched from recommenders API endpoint"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create DraftsIndex page at app/(lawyer)/cases/[clientId]/drafts/page.tsx. Grid of 7 document type cards. Each card shows: doc type name, status badge, last updated, action button (Create/Edit/View). For recommendation_letter: expandable section showing one card per recommender with status >= confirmed. Quick stats row: X of 7 started, X finalized.",
+    "acceptanceCriteria": [
+      "Page renders 7 document type cards in grid",
+      "Each card shows type name, status badge, last updated",
+      "Recommendation letter section expands to show per-recommender cards",
+      "Quick stats row displays correctly",
+      "Create/Edit buttons link to drafting workspace"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Create drafting workspace page at app/(lawyer)/cases/[clientId]/drafts/[id]/page.tsx. Two-panel layout. Header with document type title, status badge, Save button (debounced auto-save), Save Version button, back link to drafts index.",
+    "acceptanceCriteria": [
+      "Page renders two-panel layout",
+      "Header shows title, status badge, save controls, back link",
+      "Auto-save triggers on content change with debounce"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Build AI Panel (left side of drafting workspace, ~40% width, collapsible). Contains: Generate button (full doc), section list with per-section Regenerate buttons, optional instruction input per section, generation status/progress indicator.",
+    "acceptanceCriteria": [
+      "Panel is collapsible",
+      "Generate button triggers /generate endpoint",
+      "Section list renders from draft.sections metadata",
+      "Each section has regenerate button + instruction input",
+      "Progress indicator shows during generation"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Integrate TipTap rich text editor in right panel of drafting workspace (~60% width). Include toolbar (bold, italic, headings, lists, etc). Section headings rendered as navigable anchors. Real-time content from AI streams into editor. Manual editing always available.",
+    "acceptanceCriteria": [
+      "TipTap editor renders with toolbar",
+      "Section headings are navigable anchors",
+      "AI-streamed content appears in editor in real-time",
+      "User can manually edit content alongside AI generation"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add version history dropdown to drafting workspace toolbar. Lists CaseDraftVersions by date desc. Selecting a version loads that version's content into the editor (with confirmation dialog). Show version note and createdAt.",
+    "acceptanceCriteria": [
+      "Dropdown in toolbar shows version history",
+      "Each entry shows date and version note",
+      "Selecting a version shows confirmation dialog",
+      "On confirm, editor content replaced with version content"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add Drafts tab to lawyer case detail page at app/(lawyer)/cases/[clientId]/page.tsx. Mini drafts index showing document type cards in a compact grid. Each card links to full drafting workspace. Fetch drafts via GET /api/cases/[clientId]/drafts.",
+    "acceptanceCriteria": [
+      "Drafts tab visible on case detail page",
+      "Shows compact card grid of document types with status",
+      "Cards link to /cases/[clientId]/drafts/[id]"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add Recommenders section to applicant dashboard. Show list of recommenders for own case (view + add). Applicant can add recommenders via RecommenderForm but cannot trigger AI suggestions or change status beyond 'identified'.",
+    "acceptanceCriteria": [
+      "Applicant dashboard shows recommenders section",
+      "Applicant can view and add recommenders",
+      "No AI suggest button visible to applicant",
+      "Status changes limited for applicant role"
+    ],
+    "passes": true
+  },
+  {
+    "category": "ui",
+    "description": "Add Drafts section to applicant dashboard. Applicant can view and edit personal_statement draft. Can view (read-only) other draft types. Link to drafting workspace for personal statement.",
+    "acceptanceCriteria": [
+      "Applicant dashboard shows drafts section",
+      "Personal statement is editable",
+      "Other drafts are view-only for applicant",
+      "Links to appropriate drafting workspace"
+    ],
+    "passes": true
+  },
+  {
+    "category": "auth",
+    "description": "Implement role-based access control on all recommender API endpoints. Lawyer must have CaseAssignment for the clientId. Applicant can only access own client record (Client.userId matches session user). Admin has full access.",
+    "acceptanceCriteria": [
+      "Lawyer without CaseAssignment gets 403",
+      "Applicant accessing other client's recommenders gets 403",
+      "Admin can access any client's recommenders"
+    ],
+    "passes": true
+  },
+  {
+    "category": "auth",
+    "description": "Implement role-based access control on all drafts API endpoints. Same pattern as recommenders: lawyer needs CaseAssignment, applicant can only access own case. Additional: applicant can only PATCH personal_statement drafts, all others read-only for applicant.",
+    "acceptanceCriteria": [
+      "Lawyer without CaseAssignment gets 403",
+      "Applicant can PATCH personal_statement but gets 403 on PATCH other types",
+      "Applicant can GET all draft types for own case"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create reusable auth helper for case-scoped API routes. Extract common pattern: check auth, check role, verify CaseAssignment for lawyer / ownership for applicant. Use in all recommender and draft routes to reduce duplication. Place in lib/case-auth.ts.",
+    "acceptanceCriteria": [
+      "lib/case-auth.ts exports a helper function",
+      "Returns { user, client } or throws appropriate HTTP error",
+      "Used by recommender and draft API routes"
+    ],
+    "passes": true
+  }
+]

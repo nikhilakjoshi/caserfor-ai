@@ -23,14 +23,11 @@ export async function canAccessVault(
   }
 
   if (role === "lawyer") {
-    const assignment = await prisma.caseAssignment.findFirst({
-      where: {
-        lawyerId: userId,
-        client: { vaultId },
-      },
+    const client = await prisma.client.findFirst({
+      where: { vaultId, status: { not: "draft" } },
       select: { id: true },
     })
-    return !!assignment
+    return !!client
   }
 
   return false

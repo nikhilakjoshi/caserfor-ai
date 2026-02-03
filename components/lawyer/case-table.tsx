@@ -126,7 +126,8 @@ export function CaseTable({ tab = "all" }: { tab?: string }) {
 
       {!loading && !error && (
         <>
-          <Table>
+          <div className="overflow-x-auto">
+          <Table className="table-fixed w-full">
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
@@ -170,7 +171,7 @@ export function CaseTable({ tab = "all" }: { tab?: string }) {
                     <TableCell className="text-muted-foreground">
                       {new Date(c.updatedAt).toLocaleDateString()}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="text-muted-foreground max-w-[200px] truncate">
                       {c.fieldOfExpertise ?? "--"}
                     </TableCell>
                     <TableCell className="text-right">
@@ -181,6 +182,7 @@ export function CaseTable({ tab = "all" }: { tab?: string }) {
               )}
             </TableBody>
           </Table>
+          </div>
 
           {pagination && pagination.totalPages > 1 && (
             <div className="flex items-center justify-center gap-2">
