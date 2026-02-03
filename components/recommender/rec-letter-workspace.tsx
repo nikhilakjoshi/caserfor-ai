@@ -1,12 +1,15 @@
 "use client"
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react"
+import { useChat } from "@ai-sdk/react"
+import { DefaultChatTransport } from "ai"
 import { toast } from "sonner"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { DocumentEditor } from "@/components/editor/document-editor"
 import { RecLetterActions } from "./rec-letter-actions"
+import { RecLetterChat } from "./rec-letter-chat"
 
 interface TiptapDoc {
   type: string
@@ -130,14 +133,69 @@ export function RecLetterWorkspace({
   const [isStreaming, setIsStreaming] = useState(false)
   const [dirty, setDirty] = useState(false)
   const [saving, setSaving] = useState(false)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [messages, setMessages] = useState<
-    Array<{ role: "user" | "assistant"; content: string }>
-  >([])
   const [draftStatus, setDraftStatus] = useState(draft.status)
+  const [chatInput, setChatInput] = useState("")
   const [versions, setVersions] = useState<Array<{ id: string; versionNote: string | null; createdAt: string }>>([])
   const [isSavingVersion, setIsSavingVersion] = useState(false)
   const [isAddingToVault, setIsAddingToVault] = useState(false)
+
+  // Chat via useChat + DefaultChatTransport
+  const editorContentRef = useRef(editorContent)
+  editorContentRef.current = editorContent
+
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: `/api/cases/${clientId}/recommenders/${recommender.id}/draft-chat`,
+        body: () => ({ currentContent: editorContentRef.current }),
+      }),
+    [clientId, recommender.id],
+  )
+
+  const { messages: chatMessages, sendMessage, status: chatStatus } = useChat({ transport })
+
+  const isChatStreaming = chatStatus === "streaming"
+
+  // Watch for tool call results that update the editor
+  useEffect(() => {
+    for (const msg of chatMessages) {
+      if (msg.role !== "assistant") continue
+      for (const part of msg.parts) {
+        if (typeof part.type !== "string" || !part.type.startsWith("tool-")) continue
+        const toolPart = part as { type: string; state?: string; output?: unknown; toolName?: string }
+        if (toolPart.state !== "result" || !toolPart.output) continue
+        try {
+          const result = typeof toolPart.output === "string" ? JSON.parse(toolPart.output) : toolPart.output
+          if (result.type === "full_update" && result.newContent) {
+            setEditorContent(result.newContent)
+          }
+          // section_update: simple approach -- replace in HTML by heading text
+          if (result.type === "section_update" && result.heading && result.newContent) {
+            setEditorContent((prev) => {
+              // Find heading in HTML and replace content until next heading
+              const headingPattern = new RegExp(
+                `(<h[1-6][^>]*>\\s*${result.heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*</h[1-6]>)([\\s\\S]*?)(?=<h[1-6]|$)`,
+                "i",
+              )
+              const match = prev.match(headingPattern)
+              if (match) {
+                return prev.replace(headingPattern, `$1\n${result.newContent}`)
+              }
+              return prev
+            })
+          }
+        } catch {
+          // not JSON, ignore
+        }
+      }
+    }
+  }, [chatMessages])
+
+  const handleChatSend = useCallback(() => {
+    if (!chatInput.trim() || isChatStreaming) return
+    sendMessage({ text: chatInput })
+    setChatInput("")
+  }, [chatInput, isChatStreaming, sendMessage])
 
   // Extract sections from draft.sections or draft.content
   const initialSections = useMemo(() => {
@@ -418,29 +476,15 @@ export function RecLetterWorkspace({
       {/* 3-panel layout */}
       <div className="flex gap-3 h-[calc(100vh-180px)]">
         {/* Left: Chat */}
-        <div className="w-1/4 rounded-lg border bg-card overflow-y-auto p-3">
-          <h3 className="text-xs font-medium text-muted-foreground mb-2">
-            Chat
-          </h3>
-          <div className="space-y-2">
-            {messages.length === 0 && (
-              <p className="text-xs text-muted-foreground">
-                Chat with AI to refine the letter. Coming soon.
-              </p>
-            )}
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`text-xs rounded p-2 ${
-                  msg.role === "user"
-                    ? "bg-primary/10 ml-4"
-                    : "bg-muted mr-4"
-                }`}
-              >
-                {msg.content}
-              </div>
-            ))}
-          </div>
+        <div className="w-1/4 rounded-lg border bg-card p-3">
+          <RecLetterChat
+            messages={chatMessages}
+            input={chatInput}
+            onInputChange={setChatInput}
+            onSend={handleChatSend}
+            isStreaming={isChatStreaming}
+            criteriaRelevance={recommender.criteriaRelevance}
+          />
         </div>
 
         {/* Center: Editor */}

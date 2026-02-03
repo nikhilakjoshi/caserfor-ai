@@ -131,7 +131,7 @@
       "Input: textarea at bottom with send button, disabled during streaming",
       "Suggestion chips above input: 'Make more formal', 'Strengthen criteria sections', 'Add more specific examples'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -144,7 +144,7 @@
       "If AI returns editor update (update_draft_section or update_full_draft tool calls via onStepFinish), apply to editorContent",
       "Set isStreaming during response, clear on completion"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -157,7 +157,7 @@
       "Invoke rec-letter-chat-agent via ToolLoopAgent, return createAgentUIStreamResponse (matches /api/assistant/query pattern)",
       "Return streaming response via createAgentUIStreamResponse"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -173,7 +173,7 @@
       "Use defaultModel (gemini-2.5-flash) for chat responses",
       "Accept messages array for conversation context, stream output"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -185,7 +185,7 @@
       "Implement tool call handling in rec-letter-chat-agent.ts via ToolLoopAgent onStepFinish",
       "Frontend uses useChat + DefaultChatTransport to consume stream, no manual parsing needed"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "api",
@@ -255,7 +255,7 @@
       "On chip click: populate input with chip text and auto-send",
       "Hide chips after first message exchange (they're just conversation starters)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -265,7 +265,7 @@
       "Check lib/drafting-agents/recommendation-letter.ts accepts and uses recommenderId param",
       "Verify get_recommender tool is called with correct ID during generation"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -287,6 +287,6 @@
       "Apply truncation client-side before POST to /api/cases/[clientId]/recommenders/[id]/draft-chat",
       "Also enforce server-side: in draft-chat route.ts, slice messages to last 20 if exceeding limit"
     ],
-    "passes": false
+    "passes": true
   }
 ]

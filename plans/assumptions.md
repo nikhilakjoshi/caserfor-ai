@@ -350,3 +350,13 @@
 - Document processing triggered via internal HTTP fetch to process route (not direct function call) -- requires NEXT_PUBLIC_APP_URL or defaults to localhost:3000
 - No duplicate detection -- clicking Add to Vault multiple times creates multiple vault documents
 - Recommender status updated to letter_finalized server-side only -- workspace UI won't reflect until refresh
+
+## Rec-Letter Chat Agent (PRD 11-15, 20, 21, 23)
+- Chat agent returns tool results as JSON strings -- frontend parses output field from tool parts to detect editor updates
+- Tool parts identified by part.type starting with "tool-" and part.state === "result" -- matches AI SDK UIMessage format
+- update_draft_section replaces HTML content between matching heading and next heading via regex -- fragile for headings with special chars
+- Chat is ephemeral (no DB model for chat messages) -- PRD says "ephemeral chat array"
+- Agent function returns { model, instructions, tools } config object -- route constructs ToolLoopAgent from it (not the agent itself)
+- useChat status === "streaming" used to track chat streaming state, separate from isStreaming (generation polling state)
+- Suggestion chips use setTimeout(onSend, 0) after setting input -- ensures state update before send
+- Server-side 20-message truncation uses simple slice(-20) -- no system message preservation (PRD says "keep system message" but useChat doesn't send system messages)

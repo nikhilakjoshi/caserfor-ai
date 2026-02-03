@@ -1,5 +1,27 @@
 # Progress Log
 
+## 2026-02-02: Rec-letter chat system (PRD 11, 12, 13, 14, 15, 20, 21, 23)
+
+### Completed
+- Created lib/drafting-agents/rec-letter-chat-agent.ts -- conversational agent extending createDraftingTools with get_current_draft, update_draft_section, update_full_draft tools
+- Created POST /api/cases/[clientId]/recommenders/[id]/draft-chat/route.ts -- auth via authorizeCaseAccess, validates recommender ownership, truncates messages to 20, streams via ToolLoopAgent + createAgentUIStreamResponse
+- Created components/recommender/rec-letter-chat.tsx -- chat UI with message list, auto-scroll, suggestion chips (static + dynamic from criteriaRelevance), textarea input with Enter-to-send
+- Wired useChat + DefaultChatTransport in rec-letter-workspace.tsx, passing currentContent as dynamic body param
+- Tool call results (update_draft_section, update_full_draft) parsed from assistant message parts and applied to editor content
+- Suggestion chips auto-send on click, hidden after first message exchange
+- PRD 21 verified correct (recommenderId already passed correctly in generate flow) -- marked passes:true
+- PRD 15 (streaming format) implemented via standard ToolLoopAgent pattern -- no custom protocol needed
+- PRD 23 (cap messages at 20) implemented server-side in draft-chat route
+
+### Notes for next dev
+- Chat is ephemeral (no DB persistence) -- messages lost on page refresh
+- update_draft_section uses regex-based heading match in HTML -- may fail on complex heading content
+- Tool results (editor updates) detected by scanning all assistant message parts on each render -- could be optimized with a seen-set
+- Suggestion chips include up to 2 dynamic criteria from recommender.criteriaRelevance
+- No client-side message truncation -- only server-side 20-message cap
+
+---
+
 ## 2026-02-02: Add to Vault (PRD 10, 16, 17, 18)
 
 ### Completed
