@@ -118,7 +118,7 @@
       "On success: show toast with link to vault document, update recommender status badge",
       "On error: show error toast"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -197,7 +197,7 @@
       "Fetch CaseDraft where clientId + documentType=recommendation_letter + recommenderId=id",
       "If no draft or empty content, return 400"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -209,7 +209,7 @@
       "Style PDF to match professional recommendation letter format (letterhead-style, proper margins, fonts)",
       "Use in add-to-vault route to convert draft content to PDF buffer"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
@@ -223,7 +223,7 @@
       "Update recommender status to 'letter_finalized' via prisma update",
       "Return created document metadata in response"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",

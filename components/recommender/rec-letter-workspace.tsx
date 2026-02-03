@@ -137,6 +137,7 @@ export function RecLetterWorkspace({
   const [draftStatus, setDraftStatus] = useState(draft.status)
   const [versions, setVersions] = useState<Array<{ id: string; versionNote: string | null; createdAt: string }>>([])
   const [isSavingVersion, setIsSavingVersion] = useState(false)
+  const [isAddingToVault, setIsAddingToVault] = useState(false)
 
   // Extract sections from draft.sections or draft.content
   const initialSections = useMemo(() => {
@@ -312,6 +313,27 @@ export function RecLetterWorkspace({
     }
   }, [clientId, draft.id, saveDraft])
 
+  // Add to vault
+  const handleAddToVault = useCallback(async () => {
+    setIsAddingToVault(true)
+    try {
+      const res = await fetch(`/api/cases/${clientId}/recommenders/${recommender.id}/add-to-vault`, {
+        method: "POST",
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: "Failed to add to vault" }))
+        toast.error(data.error || "Failed to add to vault")
+        return
+      }
+      const data = await res.json()
+      toast.success(`Added "${data.documentName}" to vault`)
+    } catch {
+      toast.error("Network error adding to vault")
+    } finally {
+      setIsAddingToVault(false)
+    }
+  }, [clientId, recommender.id])
+
   // Cleanup timers
   useEffect(() => {
     return () => {
@@ -466,6 +488,8 @@ export function RecLetterWorkspace({
             onRestoreVersion={handleRestoreVersion}
             versions={versions}
             isSavingVersion={isSavingVersion}
+            onAddToVault={handleAddToVault}
+            isAddingToVault={isAddingToVault}
           />
         </div>
       </div>

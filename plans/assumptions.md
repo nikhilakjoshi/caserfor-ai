@@ -342,3 +342,11 @@
 - GET /versions/[versionId] returns full CaseDraftVersion record (content, plainText, sections)
 - Restored content immediately auto-saved via saveDraft (no debounce) to ensure DB consistency
 - No version deletion endpoint -- versions are append-only
+
+## Add to Vault (PRD 10, 16, 17, 18)
+- pdfkit used for PDF generation (not puppeteer/headless chrome) -- simpler but limited HTML fidelity
+- htmlToPdfBuffer uses regex-based HTML parsing, not a full DOM parser -- handles h1-h3, p, li, blockquote only
+- Draft's plainText field (which stores HTML from editor) is the PDF source, not TipTap JSON
+- Document processing triggered via internal HTTP fetch to process route (not direct function call) -- requires NEXT_PUBLIC_APP_URL or defaults to localhost:3000
+- No duplicate detection -- clicking Add to Vault multiple times creates multiple vault documents
+- Recommender status updated to letter_finalized server-side only -- workspace UI won't reflect until refresh

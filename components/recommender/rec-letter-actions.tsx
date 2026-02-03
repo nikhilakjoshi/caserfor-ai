@@ -48,6 +48,8 @@ interface RecLetterActionsProps {
   onRestoreVersion: (versionId: string) => void
   versions: VersionEntry[]
   isSavingVersion: boolean
+  onAddToVault: () => Promise<void>
+  isAddingToVault: boolean
 }
 
 export function RecLetterActions({
@@ -63,6 +65,8 @@ export function RecLetterActions({
   onRestoreVersion,
   versions,
   isSavingVersion,
+  onAddToVault,
+  isAddingToVault,
 }: RecLetterActionsProps) {
   const hasContent = editorContent.length > 0
   const isGenerating = draft.status === "generating" || isStreaming
@@ -286,11 +290,12 @@ export function RecLetterActions({
           variant="outline"
           size="sm"
           className="w-full"
-          disabled={!hasContent || isGenerating || draft.status === "not_started"}
+          disabled={!hasContent || isGenerating || isAddingToVault || draft.status === "not_started"}
           title={!hasContent ? "Generate a letter first" : undefined}
+          onClick={onAddToVault}
         >
           <Upload className="h-3.5 w-3.5 mr-1.5" />
-          Add to Vault
+          {isAddingToVault ? "Adding..." : "Add to Vault"}
         </Button>
       </div>
     </div>

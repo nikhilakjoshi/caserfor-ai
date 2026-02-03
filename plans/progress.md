@@ -1,5 +1,22 @@
 # Progress Log
 
+## 2026-02-02: Add to Vault (PRD 10, 16, 17, 18)
+
+### Completed
+- Created lib/pdf-generator.ts -- converts HTML (from TipTap editor) to PDF via pdfkit
+- Created POST /api/cases/[clientId]/recommenders/[id]/add-to-vault route
+- Route: auth via authorizeCaseAccess, finds rec letter draft, converts to PDF, uploads to S3, creates Document record, updates recommender status to letter_finalized, triggers embedding pipeline
+- Wired Add to Vault button in rec-letter-actions.tsx with loading state + toast feedback
+- Added onAddToVault/isAddingToVault props to RecLetterActions, handler in rec-letter-workspace.tsx
+
+### Notes for next dev
+- PDF generator is basic (headings, paragraphs, bullets) -- no custom fonts or letterhead styling
+- Document processing triggered fire-and-forget via internal fetch to /api/vaults/{id}/documents/process
+- Toast shows document name on success but no direct link to vault document yet (PRD step "show toast with link" partially done -- name shown, no navigable link)
+- Recommender status badge in workspace header won't update until page refresh (status update is server-side only)
+
+---
+
 ## 2026-02-02: Version history controls in actions panel (PRD 9, 22)
 
 ### Completed
